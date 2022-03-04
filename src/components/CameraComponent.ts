@@ -40,10 +40,8 @@ export default class CameraComponent implements ComponentInterface {
     init(gameWin: GameWindow) {
         this.gw = (gameWin as GameController);
 
-        const camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera(75, 4 / 3, 0.1, 10000);
+        const camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 10000);
 
-        camera.position.x = 0;
-        camera.position.z = Math.cos(this.cameraAngle)*this.depth*this.cameraDistance;
         camera.position.y = Math.sin(this.cameraAngle)*this.depth*this.cameraDistance;
 
         camera.lookAt(this.anchor);
@@ -52,9 +50,6 @@ export default class CameraComponent implements ComponentInterface {
     }
 
     update(obj: GObject, gameWin: GameWindow) {
-
-        // this.rotation += Math.PI*2*.001;
-
         this.gw.threeCamera.position.x = Math.sin(this.rotation)*this.depth*this.cameraDistance+this.anchor.x;
         this.gw.threeCamera.position.z = Math.cos(this.rotation)*this.depth*this.cameraDistance+this.anchor.z;
         this.gw.threeCamera.lookAt(this.anchor);

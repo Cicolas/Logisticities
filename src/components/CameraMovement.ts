@@ -12,7 +12,7 @@ const SMOOTHNESS = 2000;
 export default class CameraMovement implements ComponentInterface {
     name: string = "CameraMovement";
     private gw: GameController;
-    private camera: THREE.Camera;
+    private camera: CameraComponent;
 
     private isMoving: boolean;
     private isRotating: boolean;
@@ -20,35 +20,30 @@ export default class CameraMovement implements ComponentInterface {
     private mousePos: THREE.Vector2 = new THREE.Vector2();
 
     init(gameWin: GameController) {
-        this.gw = (gameWin as GameController);
+        this.gw = gameWin;
 
-        this.camera = this.gw.threeCamera;
-
-        // camera.position.x = 0;
-        // camera.position.z = Math.cos(-this.cameraAngle)*this.depth*this.cameraDistance;
-        // camera.position.y = Math.sin(-this.cameraAngle)*this.depth*this.cameraDistance;
-        // camera.rotation.x = this.cameraAngle;
+        setTimeout(this.postInit.bind(this), 100);
 
         gameWin.canvas.addEventListener("mousedown", this.mouseDown);
         gameWin.canvas.addEventListener("mousemove", this.mouseMove);
         gameWin.canvas.addEventListener("mouseup", this.mouseUp);
     }
 
-    mouseMove = (e) => {
-        // console.log(e);
+    postInit() {
+        this.camera = this.gw.getScene().getObject("camera").getComponent(CameraComponent) as CameraComponent;
+    }
 
+    mouseMove = (e) => {
         this.mousePos.x = e.clientX;
         this.mousePos.y = e.clientY;
-
-        // console.log(this.mousePos);
     }
 
     mouseDown = (e) => {
         this.firstClick.x = e.clientX;
         this.firstClick.y = e.clientY;
-        if (e.button === 0) {
-            this.isMoving = true;
-        }
+        // if (e.button === 0) {
+        //     this.isMoving = true;
+        // }
         if (e.button === 0) {
             this.isRotating = true;
             e.preventDefault();
@@ -56,9 +51,9 @@ export default class CameraMovement implements ComponentInterface {
     };
 
     mouseUp = (e) => {
-        if (e.button === 0) {
-            this.isMoving = false;
-        }
+        // if (e.button === 0) {
+        //     this.isMoving = false;
+        // }
         if (e.button === 0) {
             this.isRotating = false;
             e.preventDefault();
@@ -66,11 +61,10 @@ export default class CameraMovement implements ComponentInterface {
     }
 
     update(obj: GObject, gameWin: GameWindow) {
-        const c = obj.getComponent(CameraComponent) as CameraComponent;
         if (this.isRotating) {
             const move = -(this.mousePos.x - this.firstClick.x) / SMOOTHNESS;
 
-            c.rotation += move;
+            this.camera.rotation += move;
         }
         // if (this.isMoving) {
         //     const move = new THREE.Vector3();
@@ -87,6 +81,5 @@ export default class CameraMovement implements ComponentInterface {
         // }
     }
 
-    draw (context?: THREE.Scene) {
-    };
+    draw (context?: THREE.Scene) {};
 }

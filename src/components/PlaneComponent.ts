@@ -137,27 +137,10 @@ export default class PlaneComponent implements ComponentInterface {
         var posVec = new THREE.Vector3();
         var normVec = new THREE.Vector3();
 
-        // const positionAttr = this.geometry.getAttribute("position");
-        // const vertices = positionAttr.array;
-        // const num = (((x+1)*18)+(y*(this.map[0].length)*18))-2;
-        // console.log(vertices[num]);
-
-        ////////////////////////////////////////////////////////////////
-
-        // retVec.x = (coord.x-this.width/2);
-        // retVec.y = (this.map[coord.y][coord.x]);
-        // retVec.z = (coord.y-this.depth/2);
-
-        ////////////////////////////////////////////////////////////////
-
         const ray = new THREE.Raycaster();
-        // ray.setFromCamera(new Vector2(0, 0), this.gw.threeCamera);
-        // ray.set(new THREE.Vector3(coord.x, 10, coord.y), new THREE.Vector3(0, -1, 0));
-        ray.set(new THREE.Vector3(coord.x, 10, coord.y), new THREE.Vector3(0, -1, 0));
+        ray.set(new THREE.Vector3(coord.x, this.height*10, coord.y), new THREE.Vector3(0, -1, 0));
 
         const intersect = ray.intersectObject(this.mesh)[0];
-
-        console.log(intersect);
 
         posVec = intersect.point;
         normVec = intersect.face.normal;

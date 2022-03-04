@@ -10,31 +10,35 @@ export default class RayComponent implements ComponentInterface {
     name: string = "RayComponent";
     width: number;
     height: number;
-    mousePos: THREE.Vector2 = new THREE.Vector2();
+    mousePos: THREE.Vector3 = new THREE.Vector3();
 
     rayPos = new THREE.Vector3();
 
-    private geometry;
-    private material;
     private mesh;
 
+    private plane;
+
     init(gameWin: GameController) {
+        this.plane = gameWin.getScene().getObject("plano").getComponent(PlaneComponent) as PlaneComponent;
+
         this.width = gameWin.width;
         this.height = gameWin.height;
 
         gameWin.canvas.addEventListener("mousemove", this.mouseMove, false);
 
-        this.geometry = new THREE.SphereGeometry(1);
-        this.material = new THREE.MeshStandardMaterial({color: "red"});
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        const geometry = new THREE.CircleGeometry(1);
+        const material = new THREE.MeshStandardMaterial({color: "red"});
+        this.mesh = new THREE.Mesh(geometry, material);
+        this.mesh.rotation.x = 3/2*Math.PI;
         gameWin.threeScene.add(this.mesh);
     }
 
     mouseMove = (e) => {
         // console.log(e);
 
-        this.mousePos.x = ( e.clientX / this.width ) * 2 - 1;
-        this.mousePos.y = - ( e.clientY / this.height ) * 2 + 1;
+        this.mousePos.x = ( e.clientX / this.width ) * 2 - 1.02;
+        this.mousePos.y = - ( e.clientY / this.height ) * 2 + 1.02;
+        this.mousePos.z = .5;
 
         // console.log(this.mousePos);
     }
@@ -63,9 +67,9 @@ export default class RayComponent implements ComponentInterface {
     }
 
     draw (context?: THREE.Scene) {
-        this.mesh.position.x = this.rayPos.x-1;
-        this.mesh.position.y = this.rayPos.y+2;
-        this.mesh.position.z = this.rayPos.z-1;
+        this.mesh.position.x = this.rayPos.x;
+        this.mesh.position.y = this.rayPos.y;
+        this.mesh.position.z = this.rayPos.z;
     };
 
 }

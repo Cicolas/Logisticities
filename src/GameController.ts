@@ -27,11 +27,11 @@ export default class GameController extends GameWindow{
         this.threeScene = new THREE.Scene();
         const fog = new THREE.Fog(
             new Color("black"),
-            Math.cos(-this.cameraAngle)*this.depth*1.5*this.cameraDistance,
-            Math.cos(-this.cameraAngle)*this.depth*1.8*this.cameraDistance
+            Math.cos(-this.cameraAngle)*this.depth*1*this.cameraDistance,
+            Math.cos(-this.cameraAngle)*this.depth*3*this.cameraDistance
         );
         fog.color = new THREE.Color(0xd9d49a);
-        // scene.fog = fog;
+        // this.threeScene.fog = fog;
         this.threeScene.background = new THREE.Color(0xd9d49a);
 
         return super.initGame();

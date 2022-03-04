@@ -1,12 +1,15 @@
 import CameraComponent from "./components/CameraComponent";
 import CameraMovement from "./components/CameraMovement";
-import CityComponent from "./components/CityComponent";
+import GameManager from "./components/GameManager";
 import LightComponent from "./components/LightComponent";
 import PlaneComponent from "./components/PlaneComponent";
 import RayComponent from "./components/RayComponent";
 import GameController from "./GameController";
 import GObject from "./lib/CUASAR/GObject";
 import Scene from "./lib/CUASAR/Scene";
+
+const CANVAS_WIDTH = 160*8;
+const CANVAS_HEIGHT = 90*8;
 
 enum mapSizeEnum {
     SMALL = 1,
@@ -22,16 +25,16 @@ const DEPTH = 8*DEFINITION*MAPSIZE;
 const HEIGHT = 8*DEFINITION;
 
 const cameraI = {
-    width: WIDTH,
-    height: HEIGHT,
+    width: CANVAS_WIDTH,
+    height: CANVAS_HEIGHT,
     depth: DEPTH,
-    cameraAngle: 1/8 * Math.PI,
-    cameraDistance: 1
+    cameraAngle: 1/2 * Math.PI,
+    cameraDistance: .75
 }
 
 const planeI = {
-    seed: 3,
-    // seed: Math.random()*1000,
+    // seed: 3,
+    seed: Math.random()*100000,
     width: WIDTH,
     height: HEIGHT,
     depth: DEPTH,
@@ -41,8 +44,8 @@ const planeI = {
     perlinPower2: 4
 };
 
-const gw = new GameController("", cameraI)
-.setResolution(800, 600)
+const gw: GameController = new GameController("", cameraI)
+.setResolution(CANVAS_WIDTH, CANVAS_HEIGHT)
 .pushScene(
     new Scene("cena").addObject(
         new GObject("camera")
@@ -52,16 +55,13 @@ const gw = new GameController("", cameraI)
         new GObject("luz")
         .addComponent(new LightComponent(HEIGHT))
     ).addObject(
+        new GObject("gameManager")
+        .addComponent(new GameManager(DEFINITION*8, MAPSIZE))
+    ).addObject(
         new GObject("plano")
         .addComponent(new PlaneComponent(planeI))
-    ).addObject(
-        new GObject("raio")
-        .addComponent(new RayComponent)
-    ).addObject(
-        new GObject("cidade")
-        .addComponent(new CityComponent)
     )
 )
-.initGame();
+.initGame() as GameController;
 
-(gw as GameController).updateTHREE();
+gw.updateTHREE();
