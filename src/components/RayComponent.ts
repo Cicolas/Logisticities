@@ -22,20 +22,21 @@ export default class RayComponent implements ComponentInterface {
         this.width = gameWin.width;
         this.height = gameWin.height;
 
-        document.getElementsByTagName("canvas")[0].addEventListener("mousemove", this.mouseMove, false);
+        gameWin.canvas.addEventListener("mousemove", this.mouseMove, false);
 
-        this.geometry = new THREE.CircleGeometry(1);
+        this.geometry = new THREE.SphereGeometry(1);
         this.material = new THREE.MeshStandardMaterial({color: "red"});
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         gameWin.threeScene.add(this.mesh);
     }
 
     mouseMove = (e) => {
-        console.log(e);
-
+        // console.log(e);
 
         this.mousePos.x = ( e.clientX / this.width ) * 2 - 1;
         this.mousePos.y = - ( e.clientY / this.height ) * 2 + 1;
+
+        // console.log(this.mousePos);
     }
 
     update(obj: GObject, gameWin: GameController) {
@@ -63,7 +64,7 @@ export default class RayComponent implements ComponentInterface {
 
     draw (context?: THREE.Scene) {
         this.mesh.position.x = this.rayPos.x-1;
-        this.mesh.position.y = this.rayPos.y+1;
+        this.mesh.position.y = this.rayPos.y+2;
         this.mesh.position.z = this.rayPos.z-1;
     };
 

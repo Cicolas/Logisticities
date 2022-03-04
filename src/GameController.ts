@@ -9,6 +9,7 @@ export default class GameController extends GameWindow{
     public threeScene: THREE.Scene;
     public threeRenderer: THREE.WebGLRenderer;
     public threeCamera: THREE.Camera;
+    public canvas: HTMLCanvasElement;
 
     private cameraAngle: number;
     private cameraDistance: number;
@@ -41,6 +42,9 @@ export default class GameController extends GameWindow{
         this.threeRenderer.setSize(width, height);
         this.threeRenderer.setPixelRatio( window.devicePixelRatio );
         document.body.appendChild(this.threeRenderer.domElement);
+
+        this.canvas = document.getElementsByTagName("canvas")[0];
+
         return super.setResolution(width, height);
     }
 
