@@ -14,6 +14,7 @@ export default class CityComponent implements ComponentInterface {
     public mesh: THREE.Mesh;
 
     public cityName: string;
+    public isSelected: boolean;
 
     private plane: PlaneComponent;
     private coordinates: THREE.Vector2;
@@ -30,8 +31,6 @@ export default class CityComponent implements ComponentInterface {
     init(gameWin: GameController) {
         this.plane = gameWin.getScene().getObject("plano").getComponent(PlaneComponent) as PlaneComponent;
 
-        console.log(this.cityName);
-
         const geometry = new THREE.BoxGeometry(this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE);
         const material = new THREE.MeshStandardMaterial({color: "purple"});
         this.mesh = new THREE.Mesh(geometry, material);
@@ -39,7 +38,7 @@ export default class CityComponent implements ComponentInterface {
         this.mesh.rotation.x = 3/2*Math.PI;
         gameWin.threeScene.add(this.mesh);
 
-        setTimeout(this.postInit.bind(this), 100);
+        setTimeout(this.postInit.bind(this), 10);
     }
 
     postInit() {
@@ -61,6 +60,6 @@ export default class CityComponent implements ComponentInterface {
         this.mesh.position.x = this.position.x;
         this.mesh.position.y = this.position.y+.5;
         this.mesh.position.z = this.position.z;
-        (this.mesh.material as THREE.MeshStandardMaterial).color = new Color("purple");
+        (this.mesh.material as THREE.MeshStandardMaterial).color = this.isSelected?new Color("red"): new Color("purple");
     };
 }

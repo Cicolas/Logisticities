@@ -8,39 +8,32 @@ import PlaneComponent from './PlaneComponent';
 
 export default class RayComponent implements ComponentInterface {
     name: string = "RayComponent";
-    width: number;
-    height: number;
-    mousePos: THREE.Vector3 = new THREE.Vector3();
-
-    rayPos = new THREE.Vector3();
-
+    private gw: GameController;
     private mesh;
 
-    private plane;
+    private mousePos: THREE.Vector3 = new THREE.Vector3();
+    private rayPos = new THREE.Vector3();
 
     init(gameWin: GameController) {
-        this.plane = gameWin.getScene().getObject("plano").getComponent(PlaneComponent) as PlaneComponent;
-
-        this.width = gameWin.width;
-        this.height = gameWin.height;
+        this.gw = gameWin;
 
         gameWin.canvas.addEventListener("mousemove", this.mouseMove, false);
 
         const geometry = new THREE.CircleGeometry(1);
-        const material = new THREE.MeshStandardMaterial({color: "red"});
+        const material = new THREE.MeshStandardMaterial({color: "yellow"});
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.rotation.x = 3/2*Math.PI;
         gameWin.threeScene.add(this.mesh);
     }
 
-    mouseMove = (e) => {
-        // console.log(e);
+    mouseMove = (e: MouseEvent) => {
+        const bb = this.gw.canvas.getBoundingClientRect();
+        const mx = e.clientX - bb.left;
+        const my = e.clientY - bb.top;
 
-        this.mousePos.x = ( e.clientX / this.width ) * 2 - 1.02;
-        this.mousePos.y = - ( e.clientY / this.height ) * 2 + 1.02;
+        this.mousePos.x = ( mx / this.gw.width ) * 2 - 1;
+        this.mousePos.y = - ( my / this.gw.height ) * 2 + 1;
         this.mousePos.z = .5;
-
-        // console.log(this.mousePos);
     }
 
     update(obj: GObject, gameWin: GameController) {
@@ -50,25 +43,13 @@ export default class RayComponent implements ComponentInterface {
         const intersects = ray.intersectObjects(gameWin.threeScene.children);
 
         for ( let i = 0; i < intersects.length; i ++ ) {
-            // const obj = gameWin.getScene().getObject(intersects[i].object.name)
-            // let comp: PlaneComponent;
-
-            // if (obj) {
-            //     comp = obj.getComponent(PlaneComponent) as PlaneComponent
-            // }
-
-
-            // if (comp) {
-                // (comp.mesh.material as THREE.MeshStandardMaterial).color = new Color("white");
-            // }
-
             this.rayPos = intersects[i].point;
         }
     }
 
     draw (context?: THREE.Scene) {
         this.mesh.position.x = this.rayPos.x;
-        this.mesh.position.y = this.rayPos.y;
+        this.mesh.position.y = this.rayPos.y+.5;
         this.mesh.position.z = this.rayPos.z;
     };
 

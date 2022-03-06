@@ -1,0 +1,13 @@
+body {
+    position: absolute;
+    background-color: #413838;
+    display: flex;
+    bottom: 0px;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+canvas {
+    margin: auto;
+}
