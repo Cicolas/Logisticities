@@ -13,7 +13,8 @@ export default class LightComponent implements ComponentInterface {
     }
 
     init(gameWin: GameWindow) {
-        const light = new THREE.DirectionalLight(0xffffff);
+        // const light = new THREE.DirectionalLight(0x94add6);
+        const light = new THREE.DirectionalLight(0xffffff, 1);
         light.position.y = this.height;
         (gameWin as GameController).threeScene.add(light);
     }

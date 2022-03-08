@@ -1,8 +1,10 @@
 export const DEBUG_INFO = {
-    seed: -1,
-    showGrid: false,
-    showFog: false,
+    seed: 37055,
+    showGrid: true,
+    showFog: true,
     showWireframe: false,
+    showSea: true,
+    spawnCity: true,
     camera: {
         ortho: false,
         left: -20,
@@ -12,4 +14,4 @@ export const DEBUG_INFO = {
     }
 }
 
-export const production = true;
+export const production = false;

@@ -8,7 +8,7 @@ import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 const perlin = require('../lib/perlin').noise;
 
-const MAX_STEPNESS = 20;
+const MAX_STEPNESS = 17;
 
 export interface PlaneInterface {
     seed: number;
@@ -21,6 +21,7 @@ export interface PlaneInterface {
     perlinPower2: number;
     gridDefinition: number;
     color: color;
+    seaLevel: number;
 }
 
 export interface Vertex {
@@ -56,6 +57,7 @@ export default class PlaneComponent implements ComponentInterface {
     private map: number[][] = [];
     public grid: Vertex[][] = [];
     private gridDefinition: number;
+    private seaLevel: number;
 
     constructor(planeI: PlaneInterface){
         this.seed = Math.floor(planeI.seed);
@@ -68,6 +70,7 @@ export default class PlaneComponent implements ComponentInterface {
         this.perlinPower2 = planeI.perlinPower2;
         this.gridDefinition = planeI.gridDefinition;
         this.color = planeI.color;
+        this.seaLevel = planeI.seaLevel;
     }
 
     init(gameWin: GameController) {
@@ -88,6 +91,7 @@ export default class PlaneComponent implements ComponentInterface {
                 m1[x][z] *= this.height;
                 m2[x][z] *= this.height;
                 this.map[x][z] *= this.height;
+                this.map[x][z] -= this.seaLevel;
 
                 if (this.map[x][z] > highestPeak) {
                     highestPeak = this.map[x][z];
@@ -95,7 +99,7 @@ export default class PlaneComponent implements ComponentInterface {
             }
         }
 
-        console.log(this.map);
+        // console.log(this.map);
         this.geometry = this.rectangleGeometry(this.map, highestPeak);
         this.material = new THREE.MeshBasicMaterial({
             vertexColors: true,
@@ -176,13 +180,21 @@ export default class PlaneComponent implements ComponentInterface {
                         )
                     }else {
                         colorArr.push(
-                            colors[0].r, colors[0].g, colors[0].b,
-                            colors[1].r, colors[1].g, colors[1].b,
+                            colors[2].r, colors[2].g, colors[2].b,
+                            colors[2].r, colors[2].g, colors[2].b,
                             colors[2].r, colors[2].g, colors[2].b,
 
-                            colors[3].r, colors[3].g, colors[3].b,
-                            colors[0].r, colors[0].g, colors[0].b,
                             colors[2].r, colors[2].g, colors[2].b,
+                            colors[2].r, colors[2].g, colors[2].b,
+                            colors[2].r, colors[2].g, colors[2].b,
+
+                            // colors[0].r, colors[0].g, colors[0].b,
+                            // colors[1].r, colors[1].g, colors[1].b,
+                            // colors[2].r, colors[2].g, colors[2].b,
+
+                            // colors[3].r, colors[3].g, colors[3].b,
+                            // colors[0].r, colors[0].g, colors[0].b,
+                            // colors[2].r, colors[2].g, colors[2].b,
                         )
                     }
                 }
@@ -277,21 +289,23 @@ export default class PlaneComponent implements ComponentInterface {
                     }
                 }
 
-                if (neighborhood < 5) {
+                if (neighborhood <= 3) {
                     this.grid[i][j].apropiated = true;
+                }else if (neighborhood >= 6) {
+                    this.grid[i][j].apropiated = false;
                 }
-                if (neighborhood >= 6) {
+                if (this.grid[i][j].position.y < 0) {
                     this.grid[i][j].apropiated = false;
                 }
             }
         }
 
-        // for (let i = 0; i < this.gridDefinition; i++) {
-        //     this.grid[0][i].apropiated = false;
-        //     this.grid[i][0].apropiated = false;
-        //     this.grid[this.gridDefinition-1][i].apropiated = false;
-        //     this.grid[i][this.gridDefinition-1].apropiated = false;
-        // }
+        for (let i = 0; i < this.gridDefinition; i++) {
+            this.grid[0][i].apropiated = false;
+            this.grid[i][0].apropiated = false;
+            this.grid[this.gridDefinition-1][i].apropiated = false;
+            this.grid[i][this.gridDefinition-1].apropiated = false;
+        }
     }
     drawGrid() {
         for (let i = 0; i < this.gridDefinition; i++) {
@@ -314,8 +328,8 @@ export default class PlaneComponent implements ComponentInterface {
         rotation.y = 1/2*Math.PI-Math.atan2(vertex.normal.y, vertex.normal.x);
 
         if (
-            Math.abs(rotation.x*180/Math.PI+90)>17 ||
-            Math.abs(rotation.y*180/Math.PI)>17
+            Math.abs(rotation.x*180/Math.PI+90)>MAX_STEPNESS ||
+            Math.abs(rotation.y*180/Math.PI)>MAX_STEPNESS
         ) {
             return false;
         }
@@ -324,13 +338,15 @@ export default class PlaneComponent implements ComponentInterface {
     }
 
     getColor(height: number, highestPeak: number): color {
-        if (height*highestPeak < this.height/16) {
+        const actualHeight = (height*highestPeak);
+        // if (height*highestPeak < 0) {
+        //     return {r: 95/255, g: 152/255, b: 245/255}
+        // }else
+        if (actualHeight < this.height/this.perlinPower1/20) {
             return {r: 240/255, g: 187/255, b: 98/255}
-        }else if (height*highestPeak < this.height/2) {
+        }else if (actualHeight < this.height/this.perlinPower1/2) {
             return {r: 81/255, g: 146/255, b: 89/255}
-        }else if (height*highestPeak < this.height*1.5) {
-            return {r: 6/255, g: 70/255, b: 53/255}
-        }else if (height*highestPeak < this.height*3) {
+        }else if (actualHeight < this.height/this.perlinPower1*2) {
             return {r: 100/255, g: 102/255, b: 107/255}
         }else {
             return {r: 1, g: 1, b: 1}

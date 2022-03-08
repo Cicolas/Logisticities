@@ -2,6 +2,7 @@ import { Verify } from 'crypto';
 import * as THREE from 'three';
 import { Color } from 'three';
 import { createNewScene } from '../app';
+import { DEBUG_INFO } from '../enviroment';
 import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GObject from "../lib/CUASAR/GObject";
@@ -30,7 +31,7 @@ export default class GameManager implements ComponentInterface {
     constructor(definition, mapSize, gridDefinition) {
         this.definition = definition;
         this.gridDefinition = gridDefinition;
-        // this.cityCount = mapSize*4;
+        this.cityCount = DEBUG_INFO.spawnCity?mapSize*4:0;
 
         this.mousePos = new THREE.Vector3();
         this.cities = [];

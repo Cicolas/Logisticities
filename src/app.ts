@@ -9,6 +9,7 @@ import GameController from "./GameController";
 import GObject from "./lib/CUASAR/GObject";
 import Scene from "./lib/CUASAR/Scene";
 import { DEBUG_INFO } from './enviroment';
+import SeaComponent from './components/SeaComponent';
 
 const CANVAS_WIDTH = document.body.clientWidth;
 const CANVAS_HEIGHT = document.body.clientHeight;
@@ -19,7 +20,7 @@ enum mapSizeEnum {
     HUGE = 4
 }
 
-const MAPSIZE = mapSizeEnum.BIG;
+const MAPSIZE = mapSizeEnum.SMALL;
 
 const DEFINITION = 5;
 const WIDTH = 8*DEFINITION*MAPSIZE;
@@ -31,9 +32,9 @@ const cameraI = {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     depth: DEPTH,
-    cameraAngle: 1/4 * Math.PI,
+    cameraAngle: 1/5 * Math.PI,
     cameraDistance: .75,
-    isLocked: true
+    isLocked: false
 }
 
 const planeI = {
@@ -45,10 +46,21 @@ const planeI = {
     depth: DEPTH,
     perlinScale1: 1*DEFINITION,
     perlinScale2: 4*DEFINITION,
-    perlinPower1: 1,
+    perlinPower1: 1/2,
     perlinPower2: 4,
     gridDefinition: GRID_DEFINITION,
-    color: {r: 81/255, g: 146/255, b: 89/255}
+    color: {r: 81/255, g: 146/255, b: 89/255},
+    seaLevel: .1
+};
+
+const seaI = {
+    // seed: 47187,
+    // seed: 37055,
+    width: WIDTH,
+    height: HEIGHT,
+    depth: DEPTH,
+    color: {r: 95/255, g: 152/255, b: 245/255},
+    opacity: .5
 };
 
 const gw: GameController = new GameController("", cameraI)
@@ -81,6 +93,9 @@ export function createNewScene() {
     ).addObject(
         new GObject("plano")
         .addComponent(new PlaneComponent(planeI))
+    ).addObject(
+        new GObject("sea")
+        .addComponent(new SeaComponent(seaI))
     ).initScene(gw);
 
     gw.popScene();
