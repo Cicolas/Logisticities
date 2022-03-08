@@ -1,3 +1,4 @@
+import { BlobOptions } from 'buffer';
 import * as THREE from 'three';
 import { BufferGeometry, Color, TextureLoader, Vector2 } from "three";
 import { DEBUG_INFO } from '../enviroment';
@@ -102,12 +103,20 @@ export default class PlaneComponent implements ComponentInterface {
         });
         this.material.visible = true;
 
+        const shadow = this.rectangleGeometry(this.map, highestPeak, true);
+        const shadowMat = new THREE.MeshPhongMaterial({
+            depthFunc: THREE.EqualDepth,
+            transparent: true,
+            blending: THREE.MultiplyBlending,
+            shininess: 0
+        });
+        const shadowMesh = new THREE.Mesh(shadow, shadowMat);
+
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.name = "plano";
-        this.mesh.receiveShadow = true;
-        this.mesh.castShadow = true;
-        // this.mesh.visible = false;
+
         gameWin.threeScene.add(this.mesh);
+        gameWin.threeScene.add(shadowMesh);
 
         this.generateGrid();
         this.optimizeGrid();
@@ -124,7 +133,7 @@ export default class PlaneComponent implements ComponentInterface {
 
     draw (context?: THREE.Scene) {};
 
-    rectangleGeometry(map: number[][], highestPeak: number): BufferGeometry {
+    rectangleGeometry(map: number[][], highestPeak: number, isShadow: boolean = false): BufferGeometry {
         const geometry = new THREE.BufferGeometry();
 
         const size = ((this.width-1) * (this.depth-1))*6*3;
@@ -146,34 +155,36 @@ export default class PlaneComponent implements ComponentInterface {
                     x,   map[z][x],     z
                 )
 
-                const colors = [
-                    this.getColor(map[z+1][x+1], highestPeak),
-                    this.getColor(map[z][x+1], highestPeak),
-                    this.getColor(map[z][x], highestPeak),
+                if (!isShadow) {
+                    const colors = [
+                        this.getColor(map[z+1][x+1], highestPeak),
+                        this.getColor(map[z][x+1], highestPeak),
+                        this.getColor(map[z][x], highestPeak),
 
-                    this.getColor(map[z+1][x], highestPeak),
-                ]
+                        this.getColor(map[z+1][x], highestPeak),
+                    ]
 
-                if (DEBUG_INFO.showWireframe) {
-                    colorArr.push(
-                        map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
-                        map[z][x+1]/highestPeak, map[z][x+1]/highestPeak, map[z][x+1]/highestPeak,
-                        map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak,
+                    if (DEBUG_INFO.showWireframe) {
+                        colorArr.push(
+                            map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
+                            map[z][x+1]/highestPeak, map[z][x+1]/highestPeak, map[z][x+1]/highestPeak,
+                            map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak,
 
-                        map[z+1][x]/highestPeak, map[z+1][x]/highestPeak, map[z+1][x]/highestPeak,
-                        map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
-                        map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak
-                    )
-                }else {
-                    colorArr.push(
-                        colors[0].r, colors[0].g, colors[0].b,
-                        colors[1].r, colors[1].g, colors[1].b,
-                        colors[2].r, colors[2].g, colors[2].b,
+                            map[z+1][x]/highestPeak, map[z+1][x]/highestPeak, map[z+1][x]/highestPeak,
+                            map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
+                            map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak
+                        )
+                    }else {
+                        colorArr.push(
+                            colors[0].r, colors[0].g, colors[0].b,
+                            colors[1].r, colors[1].g, colors[1].b,
+                            colors[2].r, colors[2].g, colors[2].b,
 
-                        colors[3].r, colors[3].g, colors[3].b,
-                        colors[0].r, colors[0].g, colors[0].b,
-                        colors[2].r, colors[2].g, colors[2].b,
-                    )
+                            colors[3].r, colors[3].g, colors[3].b,
+                            colors[0].r, colors[0].g, colors[0].b,
+                            colors[2].r, colors[2].g, colors[2].b,
+                        )
+                    }
                 }
             }
         }
@@ -181,7 +192,9 @@ export default class PlaneComponent implements ComponentInterface {
         vertices.set(verticesArr);
         colors.set(colorArr);
         geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-        geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+        if (!isShadow) {
+            geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+        }
         geometry.computeVertexNormals();
         geometry.translate(-this.width/2, 0, -this.depth/2);
 
@@ -311,15 +324,16 @@ export default class PlaneComponent implements ComponentInterface {
     }
 
     getColor(height: number, highestPeak: number): color {
-        //81, 146, 89
-        //{r: 81/255, g: 146/255, b: 89/255}
-        //inverse height
-        const iH = Math.abs(height/highestPeak-1);
-        const h = (height/highestPeak)**2;
-        const r = iH*this.color.r+h;
-        const g = iH*this.color.g+h;
-        const b = iH*this.color.b+h;
-
-        return {r: r*1, g: g*1, b: b*1}
+        if (height*highestPeak < this.height/16) {
+            return {r: 240/255, g: 187/255, b: 98/255}
+        }else if (height*highestPeak < this.height/2) {
+            return {r: 81/255, g: 146/255, b: 89/255}
+        }else if (height*highestPeak < this.height*1.5) {
+            return {r: 6/255, g: 70/255, b: 53/255}
+        }else if (height*highestPeak < this.height*3) {
+            return {r: 100/255, g: 102/255, b: 107/255}
+        }else {
+            return {r: 1, g: 1, b: 1}
+        }
     }
 }

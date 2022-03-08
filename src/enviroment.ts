@@ -1,5 +1,5 @@
 export const DEBUG_INFO = {
-    seed: 47187,
+    seed: -1,
     showGrid: false,
     showFog: false,
     showWireframe: false,
