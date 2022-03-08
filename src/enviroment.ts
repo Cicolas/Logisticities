@@ -1,7 +1,8 @@
 export const DEBUG_INFO = {
     seed: 47187,
     showGrid: false,
-    showFog: true,
+    showFog: false,
+    showWireframe: false,
     camera: {
         ortho: false,
         left: -20,

@@ -1,5 +1,3 @@
-import "../images/listra.png";
-
 import * as THREE from 'three';
 import { BufferGeometry, Color, TextureLoader, Vector2 } from "three";
 import { DEBUG_INFO } from '../enviroment';
@@ -21,12 +19,19 @@ export interface PlaneInterface {
     perlinPower1: number;
     perlinPower2: number;
     gridDefinition: number;
+    color: color;
 }
 
 export interface Vertex {
     position: THREE.Vector3;
     normal: THREE.Vector3;
     apropiated?: boolean;
+}
+
+export interface color {
+    r: number,
+    g: number,
+    b: number
 }
 
 export default class PlaneComponent implements ComponentInterface {
@@ -43,6 +48,7 @@ export default class PlaneComponent implements ComponentInterface {
     private perlinScale2: number;
     private perlinPower1: number;
     private perlinPower2: number;
+    private color: color;
 
     private gw: GameController;
 
@@ -60,6 +66,7 @@ export default class PlaneComponent implements ComponentInterface {
         this.perlinPower1 = planeI.perlinPower1;
         this.perlinPower2 = planeI.perlinPower2;
         this.gridDefinition = planeI.gridDefinition;
+        this.color = planeI.color;
     }
 
     init(gameWin: GameController) {
@@ -68,6 +75,7 @@ export default class PlaneComponent implements ComponentInterface {
 
         const m1 = this.generatePerlin(0, 0, this.perlinScale1, this.seed);
         const m2 = this.generatePerlin(0, 0, this.perlinScale2, this.seed+10);
+        var highestPeak = 0;
 
         for (let x = 0; x < this.width; x++) {
             this.map[x] = [];
@@ -79,11 +87,19 @@ export default class PlaneComponent implements ComponentInterface {
                 m1[x][z] *= this.height;
                 m2[x][z] *= this.height;
                 this.map[x][z] *= this.height;
+
+                if (this.map[x][z] > highestPeak) {
+                    highestPeak = this.map[x][z];
+                }
             }
         }
 
-        this.geometry = this.rectangleGeometry(this.map);
-        this.material = this.generateMaterial();
+        console.log(this.map);
+        this.geometry = this.rectangleGeometry(this.map, highestPeak);
+        this.material = new THREE.MeshBasicMaterial({
+            vertexColors: true,
+            wireframe: DEBUG_INFO.showWireframe
+        });
         this.material.visible = true;
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -108,13 +124,15 @@ export default class PlaneComponent implements ComponentInterface {
 
     draw (context?: THREE.Scene) {};
 
-    rectangleGeometry(map: number[][]): BufferGeometry {
+    rectangleGeometry(map: number[][], highestPeak: number): BufferGeometry {
         const geometry = new THREE.BufferGeometry();
 
         const size = ((this.width-1) * (this.depth-1))*6*3;
         const vertices = new Float32Array(size);
+        const colors = new Float32Array(size);
 
         let verticesArr = [];
+        let colorArr = [];
 
         for (let x = 0; x < map.length-1; x++) {
             for (let z = 0; z < map[x].length-1; z++) {
@@ -127,11 +145,43 @@ export default class PlaneComponent implements ComponentInterface {
                     x+1, map[z+1][x+1], z+1,
                     x,   map[z][x],     z
                 )
+
+                const colors = [
+                    this.getColor(map[z+1][x+1], highestPeak),
+                    this.getColor(map[z][x+1], highestPeak),
+                    this.getColor(map[z][x], highestPeak),
+
+                    this.getColor(map[z+1][x], highestPeak),
+                ]
+
+                if (DEBUG_INFO.showWireframe) {
+                    colorArr.push(
+                        map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
+                        map[z][x+1]/highestPeak, map[z][x+1]/highestPeak, map[z][x+1]/highestPeak,
+                        map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak,
+
+                        map[z+1][x]/highestPeak, map[z+1][x]/highestPeak, map[z+1][x]/highestPeak,
+                        map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
+                        map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak
+                    )
+                }else {
+                    colorArr.push(
+                        colors[0].r, colors[0].g, colors[0].b,
+                        colors[1].r, colors[1].g, colors[1].b,
+                        colors[2].r, colors[2].g, colors[2].b,
+
+                        colors[3].r, colors[3].g, colors[3].b,
+                        colors[0].r, colors[0].g, colors[0].b,
+                        colors[2].r, colors[2].g, colors[2].b,
+                    )
+                }
             }
         }
 
         vertices.set(verticesArr);
+        colors.set(colorArr);
         geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+        geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
         geometry.computeVertexNormals();
         geometry.translate(-this.width/2, 0, -this.depth/2);
 
@@ -260,11 +310,16 @@ export default class PlaneComponent implements ComponentInterface {
         return true;
     }
 
-    generateMaterial() {
-        const img = new THREE.Material();
+    getColor(height: number, highestPeak: number): color {
+        //81, 146, 89
+        //{r: 81/255, g: 146/255, b: 89/255}
+        //inverse height
+        const iH = Math.abs(height/highestPeak-1);
+        const h = (height/highestPeak)**2;
+        const r = iH*this.color.r+h;
+        const g = iH*this.color.g+h;
+        const b = iH*this.color.b+h;
 
-        const mat = new THREE.MeshBasicMaterial({vertexColors: true});
-
-        return mat;
+        return {r: r*1, g: g*1, b: b*1}
     }
 }

@@ -47,7 +47,8 @@ const planeI = {
     perlinScale2: 4*DEFINITION,
     perlinPower1: 1,
     perlinPower2: 4,
-    gridDefinition: GRID_DEFINITION
+    gridDefinition: GRID_DEFINITION,
+    color: {r: 81/255, g: 146/255, b: 89/255}
 };
 
 const gw: GameController = new GameController("", cameraI)

@@ -31,8 +31,8 @@ export default class GameController extends GameWindow{
             Math.cos(-this.cameraAngle)*this.depth*1*this.cameraDistance,
             Math.cos(-this.cameraAngle)*this.depth*3*this.cameraDistance
         );
-        fog.color = new THREE.Color(0xd9d49a);
-        this.threeScene.background = new THREE.Color(0xd9d49a);
+        fog.color = new THREE.Color(0xe8e8e8);
+        // this.threeScene.background = new THREE.Color(0xe8e8e8);
 
         if (DEBUG_INFO.showFog) {
             this.threeScene.fog = fog;
