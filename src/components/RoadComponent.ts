@@ -63,8 +63,8 @@ export default class RoadComponent implements ComponentInterface {
     }
 
     calculateLine(cityPos1: THREE.Vector3, cityPos2: THREE.Vector3) {
-        const definition = LINE_DEFINITION*((this.definition/(8*5))**1/2)*(this.distance/Math.SQRT2);
-        console.log(definition);
+        const definition = LINE_DEFINITION*((this.definition/(8*5))**1/2)*(this.distance/Math.SQRT2)*2;
+        // console.log(definition);
 
         this.points.push(cityPos1);
         for (let i = 1; i <= Math.floor(definition); i++) {
@@ -74,10 +74,13 @@ export default class RoadComponent implements ComponentInterface {
 
             const y = this.plane.getPositionByCoordinates(
                 new THREE.Vector2(x, z)
-            ).position.y;
+            ).y+.5;
 
-            const intermediate = new THREE.Vector3(x, y+.5, z);
-            this.points.push(intermediate);
+            // const intermediate = this.plane.getPositionByCoordinates(
+            //     new THREE.Vector2(x, z)
+            // );
+            // intermediate.y += .5;
+            this.points.push(new THREE.Vector3(x, y, z));
         }
         this.points.push(cityPos2);
     }

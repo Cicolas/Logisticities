@@ -21,8 +21,8 @@ export default class CityComponent implements ComponentInterface {
     private position: THREE.Vector3;
     private definiton: number;
 
-    constructor(coordX: number = 0, coordY: number = 0, definition: number, mapsize: number, options){
-        this.coordinates = new THREE.Vector2(coordX*definition/2*mapsize, coordY*definition/2*mapsize);
+    constructor(coordX: number = 0, coordY: number = 0, definition: number, options){
+        this.coordinates = new THREE.Vector2(coordX, coordY);
         this.position = new THREE.Vector3(0, -100, 0);
         this.definiton = definition;
         this.cityName = options.name;
@@ -42,18 +42,14 @@ export default class CityComponent implements ComponentInterface {
     }
 
     postInit() {
-        const p = this.plane.getPositionByCoordinates(this.coordinates);
-
-        this.position = p.position;
-        this.mesh.rotation.x = -Math.atan2(p.normal.y, p.normal.z);
-        this.mesh.rotation.y = 1/2*Math.PI-Math.atan2(p.normal.y, p.normal.x);
-
-        // console.log(Math.atan2(p.normal.y, p.normal.x)/Math.PI*180);
-        // console.log("normal: ", p.normal);
-        // console.log(this.mesh.rotation);
+        this.spawnCity();
     }
 
     update(obj: GObject, gameWin: GameWindow) {
+        // if (this.isSelected) {
+        //     console.log(this.mesh.rotation.x*180/Math.PI+90);
+        //     console.log(this.mesh.rotation.y*180/Math.PI);
+        // }
     }
 
     draw (context?: THREE.Scene) {
@@ -61,5 +57,13 @@ export default class CityComponent implements ComponentInterface {
         this.mesh.position.y = this.position.y+.5;
         this.mesh.position.z = this.position.z;
         (this.mesh.material as THREE.MeshStandardMaterial).color = this.isSelected?new Color("red"): new Color("purple");
-    };
+    }
+
+    spawnCity() {
+        const v = this.plane.grid[this.coordinates.x][this.coordinates.y];
+
+        this.position = v.position;
+        this.mesh.rotation.x = -Math.atan2(v.normal.y, v.normal.z);
+        this.mesh.rotation.y = 1/2*Math.PI-Math.atan2(v.normal.y, v.normal.x);
+    }
 }

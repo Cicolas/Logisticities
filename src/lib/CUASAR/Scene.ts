@@ -3,7 +3,7 @@ import GameWindow from "./GameWindow";
 import GObject from "./GObject";
 
 export default class Scene {
-    private name: string = "";
+    public name: string = "";
 
     private objects: GObject[] = [];
 

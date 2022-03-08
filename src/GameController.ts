@@ -2,6 +2,7 @@ import { basename } from "path/posix";
 import *  as THREE from "three";
 import { Color } from "three";
 import { CameraInterface } from "./components/CameraComponent";
+import { DEBUG_INFO } from "./enviroment";
 import GameWindow from "./lib/CUASAR/GameWindow";
 import Scene from "./lib/CUASAR/Scene";
 
@@ -31,8 +32,11 @@ export default class GameController extends GameWindow{
             Math.cos(-this.cameraAngle)*this.depth*3*this.cameraDistance
         );
         fog.color = new THREE.Color(0xd9d49a);
-        // this.threeScene.fog = fog;
         this.threeScene.background = new THREE.Color(0xd9d49a);
+
+        if (DEBUG_INFO.showFog) {
+            this.threeScene.fog = fog;
+        }
 
         return super.initGame();
     }

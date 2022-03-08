@@ -1,10 +1,15 @@
+import { Verify } from 'crypto';
 import * as THREE from 'three';
 import { Color } from 'three';
+import { createNewScene } from '../app';
 import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GObject from "../lib/CUASAR/GObject";
 import CityComponent from './CityComponent';
+import PlaneComponent, { Vertex } from './PlaneComponent';
 import RoadComponent from './RoadComponent';
+
+const MAX_CITY_STEPNESS = 20;
 
 var ROAD_UUID = 100;
 var CITY_UUID = 200;
@@ -15,17 +20,17 @@ export default class GameManager implements ComponentInterface {
 
     private cityCount: number;
     private definition: number;
-    private mapsize: number;
+    private gridDefinition: number;
     public cities: GObject[];
 
     private mousePos: THREE.Vector3;
     private cityHovering: number;
     private citySelected: number = -1;
 
-    constructor(definition, mapsize) {
+    constructor(definition, mapSize, gridDefinition) {
         this.definition = definition;
-        this.mapsize = mapsize;
-        this.cityCount = mapsize*4;
+        this.gridDefinition = gridDefinition;
+        this.cityCount = mapSize*4;
 
         this.mousePos = new THREE.Vector3();
         this.cities = [];
@@ -40,7 +45,16 @@ export default class GameManager implements ComponentInterface {
 
         gameWin.canvas.addEventListener("click", this.mouseClick.bind(this));
         gameWin.canvas.addEventListener("mousemove", this.mouseMove);
-        // gameWin.canvas.addEventListener("mouseup", this.mouseUp);
+        document.addEventListener("keydown", this.reset);
+    }
+
+    reset(e: KeyboardEvent) {
+        console.log(e);
+
+        if (e.key === "r") {
+            console.log("newScene");
+            setTimeout(createNewScene, 10);
+        }
     }
 
     mouseClick(e: MouseEvent) {
@@ -109,18 +123,36 @@ export default class GameManager implements ComponentInterface {
 
     generateCity(gameWin: GameController) {
         for (let i = 0; i < this.cityCount; i++) {
-            const x = Math.random()*1.8-.9;
-            const y = Math.random()*1.8-.9;
+            var x;
+            var y;
+
+            do {
+                x = Math.floor(Math.random()*1000)%this.gridDefinition
+                y = Math.floor(Math.random()*1000)%this.gridDefinition
+            } while (!this.isValidCityPlace(x, y))
 
             const go = new GObject((++CITY_UUID).toString())
-                       .addComponent(
-                           new CityComponent(x, y, this.definition, this.mapsize, {name: (CITY_UUID)})
-                       )
-                       .initObject(gameWin);
+                        .addComponent(
+                            new CityComponent(x, y, this.definition, {name: (CITY_UUID)})
+                        )
+                        .initObject(gameWin);
 
             this.cities.push(go);
             gameWin.getScene().addObject(go);
         }
+    }
+
+    isValidCityPlace(x, y) {
+        if (x === 0 ||
+            y === 0 ||
+            x === this.gridDefinition-1 ||
+            y === this.gridDefinition-1
+        ) return false;
+
+        const plane = this.gw.getScene().getObject("plano").getComponent(PlaneComponent) as PlaneComponent;
+        if (plane.grid[x][y].apropiated === false) return false;
+
+        return true;
     }
 
     getMousePosition(e) {

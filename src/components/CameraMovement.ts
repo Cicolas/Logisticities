@@ -7,7 +7,7 @@ import GObject from "../lib/CUASAR/GObject";
 import CameraComponent from "./CameraComponent";
 import PlaneComponent from "./PlaneComponent";
 
-const SMOOTHNESS = 2000;
+const SMOOTHNESS = 200;
 
 export default class CameraMovement implements ComponentInterface {
     name: string = "CameraMovement";
@@ -18,6 +18,8 @@ export default class CameraMovement implements ComponentInterface {
     private isRotating: boolean;
     private firstClick: THREE.Vector2 = new THREE.Vector2();
     private mousePos: THREE.Vector2 = new THREE.Vector2();
+    private keysPressed: string[] = [];
+    private velocity: number = 1/2;
 
     init(gameWin: GameController) {
         this.gw = gameWin;
@@ -27,6 +29,9 @@ export default class CameraMovement implements ComponentInterface {
         gameWin.canvas.addEventListener("mousedown", this.mouseDown);
         gameWin.canvas.addEventListener("mousemove", this.mouseMove);
         gameWin.canvas.addEventListener("mouseup", this.mouseUp);
+        gameWin.canvas.addEventListener("wheel", this.mouseZoom);
+        document.addEventListener("keydown", this.keyEnter.bind(this));
+        document.addEventListener("keyup", this.keyExit.bind(this));
     }
 
     postInit() {
@@ -37,49 +42,61 @@ export default class CameraMovement implements ComponentInterface {
         this.mousePos.x = e.clientX;
         this.mousePos.y = e.clientY;
     }
-
     mouseDown = (e) => {
         this.firstClick.x = e.clientX;
         this.firstClick.y = e.clientY;
-        // if (e.button === 0) {
-        //     this.isMoving = true;
-        // }
         if (e.button === 0) {
             this.isRotating = true;
-            e.preventDefault();
         }
     };
-
     mouseUp = (e) => {
-        // if (e.button === 0) {
-        //     this.isMoving = false;
-        // }
         if (e.button === 0) {
             this.isRotating = false;
-            e.preventDefault();
         }
+    }
+    mouseZoom = (e: WheelEvent) => {
+        const nextZoom = Math.sign(e.deltaY)*.25+this.camera.cameraDistance;
+
+        if (nextZoom >= .25 && nextZoom <= .75) {
+            this.camera.cameraDistance = nextZoom;
+        }
+
+        this.camera.zoom(Math.sign(e.deltaY)*.25);
+        e.preventDefault();
+    }
+
+    keyEnter(e: KeyboardEvent) {
+        if (e) {
+            this.isMoving = true;
+        }
+        this.keysPressed.push(e.key);
+    }
+    keyExit(e: KeyboardEvent) {
+        this.keysPressed = this.keysPressed.filter(v => v !== e.key);
     }
 
     update(obj: GObject, gameWin: GameWindow) {
         if (this.isRotating) {
             const move = -(this.mousePos.x - this.firstClick.x) / SMOOTHNESS;
-
             this.camera.rotation += move;
+            this.camera.rotate(move);
+            this.firstClick.copy(this.mousePos);
         }
-        // if (this.isMoving) {
-        //     const move = new THREE.Vector3();
-        //     move.x = -(this.mousePos.x - this.firstClick.x) / 2;
-        //     move.y = -(this.mousePos.y - this.firstClick.y) / 2;
-
-        //     this.gw.threeCamera.position.x += move.x;
-        //     this.gw.threeCamera.position.z += move.y;
-
-        //     c.anchor.x += move.x;
-        //     c.anchor.z += move.y;
-
-        //     // this.firstClick = this.mousePos;
-        // }
+        if (this.isMoving) {
+            this.move();
+        }
     }
 
     draw (context?: THREE.Scene) {};
+
+    move() {
+        const dir = new THREE.Vector2();
+
+        if (this.keysPressed.includes("w")) dir.y -= 1;
+        if (this.keysPressed.includes("s")) dir.y += 1;
+        if (this.keysPressed.includes("d")) dir.x += 1;
+        if (this.keysPressed.includes("a")) dir.x -= 1;
+
+        this.camera.move(dir.normalize(), this.velocity);
+    }
 }

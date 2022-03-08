@@ -1,10 +1,15 @@
+import "../images/listra.png";
+
 import * as THREE from 'three';
-import { BufferGeometry, Color, Vector2 } from "three";
+import { BufferGeometry, Color, TextureLoader, Vector2 } from "three";
+import { DEBUG_INFO } from '../enviroment';
 import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 const perlin = require('../lib/perlin').noise;
+
+const MAX_STEPNESS = 20;
 
 export interface PlaneInterface {
     seed: number;
@@ -15,6 +20,13 @@ export interface PlaneInterface {
     perlinScale2: number;
     perlinPower1: number;
     perlinPower2: number;
+    gridDefinition: number;
+}
+
+export interface Vertex {
+    position: THREE.Vector3;
+    normal: THREE.Vector3;
+    apropiated?: boolean;
 }
 
 export default class PlaneComponent implements ComponentInterface {
@@ -35,6 +47,8 @@ export default class PlaneComponent implements ComponentInterface {
     private gw: GameController;
 
     private map: number[][] = [];
+    public grid: Vertex[][] = [];
+    private gridDefinition: number;
 
     constructor(planeI: PlaneInterface){
         this.seed = Math.floor(planeI.seed);
@@ -45,6 +59,7 @@ export default class PlaneComponent implements ComponentInterface {
         this.perlinScale2 = planeI.perlinScale2;
         this.perlinPower1 = planeI.perlinPower1;
         this.perlinPower2 = planeI.perlinPower2;
+        this.gridDefinition = planeI.gridDefinition;
     }
 
     init(gameWin: GameController) {
@@ -67,27 +82,33 @@ export default class PlaneComponent implements ComponentInterface {
             }
         }
 
-        this.geometry = this.RectangleGeometry(this.map);
-        this.material = new THREE.MeshStandardMaterial({ color: 0x3b9126 });
+        this.geometry = this.rectangleGeometry(this.map);
+        this.material = this.generateMaterial();
         this.material.visible = true;
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.name = "plano";
         this.mesh.receiveShadow = true;
         this.mesh.castShadow = true;
+        // this.mesh.visible = false;
+        gameWin.threeScene.add(this.mesh);
+
+        this.generateGrid();
+        this.optimizeGrid();
+        this.optimizeGrid();
+        if (DEBUG_INFO.showGrid) {
+            this.drawGrid();
+        }
     }
 
     update(obj: GObject, gameWin: GameWindow) {
         // this.mesh.rotation.y += 0.01;
-        (this.mesh.material as THREE.MeshStandardMaterial).color = new Color(0x3b9126);
+        // (this.mesh.material as THREE.MeshStandardMaterial).color = new Color(0x3b9126);
     }
 
-    draw (context?: THREE.Scene) {
-        context.add(this.mesh);
-    };
+    draw (context?: THREE.Scene) {};
 
-
-    RectangleGeometry(map: number[][]): BufferGeometry {
+    rectangleGeometry(map: number[][]): BufferGeometry {
         const geometry = new THREE.BufferGeometry();
 
         const size = ((this.width-1) * (this.depth-1))*6*3;
@@ -127,13 +148,25 @@ export default class PlaneComponent implements ComponentInterface {
             for (let z = 0; z < this.depth; z++) {
                 // m[x][z] = (perlin.simplex2(x/scale+offsetx, z/scale+offsety)+1)/2;
                 m[x][z] = (perlin.perlin2(x/scale+offsetx, z/scale+offsety)+1)/2;
+                // m[x][z] = 0;
             }
         }
 
         return m;
     }
 
-    getPositionByCoordinates(coord: THREE.Vector2): {position: THREE.Vector3, normal: THREE.Vector3} {
+    //* Doesn't work well for non integer coords
+    getPositionByCoordinates(coord: THREE.Vector2): THREE.Vector3 {
+        var posVec = new THREE.Vector3();
+        posVec.x = Math.round(coord.x);
+        posVec.z = Math.round(coord.y);
+
+        const y = this.map[Math.round(coord.y+this.depth/2)][Math.round(coord.x+this.width/2)];
+        posVec.y = y;
+
+        return posVec;
+    }
+    getVertexByCoordinates(coord: THREE.Vector2): Vertex {
         var posVec = new THREE.Vector3();
         var normVec = new THREE.Vector3();
 
@@ -145,6 +178,93 @@ export default class PlaneComponent implements ComponentInterface {
         posVec = intersect.point;
         normVec = intersect.face.normal;
 
-        return {position: posVec, normal: normVec};
+        const v: Vertex = {position: posVec, normal: normVec};
+        v.apropiated = this.checkStepness(v);
+
+        return v;
+    }
+
+    generateGrid() {
+        for (let i = 0; i < this.gridDefinition; i++) {
+            this.grid[i] = [];
+            for (let j = 0; j < this.gridDefinition; j++) {
+                const p = new THREE.Vector2();
+                p.x = ((i/(this.gridDefinition-1))*2-1)*(this.width-1)/2-.5;
+                p.y = ((j/(this.gridDefinition-1))*2-1)*(this.depth-1)/2-.5;
+
+                p.x = Math.floor(p.x);
+                p.y = Math.floor(p.y);
+
+                this.grid[i][j] = this.getVertexByCoordinates(p);
+            }
+        }
+    }
+    //TODO: check areas that is inaccessible
+    optimizeGrid() {
+        for (let i = 1; i < this.gridDefinition-1; i++) {
+            for (let j = 1; j < this.gridDefinition-1; j++) {
+                var neighborhood = 0;
+                for (let k = 0; k < 9; k++) {
+                    const x = i-((k%3)-1);
+                    const y = j-(Math.floor(k/3)-1);
+                    const v = this.grid[x][y];
+
+                    if (!v.apropiated) {
+                        neighborhood++;
+                    }
+                }
+
+                if (neighborhood < 5) {
+                    this.grid[i][j].apropiated = true;
+                }
+                if (neighborhood >= 6) {
+                    this.grid[i][j].apropiated = false;
+                }
+            }
+        }
+
+        // for (let i = 0; i < this.gridDefinition; i++) {
+        //     this.grid[0][i].apropiated = false;
+        //     this.grid[i][0].apropiated = false;
+        //     this.grid[this.gridDefinition-1][i].apropiated = false;
+        //     this.grid[i][this.gridDefinition-1].apropiated = false;
+        // }
+    }
+    drawGrid() {
+        for (let i = 0; i < this.gridDefinition; i++) {
+            for (let j = 0; j < this.gridDefinition; j++) {
+                const g = this.grid[i][j];
+                const geometry = new THREE.SphereGeometry(.25);
+                const material = new THREE.MeshStandardMaterial({color: g.apropiated?"green":"red"});
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.position.x = g.position.x;
+                mesh.position.y = g.position.y;
+                mesh.position.z = g.position.z;
+                this.gw.threeScene.add(mesh);
+            }
+        }
+    }
+
+    checkStepness(vertex: Vertex) {
+        const rotation = new THREE.Vector2();
+        rotation.x = -Math.atan2(vertex.normal.y, vertex.normal.z);
+        rotation.y = 1/2*Math.PI-Math.atan2(vertex.normal.y, vertex.normal.x);
+
+        if (
+            Math.abs(rotation.x*180/Math.PI+90)>17 ||
+            Math.abs(rotation.y*180/Math.PI)>17
+        ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    generateMaterial() {
+        const img = new THREE.Material();
+
+        const mat = new THREE.MeshBasicMaterial({vertexColors: true});
+
+        return mat;
     }
 }
