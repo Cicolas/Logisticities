@@ -20,7 +20,7 @@ enum mapSizeEnum {
     HUGE = 4
 }
 
-const MAPSIZE = mapSizeEnum.SMALL;
+const MAPSIZE = mapSizeEnum.BIG;
 
 const DEFINITION = 5;
 const WIDTH = 8*DEFINITION*MAPSIZE;

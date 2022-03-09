@@ -1,6 +1,6 @@
 export const DEBUG_INFO = {
-    seed: 37055,
-    showGrid: true,
+    seed: -1,
+    showGrid: false,
     showFog: true,
     showWireframe: false,
     showSea: true,
@@ -11,6 +11,9 @@ export const DEBUG_INFO = {
         right: 30,
         top: 20,
         bottom: -19
+    },
+    map: {
+        planify: false,
     }
 }
 

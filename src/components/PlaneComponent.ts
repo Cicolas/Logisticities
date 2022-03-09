@@ -223,8 +223,7 @@ export default class PlaneComponent implements ComponentInterface {
             m[x] = [];
             for (let z = 0; z < this.depth; z++) {
                 // m[x][z] = (perlin.simplex2(x/scale+offsetx, z/scale+offsety)+1)/2;
-                m[x][z] = (perlin.perlin2(x/scale+offsetx, z/scale+offsety)+1)/2;
-                // m[x][z] = 0;
+                m[x][z] = DEBUG_INFO.map.planify?0:(perlin.perlin2(x/scale+offsetx, z/scale+offsety)+1)/2;
             }
         }
 
@@ -251,8 +250,10 @@ export default class PlaneComponent implements ComponentInterface {
 
         const intersect = ray.intersectObject(this.mesh)[0];
 
-        posVec = intersect.point;
-        normVec = intersect.face.normal;
+        if (intersect) {
+            posVec = intersect.point;
+            normVec = intersect.face.normal;
+        }
 
         const v: Vertex = {position: posVec, normal: normVec};
         v.apropiated = this.checkStepness(v);
