@@ -17,7 +17,7 @@ export default class CityComponent implements ComponentInterface {
     public isSelected: boolean;
 
     private plane: PlaneComponent;
-    private coordinates: THREE.Vector2;
+    public coordinates: THREE.Vector2;
     private position: THREE.Vector3;
     private definiton: number;
 

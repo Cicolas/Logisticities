@@ -51,15 +51,18 @@ export default class CameraComponent implements ComponentInterface {
                 DEBUG_INFO.camera.top,
                 DEBUG_INFO.camera.bottom
             );
+
+            this.camera.rotation.x = -Math.PI/2;
+            this.camera.position.y = (DEBUG_INFO.camera.right-DEBUG_INFO.camera.left)/2;
         }else{
             this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 10000);
-        }
-        this.camera.position.y = Math.sin(this.cameraAngle)*this.depth*this.cameraDistance;
-        this.camera.position.z = Math.cos(this.cameraAngle)*this.depth*this.cameraDistance;
-        this.camera.rotation.x = -this.cameraAngle;
+            this.camera.rotation.x = -this.cameraAngle;
 
-        if (this.isLocked) {
-            this.camera.lookAt(this.anchor);
+            if (this.isLocked) {
+                this.camera.lookAt(this.anchor);
+            }
+            this.camera.position.y = Math.sin(this.cameraAngle)*this.depth*this.cameraDistance;
+            this.camera.position.z = Math.cos(this.cameraAngle)*this.depth*this.cameraDistance;
         }
 
         this.gw.threeCamera = this.camera;

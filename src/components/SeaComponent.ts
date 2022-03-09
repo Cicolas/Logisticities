@@ -39,7 +39,7 @@ export default class SeaComponent implements ComponentInterface {
 
     init(gameWin: GameController) {
         // console.log(this.map);
-        this.geometry = new THREE.PlaneGeometry(this.width-.5, this.depth-.5);
+        this.geometry = new THREE.PlaneGeometry(this.width-1, this.depth-1);
         this.material = new THREE.MeshStandardMaterial({
             color: this.color,
             opacity: this.opacity,

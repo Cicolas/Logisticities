@@ -1,3 +1,4 @@
+import { log } from 'console';
 import { randomUUID } from 'crypto';
 import * as THREE from 'three';
 import { BufferGeometry, Color } from "three";
@@ -6,7 +7,7 @@ import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 import CityComponent from './CityComponent';
-import PlaneComponent from './PlaneComponent';
+import PlaneComponent, { Vertex } from './PlaneComponent';
 
 const LINE_DEFINITION = 1;
 
@@ -53,8 +54,10 @@ export default class RoadComponent implements ComponentInterface {
         const cc1 = this.cities[0].getComponent(CityComponent) as CityComponent;
         const cc2 = this.cities[1].getComponent(CityComponent) as CityComponent;
 
-        this.distance = this.calculateDistance(cc1.mesh.position, cc2.mesh.position);
-        this.calculateLine(cc1.mesh.position, cc2.mesh.position);
+        console.log(this.cities);
+        // this.distance = this.calculateDistance(cc1.mesh.position, cc2.mesh.position);
+        // this.calculateLine(cc1.mesh.position, cc2.mesh.position);
+        this.calculateRoute(this.plane.grid, new THREE.Vector2().copy(cc1.coordinates), new THREE.Vector2().copy(cc2.coordinates));
 
         const geometry = new THREE.BufferGeometry().setFromPoints(this.points);
 
@@ -72,21 +75,44 @@ export default class RoadComponent implements ComponentInterface {
             const x = (cityPos2.x - cityPos1.x)/step+cityPos1.x;
             const z = (cityPos2.z - cityPos1.z)/step+cityPos1.z;
 
-            const y = this.plane.getPositionByCoordinates(
+            const pos = this.plane.getPositionByCoordinates(
                 new THREE.Vector2(x, z)
-            ).y+.5;
+            );
 
-            // const intermediate = this.plane.getPositionByCoordinates(
+            // const pos = this.plane.getGridByCoordinates(
             //     new THREE.Vector2(x, z)
-            // );
-            // intermediate.y += .5;
-            this.points.push(new THREE.Vector3(x, y, z));
+            // )
+
+            pos.y += .5;
+            this.points.push(pos);
         }
         this.points.push(cityPos2);
     }
 
     calculateDistance(cityPos1: THREE.Vector3, cityPos2: THREE.Vector3) {
         return cityPos1.distanceTo(cityPos2);
+    }
+
+    calculateRoute(grid: Vertex[][], linePos: THREE.Vector2, destiny: THREE.Vector2) {
+        // this.points.push(grid[linePos.x][linePos.y].position);
+        const vecPos = new THREE.Vector3().copy(grid[linePos.x][linePos.y].position);
+        vecPos.y += .5;
+        this.points.push(vecPos);
+
+        if (linePos.y < destiny.y) {
+            linePos.y++;
+        }else if(linePos.y > destiny.y){
+            linePos.y--;
+        }else if(linePos.x < destiny.x){
+            linePos.x++;
+        }else if(linePos.x > destiny.x){
+            linePos.x--;
+        }else{
+            return;
+        }
+
+        // console.log(linePos);
+        this.calculateRoute(grid, linePos, destiny);
     }
 
     update(obj: GObject, gameWin: GameWindow) {}

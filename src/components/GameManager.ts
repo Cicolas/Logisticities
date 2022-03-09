@@ -50,8 +50,6 @@ export default class GameManager implements ComponentInterface {
     }
 
     reset(e: KeyboardEvent) {
-        console.log(e);
-
         if (e.key === "r") {
             console.log("newScene");
             setTimeout(createNewScene, 10);
@@ -105,7 +103,7 @@ export default class GameManager implements ComponentInterface {
         const intersects = ray.intersectObjects(this.gw.threeScene.children);
 
         //! INCORRECT VALIDATION IF IS HOVERING A CITY OR NOT
-        if (intersects.length <= 1) this.cityHovering = -1;
+        if (intersects.length <= 3) this.cityHovering = -1;
 
         for ( let i = 0; i < intersects.length; i++) {
             const obj = this.gw.getScene().getObject(intersects[i].object.name.toString())

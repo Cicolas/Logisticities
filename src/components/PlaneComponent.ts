@@ -128,6 +128,7 @@ export default class PlaneComponent implements ComponentInterface {
         if (DEBUG_INFO.showGrid) {
             this.drawGrid();
         }
+        // console.log(this.grid);
     }
 
     update(obj: GObject, gameWin: GameWindow) {
@@ -180,13 +181,13 @@ export default class PlaneComponent implements ComponentInterface {
                         )
                     }else {
                         colorArr.push(
-                            colors[2].r, colors[2].g, colors[2].b,
-                            colors[2].r, colors[2].g, colors[2].b,
-                            colors[2].r, colors[2].g, colors[2].b,
+                            colors[0].r, colors[0].g, colors[0].b,
+                            colors[0].r, colors[0].g, colors[0].b,
+                            colors[0].r, colors[0].g, colors[0].b,
 
-                            colors[2].r, colors[2].g, colors[2].b,
-                            colors[2].r, colors[2].g, colors[2].b,
-                            colors[2].r, colors[2].g, colors[2].b,
+                            colors[0].r, colors[0].g, colors[0].b,
+                            colors[0].r, colors[0].g, colors[0].b,
+                            colors[0].r, colors[0].g, colors[0].b,
 
                             // colors[0].r, colors[0].g, colors[0].b,
                             // colors[1].r, colors[1].g, colors[1].b,
@@ -258,14 +259,28 @@ export default class PlaneComponent implements ComponentInterface {
 
         return v;
     }
+    getGridByCoordinates(coord: THREE.Vector2): THREE.Vector3 {
+        var posVec = new THREE.Vector3();
+        posVec.x = (coord.x/(this.width/2-.5))*(this.gridDefinition/2);
+        posVec.y = (coord.y/(this.depth/2-.5))*(this.gridDefinition/2);
+
+        posVec.x = Math.round(posVec.x)+10;
+        posVec.y = Math.round(posVec.y)+10;
+
+        console.log(this.grid[posVec.x][posVec.y].position);
+
+        return this.grid[posVec.x][posVec.y].position;
+        return this.getPositionByCoordinates(coord);
+    }
 
     generateGrid() {
         for (let i = 0; i < this.gridDefinition; i++) {
             this.grid[i] = [];
             for (let j = 0; j < this.gridDefinition; j++) {
                 const p = new THREE.Vector2();
-                p.x = ((i/(this.gridDefinition-1))*2-1)*(this.width-1)/2-.5;
-                p.y = ((j/(this.gridDefinition-1))*2-1)*(this.depth-1)/2-.5;
+                // p.x = ((i/(this.gridDefinition-1))*2-1)*(this.width-1)/2-.5;
+                p.x = ((i/(this.gridDefinition-1))*2-1)*(this.width/2-.5);
+                p.y = ((j/(this.gridDefinition-1))*2-1)*(this.depth/2-.5);
 
                 p.x = Math.floor(p.x);
                 p.y = Math.floor(p.y);

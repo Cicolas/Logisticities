@@ -7,8 +7,8 @@ export const DEBUG_INFO = {
     spawnCity: true,
     camera: {
         ortho: false,
-        left: -20,
-        right: 19,
+        left: -30,
+        right: 30,
         top: 20,
         bottom: -19
     }

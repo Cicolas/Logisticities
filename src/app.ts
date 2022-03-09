@@ -32,7 +32,7 @@ const cameraI = {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     depth: DEPTH,
-    cameraAngle: 1/5 * Math.PI,
+    cameraAngle: 1/4 * Math.PI,
     cameraDistance: .75,
     isLocked: false
 }
