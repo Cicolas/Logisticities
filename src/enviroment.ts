@@ -5,12 +5,13 @@ export const DEBUG_INFO = {
     showWireframe: false,
     hideSea: false,
     noCities: false,
+    showRoadGuides: false,
     camera: {
         ortho: false,
-        left: -80,
-        right: 80,
-        top: 40,
-        bottom: -39
+        left: -40,
+        right: 40,
+        top: 20,
+        bottom: -19
     },
     map: {
         planify: false,

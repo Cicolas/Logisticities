@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import * as THREE from 'three';
-import { BufferGeometry, Color } from "three";
+import { BufferGeometry, Color, Vector2, Vector3 } from "three";
 import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
@@ -8,16 +8,9 @@ import GObject from "../lib/CUASAR/GObject";
 import CityComponent from './CityComponent';
 import PlaneComponent, { Vertex } from './PlaneComponent';
 import jsAstar from 'javascript-astar';
+import { DEBUG_INFO } from '../enviroment';
 
-const LINE_DEFINITION = 1;
-const DEFAULT_CELL = {
-    distFromStart: -1, distFromEnd: -1,
-    position: undefined,
-    value: 1000000,
-    got: false,
-    able: false,
-    history: []
-};
+const LINE_DEFINITION = 10;
 
 interface Cell {
     position: position;
@@ -31,10 +24,9 @@ interface Cell {
 
 interface position {x:number, y:number}
 
-
 export default class RoadComponent implements ComponentInterface {
     name: string = "RoadComponent";
-    public points: THREE.Vector3[];
+    public vertices: THREE.Vector3[];
     public line;
 
     public cities: [GObject, GObject] = [null, null];
@@ -46,6 +38,7 @@ export default class RoadComponent implements ComponentInterface {
 
     private pathFindCells:  number[][] = [];
     private finalPath: position[] = [];
+    private points: THREE.Vector3[] = [];
 
     // constructor(from: GObject, to: GObject, definition: number){
     //     this.points = [];
@@ -54,7 +47,7 @@ export default class RoadComponent implements ComponentInterface {
     //     this.definition = definition;
     // }
     constructor(from: string, to: string, definition: number){
-        this.points = [];
+        this.vertices = [];
         this.fromName = from;
         this.toName = to;
         this.definition = definition;
@@ -79,12 +72,23 @@ export default class RoadComponent implements ComponentInterface {
 
         this.generateCells(this.plane.grid);
         this.calculateRoute(this.plane.grid, cc1Pos, cc2Pos);
+        this.smoothRoute(this.plane.grid);
         // this.drawRoute(cc2Pos);
 
-        const geometry = new THREE.BufferGeometry().setFromPoints(this.points);
+        const geometry = new THREE.BufferGeometry().setFromPoints(this.vertices);
 
         this.line = new THREE.Line(geometry, material);
         gameWin.threeScene.add(this.line);
+
+        if (DEBUG_INFO.showRoadGuides) {
+            const planeMat = new THREE.LineBasicMaterial({
+                color: 0xff0000,
+                linejoin: "bevel",
+            })
+            const planeGeo = new THREE.BufferGeometry().setFromPoints(this.points);
+            const planeLine = new THREE.Line(planeGeo, planeMat);
+            gameWin.threeScene.add(planeLine);
+        }
 
         setTimeout(this.postInit.bind(this), 20, gameWin);
     }
@@ -127,6 +131,104 @@ export default class RoadComponent implements ComponentInterface {
             }
         }
         // console.log(this.pathFindCells);
+    }
+
+    smoothRoute(grid: Vertex[][]){
+        // const pi = new THREE.Vector3(0, .5, 0);
+        // const pc = new THREE.Vector3(1, .5, 0);
+        // const pc2 = new THREE.Vector3(2, .5, 1);
+        // const pf = new THREE.Vector3(3, .5, 1);
+
+        // for (let t = 0; t < LINE_DEFINITION; t++) {
+        //     const time = t/(LINE_DEFINITION-1);
+
+        //     var n1 = pi.clone().multiplyScalar((1-time)**3);
+        //     var n2 = pc.clone().multiplyScalar(3*((1-time)**2)*time);
+        //     var n3 = pc2.clone().multiplyScalar(3*(1-time)*(time**2));
+        //     var n4 = pf.clone().multiplyScalar(time**3);
+
+        //     var p = n1.add(n2).add(n3).add(n4);
+        //     this.vertices.push(p);
+        // }
+        // return;
+        for (let i = 0; i < this.points.length; i++) {
+            const pi = this.points[i];
+            // const pc = new THREE.Vector3();
+            const pc = this.points[i+1];
+            const pc2 = this.points[i+2];
+            const pf = this.points[i+3];
+            // console.log(pi, pc, pf);
+
+            if (i+3 < this.points.length) {
+                const curveSize = this.isCurve(
+                    {x: pi.x, y: pi.z},
+                    {x: pc.x, y: pc.z},
+                    {x: pc2.x, y: pc2.z},
+                    {x: pf.x, y: pf.z}
+                );
+
+                if (curveSize === 1) {
+                    console.log(i);
+                    for (let t = 0; t < LINE_DEFINITION; t++) {
+                        const time = t/(LINE_DEFINITION-1);
+
+                        var n1 = pi.clone().multiplyScalar((1-time)**2);
+                        var n2 = pc.clone().multiplyScalar(time*(2*(1-time)));
+                        var n3 = pc2.clone().multiplyScalar(time**2);
+
+                        var p = n1.add(n2).add(n3);
+                        this.vertices.push(p);
+                    }
+                    i++;
+                }else if(curveSize === 2) {
+                    console.log(i);
+                    for (let t = 0; t < LINE_DEFINITION; t++) {
+                        const time = t/(LINE_DEFINITION-1);
+
+                        var n1 = pi.clone().multiplyScalar((1-time)**3);
+                        var n2 = pc.clone().multiplyScalar(3*((1-time)**2)*time);
+                        var n3 = pc2.clone().multiplyScalar(3*(1-time)*(time**2));
+                        var n4 = pf.clone().multiplyScalar(time**3);
+
+                        var p = n1.add(n2).add(n3).add(n4);
+                        this.vertices.push(p);
+                    }
+                    i+=2;
+                }else {
+                    this.vertices.push(pi.clone());
+                }
+            }else {
+                this.vertices.push(pi.clone());
+            }
+        }
+        // console.log(this.vertices);
+    }
+
+    isCurve(pos1: position, pos2: position, pos3: position, pos4: position) {
+        const n = {x: 0, y: 0};
+        n.x = Math.abs(pos1.x-pos2.x);
+        n.y = Math.abs(pos1.y-pos2.y);
+
+        const n2 = {x: 0, y: 0};
+        n2.x = Math.abs(pos2.x-pos3.x);
+        n2.y = Math.abs(pos2.y-pos3.y);
+
+        const n3 = {x: 0, y: 0};
+        n3.x = Math.abs(pos3.x-pos4.x);
+        n3.y = Math.abs(pos3.y-pos4.y);
+
+        // console.log(n, n2, n3);
+
+        if ((n.x !== n2.x || n.y !== n2.y) &&
+            (n2.x === n3.x && n2.y === n3.y)) {
+            return 1;
+        }
+        if ((n.x !== n2.x || n.y !== n2.y) &&
+            (n2.x !== n3.x || n2.y !== n3.y)) {
+            return 2;
+        }
+
+        return 0;
     }
 }
 

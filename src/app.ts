@@ -26,7 +26,7 @@ const DEFINITION = 5;
 const WIDTH = 8*DEFINITION*MAPSIZE;
 const DEPTH = 8*DEFINITION*MAPSIZE;
 const HEIGHT = 8*DEFINITION;
-const GRID_DEFINITION = 40*(MAPSIZE);
+const GRID_DEFINITION = 20*(MAPSIZE);
 
 const cameraI = {
     width: CANVAS_WIDTH,
@@ -46,7 +46,7 @@ const planeI = {
     depth: DEPTH,
     perlinScale1: 1*DEFINITION,
     perlinScale2: 4*DEFINITION,
-    perlinPower1: 1/2,
+    perlinPower1: 1,
     perlinPower2: 4,
     gridDefinition: GRID_DEFINITION,
     color: {r: 81/255, g: 146/255, b: 89/255},
