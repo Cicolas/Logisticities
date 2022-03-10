@@ -34,7 +34,7 @@ export default class GameController extends GameWindow{
         fog.color = new THREE.Color(0xe8e8e8);
         this.threeScene.background = new THREE.Color(0xe8e8e8);
 
-        if (DEBUG_INFO.showFog) {
+        if (!DEBUG_INFO.hideFog) {
             this.threeScene.fog = fog;
         }
 

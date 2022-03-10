@@ -54,7 +54,7 @@ export default class SeaComponent implements ComponentInterface {
         this.mesh.position.x = -.5;
         this.mesh.position.z = -.5;
 
-        if (DEBUG_INFO.showSea) {
+        if (!DEBUG_INFO.hideSea) {
             gameWin.threeScene.add(this.mesh);
         }
     }

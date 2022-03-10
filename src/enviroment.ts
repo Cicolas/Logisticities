@@ -1,16 +1,16 @@
 export const DEBUG_INFO = {
     seed: -1,
     showGrid: false,
-    showFog: true,
+    hideFog: false,
     showWireframe: false,
-    showSea: true,
-    spawnCity: true,
+    hideSea: false,
+    noCities: false,
     camera: {
         ortho: false,
-        left: -30,
-        right: 30,
-        top: 20,
-        bottom: -19
+        left: -80,
+        right: 80,
+        top: 40,
+        bottom: -39
     },
     map: {
         planify: false,

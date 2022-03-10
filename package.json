@@ -22,7 +22,10 @@
         "@types/three": "^0.128.0",
         "@typescript-eslint/eslint-plugin": "^4.32.0",
         "@typescript-eslint/parser": "^4.32.0",
+        "astar-typescript": "^1.2.5",
+        "easy-astar": "^1.0.5",
         "eslint": "^7.32.0",
+        "javascript-astar": "^0.4.1",
         "keycode-js": "^3.1.0",
         "perlin": "^1.0.0",
         "three": "^0.128.0"

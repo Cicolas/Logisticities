@@ -1,4 +1,3 @@
-import { log } from 'console';
 import { randomUUID } from 'crypto';
 import * as THREE from 'three';
 import { BufferGeometry, Color } from "three";
@@ -8,8 +7,17 @@ import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 import CityComponent from './CityComponent';
 import PlaneComponent, { Vertex } from './PlaneComponent';
+import jsAstar from 'javascript-astar';
 
 const LINE_DEFINITION = 1;
+const DEFAULT_CELL = {
+    distFromStart: -1, distFromEnd: -1,
+    position: undefined,
+    value: 1000000,
+    got: false,
+    able: false,
+    history: []
+};
 
 interface Cell {
     position: position;
@@ -18,7 +26,7 @@ interface Cell {
     value: number;
     got: boolean;
     able: boolean;
-    history: position[];
+    history: Cell[];
 }
 
 interface position {x:number, y:number}
@@ -36,7 +44,8 @@ export default class RoadComponent implements ComponentInterface {
     private toName: string;
     private definition: number;
 
-    private pathFindCells:  Cell[][] = [];
+    private pathFindCells:  number[][] = [];
+    private finalPath: position[] = [];
 
     // constructor(from: GObject, to: GObject, definition: number){
     //     this.points = [];
@@ -57,10 +66,6 @@ export default class RoadComponent implements ComponentInterface {
         this.cities[0] = gameWin.getScene().getObject(this.fromName);
         this.cities[1] = gameWin.getScene().getObject(this.toName);
 
-        setTimeout(this.postInit.bind(this), 20, gameWin);
-    }
-
-    postInit(gameWin: GameController) {
         const material = new THREE.LineBasicMaterial({
             color: 0x000000,
             linejoin: "bevel",
@@ -71,107 +76,57 @@ export default class RoadComponent implements ComponentInterface {
 
         const cc1Pos = new THREE.Vector2().copy(cc1.coordinates);
         const cc2Pos = new THREE.Vector2().copy(cc2.coordinates);
-        // console.log(this.cities);
-        // this.distance = this.calculateDistance(cc1.mesh.position, cc2.mesh.position);
-        // this.calculateLine(cc1.mesh.position, cc2.mesh.position);
-        this.generateCells(this.plane.grid, cc1Pos, cc2Pos);
-        this.calculateRoute(this.plane.grid, cc1Pos, cc2Pos, 10000);
+
+        this.generateCells(this.plane.grid);
+        this.calculateRoute(this.plane.grid, cc1Pos, cc2Pos);
+        // this.drawRoute(cc2Pos);
 
         const geometry = new THREE.BufferGeometry().setFromPoints(this.points);
 
         this.line = new THREE.Line(geometry, material);
         gameWin.threeScene.add(this.line);
+
+        setTimeout(this.postInit.bind(this), 20, gameWin);
     }
 
-    update(obj: GObject, gameWin: GameWindow) {}
+    postInit(gameWin: GameController) {
+    }
+
+    update(obj: GObject, gameWin: GameWindow) {
+    }
     draw (context?: THREE.Scene) {};
 
     calculateDistance(cityPos1: THREE.Vector3, cityPos2: THREE.Vector3) {
         return cityPos1.distanceTo(cityPos2);
     }
 
-    calculateRoute(grid: Vertex[][], startPos: position, finalPos: THREE.Vector2, bestFind: number) {
-        // this.points.push(grid[linePos.x][linePos.y].position);
-        const vecPos = new THREE.Vector3().copy(grid[startPos.x][startPos.y].position);
-        vecPos.y += .5;
-        this.points.push(vecPos);
+    calculateRoute(grid: Vertex[][], startPos: position, finalPos: position) {
+        const graph = new jsAstar.Graph(this.pathFindCells, { diagonal: true });
+        const start = graph.grid[startPos.x][startPos.y];
+        const end = graph.grid[finalPos.x][finalPos.y];
 
-        var cell = this.pathFindCells[startPos.x][startPos.y]
-        cell.got = true;
-        var bestCell: Cell = {
-            distFromStart: 0, distFromEnd: 0,
-            position: undefined,
-            value: 1000000,
-            got: false,
-            able: false,
-            history: []
-        };
+        this.finalPath = jsAstar.astar.search(graph, start, end)
 
-        for (let i = -1; i < 2; i++) {
-            for (let j = -1; j < 2; j++) {
-                if (!(i == 0 && j == 0)) {
-                    const c = this.discoverCell(
-                        new THREE.Vector2(startPos.x+i, startPos.y+j),
-                        new THREE.Vector2(startPos.x, startPos.y),
-                        new THREE.Vector2(finalPos.x, finalPos.y),
-                        cell.value
-                    );
-                    // console.log([startPos.x+i, startPos.y+j, c.distFromStart, c.distFromEnd]);
+        const s = grid[startPos.x][startPos.y].position.clone();
+        s.y += .5
+        this.points.push(s);
+        for (let i = 0; i < this.finalPath.length; i++) {
+            const element = this.finalPath[i];
 
-                    if (c.value < bestCell.value && c.able && !c.got) {
-                        bestCell.value = c.value;
-                        bestCell = c;
-                    }
-                }
-            }
+            const pos = grid[element.x][element.y].position.clone();
+            pos.y += .5
+            this.points.push(pos);
         }
-        cell = bestCell;
-        console.log(cell);
-
-        if (cell.distFromEnd === 0) {
-            const vecPos = new THREE.Vector3().copy(grid[finalPos.x][finalPos.y].position);
-            vecPos.y += .5;
-            this.points.push(vecPos);
-            return;
-        }else if(cell.value > bestFind) {
-            return cell.value;
-        }else{
-            const n = this.calculateRoute(grid, cell.position, finalPos, 10000);
-        }
-        // console.log(linePos);
-        // this.calculateRoute(grid, linePos, destiny);
     }
 
-    discoverCell(cellPos: THREE.Vector2, startPos: THREE.Vector2, finalPos: THREE.Vector2, currentVal: number): Cell {
-        const distS = startPos.distanceTo(cellPos)+currentVal;
-        const distF = finalPos.distanceTo(cellPos);
-
-        const cell = this.pathFindCells[cellPos.x][cellPos.y]
-        cell.distFromStart = distS;
-        cell.distFromEnd = distF;
-        cell.value = distS+distF;
-
-        return cell;
-    }
-
-    generateCells(grid: Vertex[][], startPos: THREE.Vector2, finalPos: THREE.Vector2) {
+    generateCells(grid: Vertex[][]) {
         for (let i = 0; i < grid.length; i++) {
             this.pathFindCells[i] = [];
             for (let j = 0; j < grid.length; j++) {
-                // const pos = new THREE.Vector2(i, j);
-                // const startP = startPos.distanceTo(pos);
-                // const finalP = finalPos.distanceTo(pos);
-                this.pathFindCells[i][j] = {
-                    position: {x: i, y: j},
-                    distFromStart: 0,
-                    distFromEnd: 0,
-                    value: 0,
-                    got: false,
-                    able: grid[i][j].apropiated,
-                    history: []
-                } as Cell;
+                this.pathFindCells[i][j] = grid[i][j].apropiated?1:0;
             }
         }
+        // console.log(this.pathFindCells);
     }
 }
 

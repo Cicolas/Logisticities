@@ -31,7 +31,7 @@ export default class GameManager implements ComponentInterface {
     constructor(definition, mapSize, gridDefinition) {
         this.definition = definition;
         this.gridDefinition = gridDefinition;
-        this.cityCount = DEBUG_INFO.spawnCity?mapSize*4:0;
+        this.cityCount = DEBUG_INFO.noCities?0:mapSize*4;
 
         this.mousePos = new THREE.Vector3();
         this.cities = [];
