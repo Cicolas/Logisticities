@@ -5,7 +5,7 @@ import GameController from "../GameController";
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
-import { position } from "../scripts/utils";
+import { cameraQuad, position } from "../scripts/utils";
 import PlaneComponent from "./PlaneComponent";
 
 export interface CameraInterface{
@@ -14,22 +14,26 @@ export interface CameraInterface{
     width: number,
     height: number,
     depth: number,
-    isLocked: boolean
+    isLocked: boolean,
+    quad: cameraQuad
 }
 
 export default class CameraComponent implements ComponentInterface {
     name: string = "CameraComponent";
     private gw: GameController;
     public camera: THREE.Camera;
+    private perspectiveCam: THREE.Camera;
+    private orthoCam: THREE.Camera;
 
     private cameraAngle: number;
     public cameraDistance: number;
     private width: number;
     private height: number;
     private depth: number;
-    private isLocked: boolean;
+    public isLocked: boolean;
     public rotation: number;
     public anchor: THREE.Vector3;
+    private quad: cameraQuad;
 
     constructor(cameraI: CameraInterface){
         this.cameraAngle = cameraI.cameraAngle;
@@ -37,6 +41,7 @@ export default class CameraComponent implements ComponentInterface {
         this.width = cameraI.width;
         this.height = cameraI.height;
         this.depth = cameraI.depth;
+        this.quad = cameraI.quad;
         this.isLocked = cameraI.isLocked;
         this.rotation = 0;
         this.anchor = new THREE.Vector3();
@@ -45,41 +50,51 @@ export default class CameraComponent implements ComponentInterface {
     init(gameWin: GameWindow) {
         this.gw = (gameWin as GameController);
 
-        if (DEBUG_INFO.camera.ortho) {
-            this.camera = new THREE.OrthographicCamera(
-                DEBUG_INFO.camera.left,
-                DEBUG_INFO.camera.right,
-                DEBUG_INFO.camera.top,
-                DEBUG_INFO.camera.bottom
-            );
+        this.orthoCam = new THREE.OrthographicCamera(
+            this.quad.left,
+            this.quad.right,
+            this.quad.top,
+            this.quad.bottom
+        );
+        this.resetOrthoCam();
+        this.perspectiveCam = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 10000);
+        this.resetPerspectiveCam();
 
-            this.camera.rotation.x = -Math.PI/2;
-            this.camera.position.y = (DEBUG_INFO.camera.right-DEBUG_INFO.camera.left)/2;
-        }else{
-            this.camera = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 10000);
-            this.camera.rotation.x = -this.cameraAngle;
-
-            if (this.isLocked) {
-                this.camera.lookAt(this.anchor);
-            }
-            this.camera.position.y = Math.sin(this.cameraAngle)*this.depth*this.cameraDistance;
-            this.camera.position.z = Math.cos(this.cameraAngle)*this.depth*this.cameraDistance;
-        }
-
+        this.camera = this.isLocked?this.orthoCam:this.perspectiveCam;
         this.gw.threeCamera = this.camera;
     }
 
+    resetOrthoCam() {
+        this.cameraDistance = .5;
+        this.orthoCam.position.y = Math.sin(this.cameraAngle)*this.depth*this.cameraDistance;
+        this.orthoCam.position.x = Math.sin(this.rotation)*this.depth*this.cameraDistance;
+        this.orthoCam.position.z = Math.cos(this.rotation)*this.depth*this.cameraDistance;
+    }
+
+    resetPerspectiveCam() {
+        this.cameraDistance = .75;
+
+        this.perspectiveCam.setRotationFromAxisAngle(new THREE.Vector3(0, 1, 0), this.rotation);
+        this.perspectiveCam.rotateOnAxis(new THREE.Vector3(1, 0, 0), -this.cameraAngle);
+
+        this.perspectiveCam.position.x = Math.sin(this.rotation)*this.depth*this.cameraDistance+this.anchor.x;
+        this.perspectiveCam.position.y = Math.sin(this.cameraAngle)*this.depth*this.cameraDistance;
+        this.perspectiveCam.position.z = Math.cos(this.rotation)*this.depth*this.cameraDistance+this.anchor.z;
+    }
+
     update(obj: GObject, gameWin: GameWindow) {
-        if (DEBUG_INFO.camera.ortho) {
+        if (DEBUG_INFO.camera.topDown) {
+            if (this.camera !== this.orthoCam) {
+                this.camera = this.orthoCam;
+            }
             this.camera.position.x = 0;
             this.camera.position.z = 0;
-        }
-
-        if (this.isLocked) {
-            this.gw.threeCamera.position.x = Math.sin(this.rotation)*this.depth*this.cameraDistance+this.anchor.x;
-            this.gw.threeCamera.position.y = Math.sin(this.cameraAngle)*this.depth*this.cameraDistance;
-            this.gw.threeCamera.position.z = Math.cos(this.rotation)*this.depth*this.cameraDistance+this.anchor.z;
-            this.gw.threeCamera.lookAt(this.anchor);
+            this.camera.lookAt(this.anchor);
+        }else if(this.isLocked) {
+            this.camera.position.x = Math.sin(this.rotation)*this.depth*this.cameraDistance+this.anchor.x;
+            this.camera.position.y = Math.sin(this.cameraAngle)*this.depth*this.cameraDistance;
+            this.camera.position.z = Math.cos(this.rotation)*this.depth*this.cameraDistance+this.anchor.z;
+            this.camera.lookAt(this.anchor);
         }
     }
 
@@ -91,7 +106,7 @@ export default class CameraComponent implements ComponentInterface {
         if (!this.isLocked) {
             var velz = new THREE.Vector2();
             velz.x = dir.y*velocity/Math.SQRT2*Math.sin(this.rotation);
-            velz.y = dir.y*velocity/Math.SQRT2*Math.cos(-this.rotation);
+            velz.y = dir.y*velocity/Math.SQRT2*Math.cos(this.rotation);
 
             this.camera.translateOnAxis(new THREE.Vector3(1, 0, 0), dir.x*velocity)
             this.camera.position.x += velz.x;
@@ -123,5 +138,17 @@ export default class CameraComponent implements ComponentInterface {
                 this.camera.translateZ(dir*this.depth*this.cameraDistance);
             }
         }
+    }
+
+    toggleLock() {
+        this.isLocked = !this.isLocked;
+        if (!this.isLocked) {
+            this.resetPerspectiveCam();
+            this.camera = this.perspectiveCam;
+        }else {
+            this.resetOrthoCam();
+            this.camera = this.orthoCam;
+        }
+        this.gw.threeCamera = this.camera;
     }
 }

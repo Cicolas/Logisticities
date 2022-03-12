@@ -13,6 +13,7 @@ import SeaComponent from './components/SeaComponent';
 
 const CANVAS_WIDTH = document.body.clientWidth;
 const CANVAS_HEIGHT = document.body.clientHeight;
+const ASPECT_RATIO = CANVAS_WIDTH/CANVAS_HEIGHT;
 
 enum mapSizeEnum {
     SMALL = 1,
@@ -34,7 +35,13 @@ const cameraI = {
     depth: DEPTH,
     cameraAngle: 1/4 * Math.PI,
     cameraDistance: .75,
-    isLocked: false
+    isLocked: true,
+    quad: {
+        left: -WIDTH*ASPECT_RATIO/1.5,
+        right: WIDTH*ASPECT_RATIO/1.5,
+        top: WIDTH/1.5,
+        bottom: -WIDTH/1.5,
+    }
 }
 
 const planeI = {

@@ -14,3 +14,10 @@ export interface position {
     x:number,
     y:number
 }
+
+export interface cameraQuad {
+    left: number,
+    right: number,
+    top: number,
+    bottom: number,
+}

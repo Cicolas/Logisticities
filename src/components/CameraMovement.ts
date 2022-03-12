@@ -7,7 +7,7 @@ import GObject from "../lib/CUASAR/GObject";
 import CameraComponent from "./CameraComponent";
 import PlaneComponent from "./PlaneComponent";
 
-const SMOOTHNESS = 200;
+const SMOOTHNESS = 300;
 
 export default class CameraMovement implements ComponentInterface {
     name: string = "CameraMovement";
@@ -57,7 +57,7 @@ export default class CameraMovement implements ComponentInterface {
     mouseZoom = (e: WheelEvent) => {
         const nextZoom = Math.sign(e.deltaY)*.25+this.camera.cameraDistance;
 
-        if (nextZoom >= .25 && nextZoom <= .75) {
+        if (nextZoom >= .25 && nextZoom <= .75 && !this.camera.isLocked) {
             this.camera.cameraDistance = nextZoom;
         }
 
@@ -69,6 +69,9 @@ export default class CameraMovement implements ComponentInterface {
         if (e) {
             this.isMoving = true;
         }
+        if (e.key === "Backspace") {
+            this.camera.toggleLock();
+        }
         this.keysPressed.push(e.key);
     }
     keyExit(e: KeyboardEvent) {
@@ -77,7 +80,7 @@ export default class CameraMovement implements ComponentInterface {
 
     update(obj: GObject, gameWin: GameWindow) {
         if (this.isRotating) {
-            const move = {x: 0, y: 0};
+            const move = {x: this.firstClick.x, y: this.firstClick.y};
             move.x = -(this.mousePos.x - this.firstClick.x) / SMOOTHNESS;
             move.y = -(this.mousePos.y - this.firstClick.y) / SMOOTHNESS;
             this.camera.rotation += move.x;

@@ -1,17 +1,21 @@
 export const DEBUG_INFO = {
     seed: 37055,
+
+    //plane related show/hide
     showGrid: false,
-    hideFog: false,
     showWireframe: false,
+
+    //engine related show/hide
+    hideFog: false,
     hideSea: false,
+
+    //game related show/hide
     noCities: false,
     showRoadGuides: false,
+
+    //non show/hide related DEBUGS
     camera: {
-        ortho: false,
-        left: -40,
-        right: 40,
-        top: 20,
-        bottom: -19
+        topDown: false
     },
     map: {
         planify: false,
