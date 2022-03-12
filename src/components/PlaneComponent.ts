@@ -1,4 +1,3 @@
-import { BlobOptions } from 'buffer';
 import * as THREE from 'three';
 import { BufferGeometry, Color, TextureLoader, Vector2 } from "three";
 import { DEBUG_INFO } from '../enviroment';

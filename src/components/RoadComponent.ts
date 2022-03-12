@@ -134,23 +134,6 @@ export default class RoadComponent implements ComponentInterface {
     }
 
     smoothRoute(grid: Vertex[][]){
-        // const pi = new THREE.Vector3(0, .5, 0);
-        // const pc = new THREE.Vector3(1, .5, 0);
-        // const pc2 = new THREE.Vector3(2, .5, 1);
-        // const pf = new THREE.Vector3(3, .5, 1);
-
-        // for (let t = 0; t < LINE_DEFINITION; t++) {
-        //     const time = t/(LINE_DEFINITION-1);
-
-        //     var n1 = pi.clone().multiplyScalar((1-time)**3);
-        //     var n2 = pc.clone().multiplyScalar(3*((1-time)**2)*time);
-        //     var n3 = pc2.clone().multiplyScalar(3*(1-time)*(time**2));
-        //     var n4 = pf.clone().multiplyScalar(time**3);
-
-        //     var p = n1.add(n2).add(n3).add(n4);
-        //     this.vertices.push(p);
-        // }
-        // return;
         for (let i = 0; i < this.points.length; i++) {
             const pi = this.points[i];
             // const pc = new THREE.Vector3();
@@ -168,7 +151,7 @@ export default class RoadComponent implements ComponentInterface {
                 );
 
                 if (curveSize === 1) {
-                    console.log(i);
+                    console.log("1: ", i);
                     for (let t = 0; t < LINE_DEFINITION; t++) {
                         const time = t/(LINE_DEFINITION-1);
 
@@ -181,7 +164,7 @@ export default class RoadComponent implements ComponentInterface {
                     }
                     i++;
                 }else if(curveSize === 2) {
-                    console.log(i);
+                    console.log("2: ", i);
                     for (let t = 0; t < LINE_DEFINITION; t++) {
                         const time = t/(LINE_DEFINITION-1);
 
@@ -206,16 +189,16 @@ export default class RoadComponent implements ComponentInterface {
 
     isCurve(pos1: position, pos2: position, pos3: position, pos4: position) {
         const n = {x: 0, y: 0};
-        n.x = Math.abs(pos1.x-pos2.x);
-        n.y = Math.abs(pos1.y-pos2.y);
+        n.x = pos1.x-pos2.x;
+        n.y = pos1.y-pos2.y;
 
         const n2 = {x: 0, y: 0};
-        n2.x = Math.abs(pos2.x-pos3.x);
-        n2.y = Math.abs(pos2.y-pos3.y);
+        n2.x = pos2.x-pos3.x;
+        n2.y = pos2.y-pos3.y;
 
         const n3 = {x: 0, y: 0};
-        n3.x = Math.abs(pos3.x-pos4.x);
-        n3.y = Math.abs(pos3.y-pos4.y);
+        n3.x = pos3.x-pos4.x;
+        n3.y = pos3.y-pos4.y;
 
         // console.log(n, n2, n3);
 

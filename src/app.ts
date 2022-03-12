@@ -20,7 +20,7 @@ enum mapSizeEnum {
     HUGE = 4
 }
 
-const MAPSIZE = mapSizeEnum.BIG;
+const MAPSIZE = mapSizeEnum.SMALL;
 
 const DEFINITION = 5;
 const WIDTH = 8*DEFINITION*MAPSIZE;
@@ -50,7 +50,7 @@ const planeI = {
     perlinPower2: 4,
     gridDefinition: GRID_DEFINITION,
     color: {r: 81/255, g: 146/255, b: 89/255},
-    seaLevel: .1
+    seaLevel: .075
 };
 
 const seaI = {
