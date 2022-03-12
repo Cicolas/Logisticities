@@ -34,7 +34,7 @@ const cameraI = {
     depth: DEPTH,
     cameraAngle: 1/4 * Math.PI,
     cameraDistance: .75,
-    isLocked: false
+    isLocked: true
 }
 
 const planeI = {
