@@ -6,9 +6,10 @@ import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 import CityComponent from './CityComponent';
-import PlaneComponent, { Vertex } from './PlaneComponent';
+import PlaneComponent from './PlaneComponent';
 import jsAstar from 'javascript-astar';
 import { DEBUG_INFO } from '../enviroment';
+import { position, Vertex } from '../scripts/utils';
 
 const LINE_DEFINITION = 10;
 
@@ -21,8 +22,6 @@ interface Cell {
     able: boolean;
     history: Cell[];
 }
-
-interface position {x:number, y:number}
 
 export default class RoadComponent implements ComponentInterface {
     name: string = "RoadComponent";
@@ -151,7 +150,7 @@ export default class RoadComponent implements ComponentInterface {
                 );
 
                 if (curveSize === 1) {
-                    console.log("1: ", i);
+                    // console.log("1: ", i);
                     for (let t = 0; t < LINE_DEFINITION; t++) {
                         const time = t/(LINE_DEFINITION-1);
 
@@ -164,7 +163,7 @@ export default class RoadComponent implements ComponentInterface {
                     }
                     i++;
                 }else if(curveSize === 2) {
-                    console.log("2: ", i);
+                    // console.log("2: ", i);
                     for (let t = 0; t < LINE_DEFINITION; t++) {
                         const time = t/(LINE_DEFINITION-1);
 

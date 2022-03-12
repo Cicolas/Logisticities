@@ -5,6 +5,7 @@ import GameController from "../GameController";
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
+import { position } from "../scripts/utils";
 import PlaneComponent from "./PlaneComponent";
 
 export interface CameraInterface{
@@ -89,19 +90,26 @@ export default class CameraComponent implements ComponentInterface {
     move(dir: THREE.Vector2, velocity: number) {
         if (!this.isLocked) {
             var velz = new THREE.Vector2();
-            velz.x = Math.sin(this.cameraAngle)*-dir.y;
-            velz.y = Math.cos(this.cameraAngle)*dir.y;
-            velz = velz.normalize();
+            velz.x = dir.y*velocity/Math.SQRT2*Math.sin(this.rotation);
+            velz.y = dir.y*velocity/Math.SQRT2*Math.cos(-this.rotation);
 
-            this.camera.translateX(dir.x*velocity);
-            this.camera.translateY(velz.x*velocity);
-            this.camera.translateZ(velz.y*velocity);
+            this.camera.translateOnAxis(new THREE.Vector3(1, 0, 0), dir.x*velocity)
+            this.camera.position.x += velz.x;
+            this.camera.position.z += velz.y;
         }
     }
 
-    rotate(rotation: number) {
+    rotate(rotation: position) {
         if (!this.isLocked) {
-            this.camera.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), rotation);
+            // const q = this.camera.getWorldQuaternion(new THREE.Quaternion());
+            // const e = new THREE.Euler().setFromQuaternion(q);
+
+            // if (ang > -Math.PI/2 && rotation.y < 0 || ang < Math.PI/2 && rotation.y > 0 ) {
+                // }
+
+            this.camera.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), rotation.x);
+            this.camera.rotateOnAxis(new THREE.Vector3(1, 0, 0), rotation.y);
+
         }
     }
 

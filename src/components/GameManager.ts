@@ -7,10 +7,8 @@ import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GObject from "../lib/CUASAR/GObject";
 import CityComponent from './CityComponent';
-import PlaneComponent, { Vertex } from './PlaneComponent';
+import PlaneComponent from './PlaneComponent';
 import RoadComponent from './RoadComponent';
-
-const MAX_CITY_STEPNESS = 20;
 
 var ROAD_UUID = 100;
 var CITY_UUID = 200;

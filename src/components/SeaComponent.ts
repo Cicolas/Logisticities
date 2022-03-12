@@ -4,7 +4,7 @@ import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
-import { color } from './PlaneComponent';
+import { color } from '../scripts/utils';
 
 export interface SeaInterface {
     width: number;

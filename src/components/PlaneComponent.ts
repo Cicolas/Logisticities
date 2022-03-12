@@ -5,6 +5,7 @@ import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
+import { color, Vertex } from '../scripts/utils';
 const perlin = require('../lib/perlin').noise;
 
 const MAX_STEPNESS = 17;
@@ -21,18 +22,6 @@ export interface PlaneInterface {
     gridDefinition: number;
     color: color;
     seaLevel: number;
-}
-
-export interface Vertex {
-    position: THREE.Vector3;
-    normal: THREE.Vector3;
-    apropiated?: boolean;
-}
-
-export interface color {
-    r: number,
-    g: number,
-    b: number
 }
 
 export default class PlaneComponent implements ComponentInterface {

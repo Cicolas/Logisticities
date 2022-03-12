@@ -77,8 +77,10 @@ export default class CameraMovement implements ComponentInterface {
 
     update(obj: GObject, gameWin: GameWindow) {
         if (this.isRotating) {
-            const move = -(this.mousePos.x - this.firstClick.x) / SMOOTHNESS;
-            this.camera.rotation += move;
+            const move = {x: 0, y: 0};
+            move.x = -(this.mousePos.x - this.firstClick.x) / SMOOTHNESS;
+            move.y = -(this.mousePos.y - this.firstClick.y) / SMOOTHNESS;
+            this.camera.rotation += move.x;
             this.camera.rotate(move);
             this.firstClick.copy(this.mousePos);
         }
