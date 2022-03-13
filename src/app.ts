@@ -1,4 +1,5 @@
 import './page/style/app.css';
+import './game.css';
 
 import CameraComponent from "./components/CameraComponent";
 import CameraMovement from "./components/CameraMovement";
@@ -10,6 +11,7 @@ import GObject from "./lib/CUASAR/GObject";
 import Scene from "./lib/CUASAR/Scene";
 import { DEBUG_INFO } from './enviroment';
 import SeaComponent from './components/SeaComponent';
+import UIManager from './components/UIManager';
 
 const CANVAS_WIDTH = document.body.clientWidth;
 const CANVAS_HEIGHT = document.body.clientHeight;
@@ -94,6 +96,9 @@ export function createNewScene() {
     ).addObject(
         new GObject("luz")
         .addComponent(new LightComponent(HEIGHT))
+    ).addObject(
+        new GObject("UI")
+        .addComponent(new UIManager(CANVAS_WIDTH, CANVAS_HEIGHT))
     ).addObject(
         new GObject("gameManager")
         .addComponent(new GameManager(DEFINITION*8, MAPSIZE, GRID_DEFINITION))

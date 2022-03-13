@@ -6,7 +6,7 @@ export const DEBUG_INFO = {
     showWireframe: false,
 
     //engine related show/hide
-    hideFog: false,
+    hideFog: true,
     hideSea: false,
 
     //game related show/hide
