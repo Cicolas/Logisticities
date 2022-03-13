@@ -103,6 +103,7 @@ export default class PlaneComponent implements ComponentInterface {
             shininess: 0
         });
         const shadowMesh = new THREE.Mesh(shadow, shadowMat);
+        shadowMesh.name = "shadow"
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.name = "plano";

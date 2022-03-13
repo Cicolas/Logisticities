@@ -1,9 +1,8 @@
 import GameController from "../GameController";
 import ComponentInterface from "../lib/CUASAR/Component";
-import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 import UI from "../lib/TELESCOPE/UI";
-import BoxElement from "./UI/box";
+import UIObject, { UIConfig } from "../lib/TELESCOPE/UIObject";
 
 export default class UIManager implements ComponentInterface {
     name: string = "UIManager";
@@ -12,20 +11,30 @@ export default class UIManager implements ComponentInterface {
     private width: number;
     private height: number;
 
-    constructor(width: number, height: number){
+    constructor(width: number, height: number, UI?: UI){
         this.width = width;
         this.height = height;
+
+        if (UI) this.UI = UI;
     }
 
     init(gameWin: GameController) {
-        this.UI = new UI(gameWin.canvas, this.width, this.height, gameWin);
-
-        this.UI.addElement(new BoxElement, {
-            position: {x: this.width/2, y: this.height/2},
-            size: {x: 300, y: 150}
-        })
+        if (!this.UI)
+            this.UI = new UI(gameWin.canvas, this.width, this.height, gameWin);
     }
 
-    update(obj: GObject, gameWin: GameWindow) {}
+    update(obj: GObject, gameWin: GameController) {
+        this.UI.uiElementList.forEach(value => {
+            if (value.update) {
+                value.update(gameWin);
+            }
+        })
+    }
     draw (context?: THREE.Scene) {};
+
+    addElement(elem: UIObject, opt: UIConfig): UIManager {
+        this.UI.addElement(elem, opt);
+
+        return this;
+    }
 }

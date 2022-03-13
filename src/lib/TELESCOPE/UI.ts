@@ -24,22 +24,20 @@ export default class UI {
         const div = document.createElement("div");
         div.id = "UI";
         div.style.position = "absolute";
-        div.style.left = this.boundingBox.left+"px";
-        div.style.top = this.boundingBox.top+"px";
         div.style.width = this.width+"px";
         div.style.height = this.height+"px";
         div.style.zIndex = "99";
         this.div = div;
     }
 
-    addElement(elem: UIObject, opt?: UIConfig) {
+    addElement(elem: UIObject, opt?: UIConfig): UI {
         this.uiElementList.push(elem);
 
         if (elem.html) {
             const div = document.createElement("div")
             div.className = elem.name;
             div.innerHTML = elem.html;
-            div.style.position = "absolute";
+            div.style.position = "relative";
 
             if (opt) {
                 if (opt.position) {
@@ -52,7 +50,7 @@ export default class UI {
                 }
                 if (opt.time) {
                     setTimeout(() => {
-                        this.destroyElement(elem.name)
+                        this.destroyElement(elem)
                     }, opt.time)
                 }
             }
@@ -62,6 +60,8 @@ export default class UI {
 
             this.div.appendChild(elem.elem);
         }
+
+        return this;
     }
 
     public getElement(t: string): Object | undefined {
@@ -70,15 +70,14 @@ export default class UI {
         );
     }
 
-    public destroyElement(t: string): Object | undefined {
-        const obj = (this.getElement(t) as UIObject);
-        if (obj.destroy) {
-            obj.destroy();
+    public destroyElement(t: UIObject): Object | undefined {
+        if (t.destroy) {
+            t.destroy();
         }else {
-            obj.elem.remove();
+            t.elem.remove();
         }
         return this.uiElementList.filter(value =>
-            value.name !== t
+            value !== t
         );
     }
 }

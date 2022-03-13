@@ -6,9 +6,12 @@ import { DEBUG_INFO } from '../enviroment';
 import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GObject from "../lib/CUASAR/GObject";
+import { position } from '../scripts/utils';
 import CityComponent from './CityComponent';
 import PlaneComponent from './PlaneComponent';
 import RoadComponent from './RoadComponent';
+import BoxElement from './UI/box/BoxElement';
+import UIManager from './UIManager';
 
 var ROAD_UUID = 100;
 var CITY_UUID = 200;
@@ -16,13 +19,15 @@ var CITY_UUID = 200;
 export default class GameManager implements ComponentInterface {
     name: string = "GameManager";
     private gw: GameController;
+    private UIMgr: UIManager;
 
     private cityCount: number;
     private definition: number;
     private gridDefinition: number;
     public cities: GObject[];
 
-    private mousePos: THREE.Vector3;
+    private mousePos: position;
+    private rawMousePos: position;
     private cityHovering: number;
     private citySelected: number = -1;
 
@@ -31,7 +36,9 @@ export default class GameManager implements ComponentInterface {
         this.gridDefinition = gridDefinition;
         this.cityCount = DEBUG_INFO.noCities?0:mapSize*4;
 
-        this.mousePos = new THREE.Vector3();
+        // this.mousePos = new THREE.Vector3();
+        this.mousePos = {x: -1, y: -1};
+        this.rawMousePos = {x: -1, y: -1};
         this.cities = [];
 
         this.cityHovering = null;
@@ -39,6 +46,7 @@ export default class GameManager implements ComponentInterface {
 
     init(gameWin: GameController) {
         this.gw = gameWin;
+        this.UIMgr = this.gw.getScene().getObject("UIManager").getComponent(UIManager) as UIManager;
 
         setTimeout(this.postInit.bind(this), 10, gameWin);
 
@@ -100,17 +108,25 @@ export default class GameManager implements ComponentInterface {
 
         const intersects = ray.intersectObjects(this.gw.threeScene.children);
 
-        //! INCORRECT VALIDATION IF IS HOVERING A CITY OR NOT
-        if (intersects.length <= 3) this.cityHovering = -1;
+        if (!intersects.some(value => value.object.name.toString().startsWith("2"))) {
+            this.cityHovering = -1;
+        }else{
+            for (let i = 0; i < intersects.length; i++) {
+                const obj = this.gw.getScene().getObject(intersects[i].object.name.toString())
 
-        for ( let i = 0; i < intersects.length; i++) {
-            const obj = this.gw.getScene().getObject(intersects[i].object.name.toString())
+                if (obj) {
+                    if (obj.name.startsWith("2")) {
+                        const comp = obj.getComponent(CityComponent) as CityComponent;
+                        (comp.mesh.material as THREE.MeshStandardMaterial).color = new Color("white");
+                        this.cityHovering = this.cities.findIndex(v => v.name === obj.name);
 
-            if (obj) {
-                if (obj.name.startsWith("2")) {
-                    const comp = obj.getComponent(CityComponent) as CityComponent;
-                    (comp.mesh.material as THREE.MeshStandardMaterial).color = new Color("white");
-                    this.cityHovering = this.cities.findIndex(v => v.name === obj.name);
+                        // const box = new BoxElement(comp.cityName, "Cidade normal, nada de mais");
+
+                        // this.UIMgr.addElement(box, {
+                        //     position: {x: this.mousePos.x, y: this.mousePos.y},
+                        //     size: {x: 300, y: 150},
+                        // })
+                    }
                 }
             }
         }
@@ -157,8 +173,11 @@ export default class GameManager implements ComponentInterface {
         const mx = e.clientX - bb.left;
         const my = e.clientY - bb.top;
 
+        this.rawMousePos.x = e.clientX;
+        this.rawMousePos.y = e.clientY;
+
         this.mousePos.x = ( mx / this.gw.width ) * 2 - 1;
         this.mousePos.y = - ( my / this.gw.height ) * 2 + 1;
-        this.mousePos.z = .5;
+        // this.mousePos.z = .5;
     }
 }

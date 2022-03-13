@@ -50,6 +50,7 @@ export default class SeaComponent implements ComponentInterface {
         this.material.visible = true;
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh.name = "sea";
         this.mesh.rotation.x = -Math.PI/2;
         this.mesh.position.x = -.5;
         this.mesh.position.z = -.5;

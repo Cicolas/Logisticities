@@ -1,5 +1,4 @@
 import './page/style/app.css';
-import './game.css';
 
 import CameraComponent from "./components/CameraComponent";
 import CameraMovement from "./components/CameraMovement";
@@ -12,6 +11,9 @@ import Scene from "./lib/CUASAR/Scene";
 import { DEBUG_INFO } from './enviroment';
 import SeaComponent from './components/SeaComponent';
 import UIManager from './components/UIManager';
+import UI from './lib/TELESCOPE/UI';
+import loading from './page/loading.html';
+import BoxElement from './components/UI/box/BoxElement';
 
 const CANVAS_WIDTH = document.body.clientWidth;
 const CANVAS_HEIGHT = document.body.clientHeight;
@@ -72,11 +74,28 @@ const seaI = {
     opacity: .5
 };
 
+var _UI: UIManager;
 const gw: GameController = new GameController("", cameraI)
 .setResolution(CANVAS_WIDTH, CANVAS_HEIGHT)
 .pushScene(
     new Scene("inicio")
 )
+.call((gameWin: GameController) => {
+    _UI = new UIManager(
+        CANVAS_WIDTH,
+        CANVAS_HEIGHT,
+        new UI(gameWin.canvas, CANVAS_WIDTH, CANVAS_HEIGHT, gameWin)
+    )
+    .addElement({name: "loading", html: loading, init: () => {}}, {
+        position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},
+        time: 100
+    });
+
+    gameWin.getScene().addObject(
+        new GObject("UIManager")
+        .addComponent(_UI)
+    )
+})
 .initGame() as GameController;
 setTimeout(createNewScene, 10);
 
@@ -97,9 +116,6 @@ export function createNewScene() {
         new GObject("luz")
         .addComponent(new LightComponent(HEIGHT))
     ).addObject(
-        new GObject("UI")
-        .addComponent(new UIManager(CANVAS_WIDTH, CANVAS_HEIGHT))
-    ).addObject(
         new GObject("gameManager")
         .addComponent(new GameManager(DEFINITION*8, MAPSIZE, GRID_DEFINITION))
     ).addObject(
@@ -108,7 +124,16 @@ export function createNewScene() {
     ).addObject(
         new GObject("sea")
         .addComponent(new SeaComponent(seaI))
-    ).initScene(gw);
+    ).initScene(gw).addObject(
+        new GObject("UIManager")
+        .addComponent(_UI.addElement(
+            new BoxElement("Título", "Texto muito foda namoral"),
+            {
+                position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},
+                size: {x: 300, y: 150}
+            }
+        ))
+    );
 
     gw.popScene();
     gw.pushScene(scene);

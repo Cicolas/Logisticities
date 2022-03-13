@@ -7,6 +7,7 @@ export default interface UIObject {
     elem?: HTMLElement
 
     init: (ui: UI, gameWin: GameController) => void;
+    update?: (gameWin: GameController) => void;
     destroy?: () => void;
 }
 
