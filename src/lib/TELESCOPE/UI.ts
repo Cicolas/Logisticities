@@ -37,7 +37,7 @@ export default class UI {
             const div = document.createElement("div")
             div.className = elem.name;
             div.innerHTML = elem.html;
-            div.style.position = "relative";
+            div.style.position = "absolute";
 
             if (opt) {
                 if (opt.position) {

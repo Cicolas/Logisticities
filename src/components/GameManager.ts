@@ -6,6 +6,7 @@ import { DEBUG_INFO } from '../enviroment';
 import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GObject from "../lib/CUASAR/GObject";
+import { getCityName, resetCityName } from '../scripts/cityNames';
 import { position } from '../scripts/utils';
 import CityComponent from './CityComponent';
 import PlaneComponent from './PlaneComponent';
@@ -30,6 +31,8 @@ export default class GameManager implements ComponentInterface {
     private rawMousePos: position;
     private cityHovering: number;
     private citySelected: number = -1;
+
+    private box: BoxElement;
 
     constructor(definition, mapSize, gridDefinition) {
         this.definition = definition;
@@ -58,6 +61,7 @@ export default class GameManager implements ComponentInterface {
     reset(e: KeyboardEvent) {
         if (e.key === "r") {
             console.log("newScene");
+            resetCityName();
             setTimeout(createNewScene, 10);
         }
     }
@@ -119,17 +123,12 @@ export default class GameManager implements ComponentInterface {
                         const comp = obj.getComponent(CityComponent) as CityComponent;
                         (comp.mesh.material as THREE.MeshStandardMaterial).color = new Color("white");
                         this.cityHovering = this.cities.findIndex(v => v.name === obj.name);
-
-                        // const box = new BoxElement(comp.cityName, "Cidade normal, nada de mais");
-
-                        // this.UIMgr.addElement(box, {
-                        //     position: {x: this.mousePos.x, y: this.mousePos.y},
-                        //     size: {x: 300, y: 150},
-                        // })
                     }
                 }
             }
         }
+
+        this.updateBoxes();
     }
 
     draw (context?: THREE.Scene) {};
@@ -146,7 +145,7 @@ export default class GameManager implements ComponentInterface {
 
             const go = new GObject((++CITY_UUID).toString())
                         .addComponent(
-                            new CityComponent(x, y, this.definition, {name: (CITY_UUID)})
+                            new CityComponent(x, y, this.definition, {name: getCityName(), UUID: CITY_UUID})
                         )
                         .initObject(gameWin);
 
@@ -179,5 +178,24 @@ export default class GameManager implements ComponentInterface {
         this.mousePos.x = ( mx / this.gw.width ) * 2 - 1;
         this.mousePos.y = - ( my / this.gw.height ) * 2 + 1;
         // this.mousePos.z = .5;
+    }
+
+    updateBoxes() {
+        if (this.cityHovering >= 0) {
+            if (!this.box) {
+                const cityComp = this.cities[this.cityHovering].getComponent(CityComponent) as CityComponent;
+
+                this.box = new BoxElement(cityComp.cityName, "Cidade normal, nada de mais");
+                this.UIMgr.addElement(this.box, {
+                    position: {x: this.rawMousePos.x, y: this.rawMousePos.y-125},
+                    size: {x: 300, y: 150},
+                })
+            }else{
+                this.box.position = {x: this.rawMousePos.x, y: this.rawMousePos.y-125};
+            }
+        }else if(this.box){
+            this.box.destroy();
+            this.box = null;
+        }
     }
 }

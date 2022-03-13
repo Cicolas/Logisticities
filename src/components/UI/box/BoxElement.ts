@@ -1,12 +1,14 @@
 import GameController from '../../../GameController';
 import UI from '../../../lib/TELESCOPE/UI';
 import UIObject from '../../../lib/TELESCOPE/UIObject';
+import { position } from '../../../scripts/utils';
 import box from './BoxElement.html';
 
 export default class BoxElement implements UIObject{
     name: string = "BoxElement";
     public html: string = box;
     public elem: HTMLElement;
+    public position: position = {x: -Infinity, y: -Infinity};
 
     private frame: number = 0;
     private title: string = "";
@@ -28,17 +30,20 @@ export default class BoxElement implements UIObject{
         });
     };
 
-    update(gameWin: GameController) {};
+    update(gameWin: GameController) {
+        this.elem.style.left = this.position.x+"px";
+        this.elem.style.top = this.position.y+"px";
+    };
 
     destroy() {
         this.elem.animate([
             { opacity: "0%" }
         ], {
-            duration: 400
+            duration: 100
         })
 
         setTimeout(() => {
             this.elem.remove();
-        }, 390)
+        }, 90)
     };
 }

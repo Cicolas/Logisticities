@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import * as THREE from 'three';
 import { BufferGeometry, Color } from "three";
 import GameController from '../GameController';
@@ -20,12 +19,14 @@ export default class CityComponent implements ComponentInterface {
     public coordinates: THREE.Vector2;
     private position: THREE.Vector3;
     private definiton: number;
+    private uuid: string;
 
     constructor(coordX: number = 0, coordY: number = 0, definition: number, options){
         this.coordinates = new THREE.Vector2(coordX, coordY);
         this.position = new THREE.Vector3(0, -100, 0);
         this.definiton = definition;
         this.cityName = options.name;
+        this.uuid = options.UUID.toString();
     }
 
     init(gameWin: GameController) {
@@ -34,7 +35,7 @@ export default class CityComponent implements ComponentInterface {
         const geometry = new THREE.BoxGeometry(this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE);
         const material = new THREE.MeshStandardMaterial({color: "purple"});
         this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.name = this.cityName;
+        this.mesh.name = this.uuid;
         this.mesh.rotation.x = 3/2*Math.PI;
         gameWin.threeScene.add(this.mesh);
 
