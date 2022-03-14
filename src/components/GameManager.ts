@@ -172,8 +172,8 @@ export default class GameManager implements ComponentInterface {
         const mx = e.clientX - bb.left;
         const my = e.clientY - bb.top;
 
-        this.rawMousePos.x = e.clientX;
-        this.rawMousePos.y = e.clientY;
+        this.rawMousePos.x = e.clientX - bb.left;
+        this.rawMousePos.y = e.clientY - bb.top;
 
         this.mousePos.x = ( mx / this.gw.width ) * 2 - 1;
         this.mousePos.y = - ( my / this.gw.height ) * 2 + 1;
@@ -185,7 +185,7 @@ export default class GameManager implements ComponentInterface {
             if (!this.box) {
                 const cityComp = this.cities[this.cityHovering].getComponent(CityComponent) as CityComponent;
 
-                this.box = new BoxElement(cityComp.cityName, "Cidade normal, nada de mais");
+                this.box = new BoxElement(cityComp.cityName, "Cidade normal, nada de mais", {isCity: true});
                 this.UIMgr.addElement(this.box, {
                     position: {x: this.rawMousePos.x, y: this.rawMousePos.y-125},
                     size: {x: 300, y: 150},

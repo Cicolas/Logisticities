@@ -1,60 +1,48 @@
-# ASTRO GAME ENGINE
--------------------
+# Logistiq
 
-Astro game engine, is a typescript game engine, focused in simplicity, versatility, and light-weight.
-It was/is, strongly inspired by the lua game engine LOVE.
+---
 
-### System
-- [x] Graphics
-- [ ] Sound
-- [ ] Physics*
-- [x] World
-- [x] Bodies
-- [ ] Collision Handler
-- [ ] "Wireless Forces" (Effects Areas)
+**Logistiq** é um jogo de puzzle management onde você precisa conectar *cidades* para que 
 
-### Core Classes
-- [x] Game
-- [ ] Scene
-- [ ] Objects
-- [ ] Components
+todas supram suas necessidades.
 
-### Handlers
-- [x] Keyboard Handler
-- [x] Mouse Handler
-- [ ] Controller (maybe)
-- [ ] Camera Handler (look love-sti camera)
+As demandas vão cada vez ficando maiores até o ponto em que é impossível supri-las
 
-### Misc
-- [x] Improve Usability
-- [x] Maths (vectors, random, etc...)
-- [x] Vector
-- [x] Transform
-- [x] Random
-- [x] Image Loading
-- [ ] Saving/Loading
-- [ ] TileMap Creation/Tiled Loading
-- [ ] Integration with HTML for UI
 
-Compatibility with canvas
+- Conecte as *cidades* via rodovias
+- Supra as necessidades de uma *cidade* com a outra
+- Ganhe dinheiro suprindo as necessidades das *cidades*
+- melhore as *cidades* com dinheiro
 
-## Study Table
---------------
+## Suprimentos
 
-- Physics for game dev
-- Code optimization
-- PIXIJS for graphics
+---
 
-## Version names
-----------------
+Lista de suprimentos que podem ser necessários ou abundantes
 
-- Sol           0.1.0 - Dev
-- Mercúrio      0.2.0 - Alpha
-- Vênus         0.3.0 - Beta
-- Terra         1.0.0
-- Marte         2.0.0
-- Júpiter       3.0.0
-- Saturno       4.0.0
-- Urano         5.0.0
-- Netuno        6.0.0
-- Planeta 9     7.0.0
+- Eletricidade
+- Água
+- Insumos Primários (Madeira, Pedra)
+- "Industria"
+- Pessoas
+
+## Melhorias
+
+---
+
+As melhorias que podem ser dadas nas *cidades*
+
+- Cidade Industrial: Mais industrias são produzidos
+- Megalópole: Mais pessoas são produzidas
+- Countryside: Mais insumos primários são produzidos
+- Hub: Rodovias que se ligam a essa cidade são mais rápidas
+- Cidade Maravilhosa: Mais pessoas são necessárias na cidade
+- Porto Seco: Mais caminhões saem da cidade
+- Cidade Pacífica: Limite de carência de Suprimentos maior para aquela cidade
+
+## Progressão
+
+---
+
+O jogo é composto por pequenas fases de no máximo 10 minutos. Se Perde quando a demanda por Suprimentos fica muito alta em qualquer cidade. Cada Suprimento entregue se é ganhado experiência ao alcançar certo ponto o jogador pode escolher dentre três melhorias e uma cidade para aplicar.
+

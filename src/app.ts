@@ -17,6 +17,8 @@ import BoxElement from './components/UI/box/BoxElement';
 
 const CANVAS_WIDTH = document.body.clientWidth;
 const CANVAS_HEIGHT = document.body.clientHeight;
+// const CANVAS_WIDTH = 800;
+// const CANVAS_HEIGHT = 600;
 const ASPECT_RATIO = CANVAS_WIDTH/CANVAS_HEIGHT;
 
 enum mapSizeEnum {
@@ -43,8 +45,8 @@ const cameraI = {
     quad: {
         left: -WIDTH*ASPECT_RATIO/1.5,
         right: WIDTH*ASPECT_RATIO/1.5,
-        top: WIDTH/1.5,
-        bottom: -WIDTH/1.5,
+        top: WIDTH/1.5+1,
+        bottom: -WIDTH/1.5+1,
     }
 }
 
@@ -61,7 +63,7 @@ const planeI = {
     perlinPower2: 4,
     gridDefinition: GRID_DEFINITION,
     color: {r: 81/255, g: 146/255, b: 89/255},
-    seaLevel: .075
+    seaLevel: 0
 };
 
 const seaI = {
@@ -71,7 +73,7 @@ const seaI = {
     height: HEIGHT,
     depth: DEPTH,
     color: {r: 95/255, g: 152/255, b: 245/255},
-    opacity: .5
+    opacity: .75
 };
 
 var _UI: UIManager;
@@ -79,14 +81,12 @@ const gw: GameController = new GameController("", cameraI)
 .setResolution(CANVAS_WIDTH, CANVAS_HEIGHT)
 .pushScene(
     new Scene("inicio")
-)
-.call((gameWin: GameController) => {
+).call((gameWin: GameController) => {
     _UI = new UIManager(
         CANVAS_WIDTH,
         CANVAS_HEIGHT,
         new UI(gameWin.canvas, CANVAS_WIDTH, CANVAS_HEIGHT, gameWin)
-    )
-    .addElement({name: "loading", html: loading, init: () => {}}, {
+    ).addElement({name: "loading", html: loading, init: () => {}}, {
         position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},
         time: 100
     });
@@ -95,8 +95,7 @@ const gw: GameController = new GameController("", cameraI)
         new GObject("UIManager")
         .addComponent(_UI)
     )
-})
-.initGame() as GameController;
+}).initGame() as GameController;
 setTimeout(createNewScene, 10);
 
 gw.updateTHREE();
@@ -130,7 +129,7 @@ export function createNewScene() {
             new BoxElement("Título", "Texto muito foda namoral"),
             {
                 position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},
-                size: {x: 300, y: 150}
+                size: {x: 300, y: 400}
             }
         ))
     );

@@ -26,6 +26,8 @@ export default class UI {
         div.style.position = "absolute";
         div.style.width = this.width+"px";
         div.style.height = this.height+"px";
+        div.style.left = this.boundingBox.x-8+"px";
+        div.style.top = this.boundingBox.y-8+"px";
         div.style.zIndex = "99";
         this.div = div;
     }

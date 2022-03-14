@@ -14,7 +14,21 @@
     .BoxElement>.title {
         color: #fff;
         /* text-align: center; */
-        font-size: 2em;
+        font-size: 1.75em;
+    }
+    
+    .BoxElement>.title>.upgrade {
+        /* position: absolute; */
+        float: right;
+        margin-top: -4px;
+        width: 32px;
+        height: 32px;
+        background-color: #ffffff33;
+        border-radius: 32px;
+        border-width: 2px;
+        border-style: solid;
+        border-color: #ffffff33;
+        text-align: center;
     }
     
     .BoxElement>p {
@@ -24,12 +38,19 @@
         margin-top: -2px;
         line-height: 1.75em;
     }
+    
+    .hidden {
+        display: none;
+    }
 </style>
 
 <div class="title">
     <b class="$TITLE">
         Texto
     </b>
+    <div class="upgrade $UPGRADE">
+        i
+    </div>
     <hr>
 </div>
 <p class="$TEXT">

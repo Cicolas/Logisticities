@@ -7,7 +7,7 @@ export const DEBUG_INFO = {
 
     //engine related show/hide
     hideFog: true,
-    hideSea: false,
+    hideSea: true,
 
     //game related show/hide
     noCities: false,
