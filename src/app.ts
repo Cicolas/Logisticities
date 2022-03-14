@@ -125,13 +125,14 @@ export function createNewScene() {
         .addComponent(new SeaComponent(seaI))
     ).initScene(gw).addObject(
         new GObject("UIManager")
-        .addComponent(_UI.addElement(
-            new BoxElement("Título", "Texto muito foda namoral"),
+        .addComponent(_UI
+            .addElement(
+            new BoxElement("Logistiq dev", "<i>Logistiq dev version</i><br/>Bugs will be encountered, be aware :P"),
             {
                 position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},
                 size: {x: 300, y: 400}
-            }
-        ))
+            })
+        )
     );
 
     gw.popScene();

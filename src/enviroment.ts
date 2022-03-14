@@ -15,10 +15,15 @@ export const DEBUG_INFO = {
 
     //non show/hide related DEBUGS
     camera: {
-        topDown: false
+        topDown: false,
+        emitLight: false,
     },
     map: {
-        planify: false,
+        planify: false
+    },
+    city: {
+        dontLoadObj: false,
+        dontEmitLight: false
     }
 }
 

@@ -45,4 +45,8 @@ export default class Scene {
         }
         return this;
     }
+
+    public removeObject(obj: GObject) {
+        this.objects = this.objects.filter(value => value !== obj);
+    }
 }

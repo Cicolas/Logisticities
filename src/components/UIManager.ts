@@ -32,7 +32,7 @@ export default class UIManager implements ComponentInterface {
     }
     draw (context?: THREE.Scene) {};
 
-    addElement(elem: UIObject, opt: UIConfig): UIManager {
+    addElement(elem: UIObject, opt?: UIConfig): UIManager {
         this.UI.addElement(elem, opt);
 
         return this;

@@ -6,10 +6,10 @@ const cityNames: [string, boolean][] = [
 ]
 
 export function getCityName(){
-    var c = cityNames[Math.round(Math.random()*100)%cityNames.length];
-    while (c[1]) {
+    var c;
+    do {
         c = cityNames[Math.round(Math.random()*100)%cityNames.length];
-    }
+    }while (c[1])
     c[1] = true;
 
     return c[0];

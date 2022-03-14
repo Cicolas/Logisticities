@@ -39,8 +39,6 @@ export default class BoxElement implements UIObject{
 
         if (!this.options.isCity) {
             up.className = up.className+" hidden"
-            console.log(up);
-
         }
 
         this.elem.addEventListener("click", () => {

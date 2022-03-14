@@ -1,4 +1,3 @@
-import { Verify } from 'crypto';
 import * as THREE from 'three';
 import { Color } from 'three';
 import { createNewScene } from '../app';
@@ -7,6 +6,7 @@ import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GObject from "../lib/CUASAR/GObject";
 import { getCityName, resetCityName } from '../scripts/cityNames';
+import { resetSuply } from '../scripts/suply';
 import { position } from '../scripts/utils';
 import CityComponent from './CityComponent';
 import PlaneComponent from './PlaneComponent';
@@ -37,7 +37,7 @@ export default class GameManager implements ComponentInterface {
     constructor(definition, mapSize, gridDefinition) {
         this.definition = definition;
         this.gridDefinition = gridDefinition;
-        this.cityCount = DEBUG_INFO.noCities?0:mapSize*4;
+        this.cityCount = DEBUG_INFO.noCities?0:mapSize*2;
 
         // this.mousePos = new THREE.Vector3();
         this.mousePos = {x: -1, y: -1};
@@ -62,6 +62,7 @@ export default class GameManager implements ComponentInterface {
         if (e.key === "r") {
             console.log("newScene");
             resetCityName();
+            resetSuply();
             setTimeout(createNewScene, 10);
         }
     }
@@ -80,7 +81,7 @@ export default class GameManager implements ComponentInterface {
                 const c2 = this.cities[this.cityHovering];
 
                 const go = new GObject((++ROAD_UUID).toString()).addComponent(
-                    new RoadComponent(c1.name, c2.name, this.definition)
+                    new RoadComponent(c1.name, c2.name)
                 ).initObject(this.gw)
                 this.gw.getScene().addObject(go);
 
@@ -146,8 +147,7 @@ export default class GameManager implements ComponentInterface {
             const go = new GObject((++CITY_UUID).toString())
                         .addComponent(
                             new CityComponent(x, y, this.definition, {name: getCityName(), UUID: CITY_UUID})
-                        )
-                        .initObject(gameWin);
+                        ).initObject(gameWin);
 
             this.cities.push(go);
             gameWin.getScene().addObject(go);

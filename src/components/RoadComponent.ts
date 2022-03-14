@@ -33,11 +33,11 @@ export default class RoadComponent implements ComponentInterface {
     private plane: PlaneComponent;
     private fromName: string;
     private toName: string;
-    private definition: number;
 
     private pathFindCells:  number[][] = [];
     private finalPath: position[] = [];
     private points: THREE.Vector3[] = [];
+    private isInvalid: boolean;
 
     // constructor(from: GObject, to: GObject, definition: number){
     //     this.points = [];
@@ -45,48 +45,50 @@ export default class RoadComponent implements ComponentInterface {
     //     this.cities[1] = to;
     //     this.definition = definition;
     // }
-    constructor(from: string, to: string, definition: number){
+    constructor(from: string, to: string){
         this.vertices = [];
         this.fromName = from;
         this.toName = to;
-        this.definition = definition;
     }
 
     init(gameWin: GameController) {
         this.plane = gameWin.getScene().getObject("plano").getComponent(PlaneComponent) as PlaneComponent;
-
         this.cities[0] = gameWin.getScene().getObject(this.fromName);
         this.cities[1] = gameWin.getScene().getObject(this.toName);
 
-        const material = new THREE.LineBasicMaterial({
-            color: 0x000000,
-            linejoin: "bevel",
-        })
-
-        const cc1 = this.cities[0].getComponent(CityComponent) as CityComponent;
-        const cc2 = this.cities[1].getComponent(CityComponent) as CityComponent;
-
-        const cc1Pos = new THREE.Vector2().copy(cc1.coordinates);
-        const cc2Pos = new THREE.Vector2().copy(cc2.coordinates);
-
-        this.generateCells(this.plane.grid);
-        this.calculateRoute(this.plane.grid, cc1Pos, cc2Pos);
-        this.smoothRoute(this.plane.grid);
-        // this.drawRoute(cc2Pos);
-
-        const geometry = new THREE.BufferGeometry().setFromPoints(this.vertices);
-
-        this.line = new THREE.Line(geometry, material);
-        gameWin.threeScene.add(this.line);
-
-        if (DEBUG_INFO.showRoadGuides) {
-            const planeMat = new THREE.LineBasicMaterial({
-                color: 0xff0000,
+        if (this.updateCities()) {
+            const material = new THREE.LineBasicMaterial({
+                color: 0x000000,
                 linejoin: "bevel",
             })
-            const planeGeo = new THREE.BufferGeometry().setFromPoints(this.points);
-            const planeLine = new THREE.Line(planeGeo, planeMat);
-            gameWin.threeScene.add(planeLine);
+
+            const cc1 = this.cities[0].getComponent(CityComponent) as CityComponent;
+            const cc2 = this.cities[1].getComponent(CityComponent) as CityComponent;
+
+            const cc1Pos = new THREE.Vector2().copy(cc1.coordinates);
+            const cc2Pos = new THREE.Vector2().copy(cc2.coordinates);
+
+            this.generateCells(this.plane.grid);
+            this.calculateRoute(this.plane.grid, cc1Pos, cc2Pos);
+            this.smoothRoute(this.plane.grid);
+            // this.drawRoute(cc2Pos);
+
+            const geometry = new THREE.BufferGeometry().setFromPoints(this.vertices);
+
+            this.line = new THREE.Line(geometry, material);
+            gameWin.threeScene.add(this.line);
+
+            if (DEBUG_INFO.showRoadGuides) {
+                const planeMat = new THREE.LineBasicMaterial({
+                    color: 0xff0000,
+                    linejoin: "bevel",
+                })
+                const planeGeo = new THREE.BufferGeometry().setFromPoints(this.points);
+                const planeLine = new THREE.Line(planeGeo, planeMat);
+                gameWin.threeScene.add(planeLine);
+            }
+        }else {
+            this.isInvalid = true;
         }
 
         setTimeout(this.postInit.bind(this), 20, gameWin);
@@ -96,7 +98,11 @@ export default class RoadComponent implements ComponentInterface {
     }
 
     update(obj: GObject, gameWin: GameWindow) {
+        if (this.isInvalid) {
+            gameWin.getScene().removeObject(obj);
+        }
     }
+
     draw (context?: THREE.Scene) {};
 
     calculateDistance(cityPos1: THREE.Vector3, cityPos2: THREE.Vector3) {
@@ -211,6 +217,12 @@ export default class RoadComponent implements ComponentInterface {
         }
 
         return 0;
+    }
+
+    updateCities(): boolean {
+        const conf1 = (this.cities[0].getComponent(CityComponent) as CityComponent).addRoad(this);
+        const conf2 = (this.cities[1].getComponent(CityComponent) as CityComponent).addRoad(this);
+        return conf1 && conf2;
     }
 }
 

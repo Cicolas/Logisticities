@@ -11,7 +11,11 @@ export default class GameController extends GameWindow{
     public threeRenderer: THREE.WebGLRenderer;
     public threeCamera: THREE.Camera;
     public canvas: HTMLCanvasElement;
+    public frame: number = 0;
+    public fps: number = 0;
+    public dt: number = 0;
 
+    private lastFrameTime;
     private cameraAngle: number;
     private cameraDistance: number;
     private depth: number;
@@ -53,6 +57,12 @@ export default class GameController extends GameWindow{
     }
 
     public updateTHREE = (): void => {
+        this.dt = (Date.now()-this.lastFrameTime)/1000;
+        this.fps = 1/(this.dt);
+        this.lastFrameTime = Date.now();
+
+
+        this.frame++;
         this.updateGame();
         this.drawGame(this.threeScene);
 
