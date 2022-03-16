@@ -1,59 +1,31 @@
-<style>
-    .BoxElement {
-        display: flex;
-        flex-direction: column;
-        background-color: #29282ebe;
-        backdrop-filter: blur(2px) brightness(50%);
-        padding: 20px;
-        border-radius: 10px;
-        transform: translate(-50%, -50%);
-        pointer-events: all;
-        user-select: none;
-    }
-    
-    .BoxElement>.title {
-        color: #fff;
-        /* text-align: center; */
-        font-size: 1.75em;
-    }
-    
-    .BoxElement>.title>.upgrade {
-        /* position: absolute; */
-        float: right;
-        margin-top: -4px;
-        width: 32px;
-        height: 32px;
-        background-color: #ffffff33;
-        border-radius: 32px;
-        border-width: 2px;
-        border-style: solid;
-        border-color: #ffffff33;
-        text-align: center;
-    }
-    
-    .BoxElement>p {
-        color: #c4c4c4;
-        overflow-y: auto;
-        font-size: 1em;
-        margin-top: -2px;
-        line-height: 1.75em;
-    }
-    
-    .hidden {
-        display: none;
-    }
-</style>
-
 <div class="title">
     <b class="$TITLE">
         Texto
     </b>
-    <div class="upgrade $UPGRADE">
-        i
+    <div class="circle float-right circle-32px $UPGRADE">
+        🌇
     </div>
     <hr>
 </div>
-<p class="$TEXT">
-    Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea voluptate inventore soluta incidunt corporis modi harum non earum officia aut quae beatae culpa distinctio quos, doloremque sint saepe magnam similique tempore nulla vitae, est iure dicta. Adipisci
-    mollitia deserunt quibusdam nihil, quasi architecto voluptate consequuntur consequatur nam amet velit quae.
-</p>
+<div class="body">
+    <span class="$TEXT">
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Ea voluptate inventore soluta incidunt corporis modi harum non earum officia aut quae beatae culpa distinctio quos, doloremque sint saepe magnam similique tempore nulla vitae, est iure dicta. Adipisci
+        mollitia deserunt quibusdam nihil, quasi architecto voluptate consequuntur consequatur nam amet velit quae.
+    </span>
+    <div class="info">
+        <div class="left">
+            <div>Have:</div>
+            <div class="list left-list $HAVE">
+            </div>
+        </div>
+        <hr>
+        <div class="right">
+            <div>Need:</div>
+            <div class="list right-list $NEEDS">
+                <div class="circle circle-24px">
+                    🧱
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

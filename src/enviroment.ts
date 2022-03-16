@@ -6,8 +6,8 @@ export const DEBUG_INFO = {
     showWireframe: false,
 
     //engine related show/hide
-    hideFog: true,
-    hideSea: true,
+    hideFog: false,
+    hideSea: false,
 
     //game related show/hide
     noCities: false,
@@ -22,8 +22,8 @@ export const DEBUG_INFO = {
         planify: false
     },
     city: {
-        dontLoadObj: false,
-        dontEmitLight: false
+        number: 4,
+        dontLoadObj: false
     }
 }
 

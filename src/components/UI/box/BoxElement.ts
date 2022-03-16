@@ -1,15 +1,28 @@
+import "./BoxElement.css";
+
 import GameController from '../../../GameController';
 import UI from '../../../lib/TELESCOPE/UI';
 import UIObject from '../../../lib/TELESCOPE/UIObject';
+import emojiMap from '../../../scripts/emojiMap';
+import Suply from '../../../scripts/suply';
 import { position } from '../../../scripts/utils';
+import RoadComponent from '../../RoadComponent';
 import box from './BoxElement.html';
 
 const DEFAULT_CONFIG = {
     isCity: false
 }
 
+export interface CityInterface {
+    UUID: string,
+    cityName: string,
+    roads?: RoadComponent[],
+    suplies?: Suply[]
+}
+
 export interface BoxElementOptions {
-    isCity: boolean
+    isCity: boolean,
+    city?: CityInterface
 }
 
 export default class BoxElement implements UIObject{
@@ -33,12 +46,26 @@ export default class BoxElement implements UIObject{
         const title = this.elem.getElementsByClassName("$TITLE")[0];
         const text = this.elem.getElementsByClassName("$TEXT")[0];
         const up = this.elem.getElementsByClassName("$UPGRADE")[0];
+        const info = this.elem.getElementsByClassName("info")[0];
+        const have = this.elem.getElementsByClassName("$HAVE")[0];
+        const needs = this.elem.getElementsByClassName("$NEEDS")[0];
         title.innerHTML = this.title;
         text.innerHTML = this.text;
         up.innerHTML = "";
+        have.innerHTML = "";
+        needs.innerHTML = "";
 
         if (!this.options.isCity) {
             up.className = up.className+" hidden"
+            info.className = up.className+" hidden"
+        }else {
+            if (this.options.city.suplies) {
+                for (let i = 0; i < this.options.city.suplies.length; i++) {
+                    const element = this.options.city.suplies[i];
+
+                    this.setSuply(element.need?needs: have, element)
+                }
+            }
         }
 
         this.elem.addEventListener("click", () => {
@@ -62,4 +89,13 @@ export default class BoxElement implements UIObject{
             this.elem.remove();
         }, 90)
     };
+
+    setSuply(div: Element, suply: Suply) {
+        const html = `
+            <div class="circle circle-24px">
+                ${suply.emoji}
+            </div>
+        `
+        div.innerHTML += html;
+    }
 }

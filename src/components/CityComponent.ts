@@ -8,17 +8,18 @@ import cityOBJ from "../models/predio.obj";
 import { DEBUG_INFO } from '../enviroment';
 import { Color } from 'three';
 import RoadComponent from './RoadComponent';
-import Suply, { startRandomSuply } from '../scripts/suply';
+import Suply, { getRandomNeed, startRandomSuply } from '../scripts/suply';
+import { CityInterface } from './UI/box/BoxElement';
 
 const CITY_SIZE = 3;
 
-export default class CityComponent implements ComponentInterface {
+export default class CityComponent implements ComponentInterface, CityInterface {
     name: string = "CityComponent";
     public mesh: THREE.Mesh;
 
     public cityName: string;
     public isSelected: boolean;
-    public uuid: string;
+    public UUID: string;
     public position: THREE.Vector3;
     public coordinates: THREE.Vector2;
     public roads: RoadComponent[] = [];
@@ -33,7 +34,7 @@ export default class CityComponent implements ComponentInterface {
         this.position = new THREE.Vector3(0, -100, 0);
         this.definiton = definition;
         this.cityName = options.name;
-        this.uuid = options.UUID.toString();
+        this.UUID = options.UUID.toString();
     }
 
     init(gameWin: GameController) {
@@ -43,7 +44,7 @@ export default class CityComponent implements ComponentInterface {
             const geometry = new THREE.BoxGeometry(this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE);
             const material = new THREE.MeshStandardMaterial({color: "purple"});
             this.mesh = new THREE.Mesh(geometry, material);
-            this.mesh.name = this.uuid;
+            this.mesh.name = this.UUID;
             this.mesh.rotation.x = 3/2*Math.PI;
             this.setCity();
             gameWin.threeScene.add(this.mesh);
@@ -57,14 +58,15 @@ export default class CityComponent implements ComponentInterface {
     }
 
     postInit(gameWin: GameController) {
-
+        this.getNeeds();
     }
 
     update(obj: GObject, gameWin: GameController) {
         this.n += gameWin.dt;
 
-        if (this.suplies[0]) {
-            this.suplies[0].quantity += gameWin.dt;
+        for (let i = 0; i < this.suplies.length; i++) {
+            const element = this.suplies[i];
+            element.quantity += gameWin.dt
         }
     }
 
@@ -81,8 +83,14 @@ export default class CityComponent implements ComponentInterface {
         this.mesh.position.x = v.position.x;
         this.mesh.position.y = v.position.y+(DEBUG_INFO.city.dontLoadObj?.5:0);
         this.mesh.position.z = v.position.z;
-        this.mesh.rotation.x = DEBUG_INFO.city.dontLoadObj?-Math.atan2(v.normal.y, v.normal.z):0;
-        this.mesh.rotation.y = 1/2*Math.PI-Math.atan2(v.normal.y, v.normal.x);
+
+        if (DEBUG_INFO.city.dontLoadObj) {
+            this.mesh.rotation.x = -Math.atan2(v.normal.y, v.normal.z);
+            this.mesh.rotation.y = 1/2*Math.PI-Math.atan2(v.normal.y, v.normal.x);
+        }else {
+            this.mesh.rotation.x = -Math.atan2(v.normal.y, v.normal.z)+Math.PI/2;
+            this.mesh.rotation.z = Math.atan2(v.normal.y, v.normal.x)-Math.PI/2;
+        }
     }
 
     loadOBJ(gameWin: GameController) {
@@ -93,7 +101,7 @@ export default class CityComponent implements ComponentInterface {
             c.parent = null;
 
             this.mesh = c;
-            this.mesh.name = this.uuid;
+            this.mesh.name = this.UUID;
             this.setCity();
             this.mesh.scale.x = this.definiton/80;
             this.mesh.scale.y = this.definiton/80;
@@ -111,5 +119,12 @@ export default class CityComponent implements ComponentInterface {
 
     startSuply() {
         this.suplies.push(startRandomSuply(this.cityName))
+    }
+
+    getNeeds() {
+        const suply = {...getRandomNeed(this.cityName)[1]};
+        suply.need = true;
+
+        this.suplies.push(suply);
     }
 }

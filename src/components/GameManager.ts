@@ -37,7 +37,7 @@ export default class GameManager implements ComponentInterface {
     constructor(definition, mapSize, gridDefinition) {
         this.definition = definition;
         this.gridDefinition = gridDefinition;
-        this.cityCount = DEBUG_INFO.noCities?0:mapSize*2;
+        this.cityCount = DEBUG_INFO.noCities?0:mapSize*DEBUG_INFO.city.number;
 
         // this.mousePos = new THREE.Vector3();
         this.mousePos = {x: -1, y: -1};
@@ -185,7 +185,7 @@ export default class GameManager implements ComponentInterface {
             if (!this.box) {
                 const cityComp = this.cities[this.cityHovering].getComponent(CityComponent) as CityComponent;
 
-                this.box = new BoxElement(cityComp.cityName, "Cidade normal, nada de mais", {isCity: true});
+                this.box = new BoxElement(cityComp.cityName, "Cidade normal, nada de mais", {isCity: true, city: cityComp});
                 this.UIMgr.addElement(this.box, {
                     position: {x: this.rawMousePos.x, y: this.rawMousePos.y-125},
                     size: {x: 300, y: 150},

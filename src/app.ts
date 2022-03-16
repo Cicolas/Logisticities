@@ -14,6 +14,7 @@ import UIManager from './components/UIManager';
 import UI from './lib/TELESCOPE/UI';
 import loading from './page/loading.html';
 import BoxElement from './components/UI/box/BoxElement';
+import UpgradeElement from './components/UI/upgradeSelection/UpgradeElement';
 
 const CANVAS_WIDTH = document.body.clientWidth;
 const CANVAS_HEIGHT = document.body.clientHeight;
@@ -126,12 +127,17 @@ export function createNewScene() {
     ).initScene(gw).addObject(
         new GObject("UIManager")
         .addComponent(_UI
-            .addElement(
-            new BoxElement("Logistiq dev", "<i>Logistiq dev version</i><br/>Bugs will be encountered, be aware :P"),
-            {
-                position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},
-                size: {x: 300, y: 400}
-            })
+            // .addElement(
+            // new BoxElement("Rosario", "Uma cidade normal, nada de especial", {isCity: true,
+            //     city: {
+            //         UUID: "100",
+            //         cityName: "Rosario"
+            //     }
+            // }),
+            // {
+            //     position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},
+            //     size: {x: 300, y: 150}
+            // })
         )
     );
 

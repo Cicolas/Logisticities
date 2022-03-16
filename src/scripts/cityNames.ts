@@ -1,3 +1,5 @@
+import { getInRandomList } from "./utils";
+
 const cityNames: [string, boolean][] = [
     ["Roseira", false],
     ["Maryland", false],
@@ -6,10 +8,7 @@ const cityNames: [string, boolean][] = [
 ]
 
 export function getCityName(){
-    var c;
-    do {
-        c = cityNames[Math.round(Math.random()*100)%cityNames.length];
-    }while (c[1])
+    var c = getInRandomList(cityNames);
     c[1] = true;
 
     return c[0];

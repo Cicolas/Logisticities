@@ -21,3 +21,12 @@ export interface cameraQuad {
     top: number,
     bottom: number,
 }
+
+export function getInRandomList<T>(list: [T, boolean][]): [T, boolean] {
+    var s;
+    do{
+        s = list[Math.floor(Math.random()*1000)%list.length];
+    }while(s[1])
+
+    return s;
+}
