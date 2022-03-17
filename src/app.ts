@@ -16,8 +16,11 @@ import loading from './page/loading.html';
 import BoxElement from './components/UI/box/BoxElement';
 import UpgradeElement from './components/UI/upgradeSelection/UpgradeElement';
 
-const CANVAS_WIDTH = document.body.clientWidth;
-const CANVAS_HEIGHT = document.body.clientHeight;
+if (!DEBUG_INFO.camera.dontChangeSize) {
+    document.body.classList.add("resizable");
+}
+const CANVAS_WIDTH = DEBUG_INFO.camera.dontChangeSize?document.body.clientWidth:window.innerWidth;
+const CANVAS_HEIGHT = DEBUG_INFO.camera.dontChangeSize?document.body.clientHeight:window.innerHeight;
 // const CANVAS_WIDTH = 800;
 // const CANVAS_HEIGHT = 600;
 const ASPECT_RATIO = CANVAS_WIDTH/CANVAS_HEIGHT;
@@ -44,10 +47,10 @@ const cameraI = {
     cameraDistance: .9,
     isLocked: true,
     quad: {
-        left: -WIDTH*ASPECT_RATIO/1.5,
-        right: WIDTH*ASPECT_RATIO/1.5,
-        top: WIDTH/1.5+1,
-        bottom: -WIDTH/1.5+1,
+        left: -WIDTH/1.5,
+        right: WIDTH/1.5,
+        top: HEIGHT/1.5,
+        bottom: -HEIGHT/1.5,
     }
 }
 

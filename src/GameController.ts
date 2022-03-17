@@ -42,7 +42,16 @@ export default class GameController extends GameWindow{
             this.threeScene.fog = fog;
         }
 
+        window.addEventListener("resize", this.resize.bind(this));
+
         return super.initGame();
+    }
+
+    private resize() {
+        if (!DEBUG_INFO.camera.dontChangeSize) {
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
+        }
     }
 
     public setResolution(width: number, height: number): GameWindow {

@@ -1,3 +1,4 @@
+import { DEBUG_INFO } from "../../enviroment";
 import GameController from "../../GameController";
 import UIObject, { UIConfig } from "./UIObject";
 
@@ -17,6 +18,7 @@ export default class UI {
         this.width = width;
         this.height = height;
         this.start();
+
         document.body.appendChild(this.div);
     }
 
@@ -26,8 +28,8 @@ export default class UI {
         div.style.position = "absolute";
         div.style.width = this.width+"px";
         div.style.height = this.height+"px";
-        div.style.left = this.boundingBox.x-8+"px";
-        div.style.top = this.boundingBox.y-8+"px";
+        div.style.left = this.boundingBox.x+(DEBUG_INFO.camera.dontChangeSize?-8:0)+"px";
+        div.style.top = this.boundingBox.y+(DEBUG_INFO.camera.dontChangeSize?-8:0)+"px";
         div.style.zIndex = "99";
         this.div = div;
     }
@@ -81,5 +83,17 @@ export default class UI {
         return this.uiElementList.filter(value =>
             value !== t
         );
+    }
+
+    public resize(w, h) {
+        this.width = w;
+        this.height = h;
+
+        this.div.style.width = this.width+"px";
+        this.div.style.height = this.height+"px";
+        this.div.style.left = this.boundingBox.x+"px";
+        this.div.style.top = this.boundingBox.y+"px";
+
+        // this.canvas.
     }
 }

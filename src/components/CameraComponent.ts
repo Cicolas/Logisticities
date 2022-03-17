@@ -29,6 +29,7 @@ export default class CameraComponent implements ComponentInterface {
     public cameraDistance: number;
     private width: number;
     private height: number;
+    private aspectRatio: number;
     private depth: number;
     public isLocked: boolean;
     public rotation: number;
@@ -40,6 +41,7 @@ export default class CameraComponent implements ComponentInterface {
         this.cameraDistance = cameraI.cameraDistance;
         this.width = cameraI.width;
         this.height = cameraI.height;
+        this.aspectRatio = cameraI.width/cameraI.height;
         this.depth = cameraI.depth;
         this.quad = cameraI.quad;
         this.isLocked = cameraI.isLocked;
@@ -51,18 +53,23 @@ export default class CameraComponent implements ComponentInterface {
         this.gw = (gameWin as GameController);
 
         this.orthoCam = new THREE.OrthographicCamera(
-            this.quad.left,
-            this.quad.right,
+            this.quad.left*this.aspectRatio,
+            this.quad.right*this.aspectRatio,
             this.quad.top,
             this.quad.bottom,
             -100,
         );
+        if (!DEBUG_INFO.camera.dontChangeSize) {
+            this.resize();
+        }
         this.resetOrthoCam();
-        this.perspectiveCam = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 10000);
+        this.perspectiveCam = new THREE.PerspectiveCamera(75, this.aspectRatio, 0.1, 10000);
         this.resetPerspectiveCam();
 
         this.camera = this.isLocked?this.orthoCam:this.perspectiveCam;
         this.gw.threeCamera = this.camera;
+
+        window.addEventListener("resize", this.resize.bind(this))
     }
 
     resetOrthoCam() {
@@ -70,9 +77,6 @@ export default class CameraComponent implements ComponentInterface {
         this.orthoCam.position.y = Math.sin(this.cameraAngle)*this.depth*this.cameraDistance;
         this.orthoCam.position.x = Math.sin(this.rotation)*this.depth*this.cameraDistance;
         this.orthoCam.position.z = Math.cos(this.rotation)*this.depth*this.cameraDistance;
-
-        console.log(this.orthoCam);
-
     }
 
     resetPerspectiveCam() {
@@ -155,5 +159,21 @@ export default class CameraComponent implements ComponentInterface {
             this.gw.threeCamera = this.orthoCam;
         }
         this.gw.threeCamera = this.camera;
+    }
+
+    resize() {
+        if (!DEBUG_INFO.camera.dontChangeSize) {
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
+            this.aspectRatio = this.width/this.height;
+
+            this.gw.threeRenderer.setSize(this.width, this.height);
+
+            this.orthoCam.left = this.quad.left*this.aspectRatio-1;
+            this.orthoCam.right = this.quad.right*this.aspectRatio-1;
+            this.orthoCam.top = this.quad.top+1;
+            this.orthoCam.bottom = this.quad.bottom+1;
+            this.orthoCam.updateProjectionMatrix();
+        }
     }
 }

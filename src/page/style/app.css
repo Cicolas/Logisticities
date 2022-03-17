@@ -8,6 +8,11 @@ body {
     right: 0px;
 }
 
+.resizable {
+    margin: 0px;
+    overflow: hidden;
+}
+
 canvas {
     margin: auto;
 }

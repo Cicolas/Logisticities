@@ -78,7 +78,5 @@ export function resetSuply(){
 export function getRandomNeed(cityName: string) {
     const needsList = production.filter(value => value[0] !== cityName);
 
-    console.log(production);
-
     return needsList[Math.floor(Math.random()*1000)%needsList.length];
 }

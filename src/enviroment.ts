@@ -17,6 +17,7 @@ export const DEBUG_INFO = {
     camera: {
         topDown: false,
         emitLight: false,
+        dontChangeSize: true,
     },
     map: {
         planify: false

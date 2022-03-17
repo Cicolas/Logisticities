@@ -21,6 +21,8 @@ export default class UIManager implements ComponentInterface {
     init(gameWin: GameController) {
         if (!this.UI)
             this.UI = new UI(gameWin.canvas, this.width, this.height, gameWin);
+
+        window.addEventListener("resize", this.resize.bind(this));
     }
 
     update(obj: GObject, gameWin: GameController) {
@@ -36,5 +38,11 @@ export default class UIManager implements ComponentInterface {
         this.UI.addElement(elem, opt);
 
         return this;
+    }
+
+    resize() {
+        this.width = window.innerWidth;
+        this.height = window.innerHeight;
+        this.UI.resize(this.width, this.height);
     }
 }
