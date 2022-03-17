@@ -1,10 +1,8 @@
-import { basename } from "path/posix";
 import *  as THREE from "three";
 import { Color } from "three";
 import { CameraInterface } from "./components/CameraComponent";
 import { DEBUG_INFO } from "./enviroment";
 import GameWindow from "./lib/CUASAR/GameWindow";
-import Scene from "./lib/CUASAR/Scene";
 
 export default class GameController extends GameWindow{
     public threeScene: THREE.Scene;

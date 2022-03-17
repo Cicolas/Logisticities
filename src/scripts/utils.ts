@@ -30,3 +30,7 @@ export function getInRandomList<T>(list: [T, boolean][]): [T, boolean] {
 
     return s;
 }
+
+export function Clamp(num, min, max) {
+    return Math.min(Math.max(num, min), max)
+};

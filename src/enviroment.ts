@@ -11,7 +11,9 @@ export const DEBUG_INFO = {
 
     //game related show/hide
     noCities: false,
+    noRoadSmooth: false,
     showRoadGuides: false,
+    showRoadVertices: false,
 
     //non show/hide related DEBUGS
     camera: {
@@ -24,7 +26,7 @@ export const DEBUG_INFO = {
     },
     city: {
         //! Numbers above 4 cause crashes
-        number: 4,
+        number: 2,
         dontLoadObj: false
     }
 }

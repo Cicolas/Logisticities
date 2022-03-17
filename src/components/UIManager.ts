@@ -1,3 +1,4 @@
+import { DEBUG_INFO } from "../enviroment";
 import GameController from "../GameController";
 import ComponentInterface from "../lib/CUASAR/Component";
 import GObject from "../lib/CUASAR/GObject";
@@ -41,8 +42,10 @@ export default class UIManager implements ComponentInterface {
     }
 
     resize() {
-        this.width = window.innerWidth;
-        this.height = window.innerHeight;
-        this.UI.resize(this.width, this.height);
+        if (!DEBUG_INFO.camera.dontChangeSize) {
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
+            this.UI.resize(this.width, this.height);
+        }
     }
 }

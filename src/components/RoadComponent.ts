@@ -10,18 +10,9 @@ import PlaneComponent from './PlaneComponent';
 import jsAstar from 'javascript-astar';
 import { DEBUG_INFO } from '../enviroment';
 import { position, Vertex } from '../scripts/utils';
+import TrainComponent from './TrainComponent';
 
 const LINE_DEFINITION = 10;
-
-interface Cell {
-    position: position;
-    distFromStart: number;
-    distFromEnd: number;
-    value: number;
-    got: boolean;
-    able: boolean;
-    history: Cell[];
-}
 
 export default class RoadComponent implements ComponentInterface {
     name: string = "RoadComponent";
@@ -29,7 +20,7 @@ export default class RoadComponent implements ComponentInterface {
     public line;
 
     public cities: [GObject, GObject] = [null, null];
-    public distance: number;
+    public distance: number = 0;
     private plane: PlaneComponent;
     private fromName: string;
     private toName: string;
@@ -71,6 +62,7 @@ export default class RoadComponent implements ComponentInterface {
             this.generateCells(this.plane.grid);
             this.calculateRoute(this.plane.grid, cc1Pos, cc2Pos);
             this.smoothRoute(this.plane.grid);
+            this.calculateDistance();
             // this.drawRoute(cc2Pos);
 
             const geometry = new THREE.BufferGeometry().setFromPoints(this.vertices);
@@ -87,6 +79,9 @@ export default class RoadComponent implements ComponentInterface {
                 const planeLine = new THREE.Line(planeGeo, planeMat);
                 gameWin.threeScene.add(planeLine);
             }
+            if (DEBUG_INFO.showRoadVertices) {
+                this.showRoadVerticecs(gameWin);
+            }
         }else {
             this.isInvalid = true;
         }
@@ -95,6 +90,11 @@ export default class RoadComponent implements ComponentInterface {
     }
 
     postInit(gameWin: GameController) {
+        gameWin.getScene().addObject(
+            new GObject("train 1").addComponent(
+                new TrainComponent(this)
+            ).initObject(gameWin)
+        )
     }
 
     update(obj: GObject, gameWin: GameWindow) {
@@ -105,8 +105,13 @@ export default class RoadComponent implements ComponentInterface {
 
     draw (context?: THREE.Scene) {};
 
-    calculateDistance(cityPos1: THREE.Vector3, cityPos2: THREE.Vector3) {
-        return cityPos1.distanceTo(cityPos2);
+    calculateDistance() {
+        for (let i = this.vertices.length-1; i > 1; i--) {
+            const p1 = this.vertices[i];
+            const p2 = this.vertices[i-1];
+
+            this.distance += (p1.clone().sub(p2)).length();
+        }
     }
 
     calculateRoute(grid: Vertex[][], startPos: position, finalPos: position) {
@@ -139,57 +144,75 @@ export default class RoadComponent implements ComponentInterface {
     }
 
     smoothRoute(grid: Vertex[][]){
-        for (let i = 0; i < this.points.length; i++) {
-            const pi = this.points[i];
-            // const pc = new THREE.Vector3();
-            const pc = this.points[i+1];
-            const pc2 = this.points[i+2];
-            const pf = this.points[i+3];
-            // console.log(pi, pc, pf);
+        if (!DEBUG_INFO.noRoadSmooth) {
+            for (let i = 0; i < this.points.length; i++) {
+                const pi = this.points[i];
+                // const pc = new THREE.Vector3();
+                const pc = this.points[i+1];
+                const pc2 = this.points[i+2];
+                const pf = this.points[i+3];
+                // console.log(pi, pc, pf);
 
-            if (i+3 < this.points.length) {
-                const curveSize = this.isCurve(
-                    {x: pi.x, y: pi.z},
-                    {x: pc.x, y: pc.z},
-                    {x: pc2.x, y: pc2.z},
-                    {x: pf.x, y: pf.z}
-                );
+                if (i+3 < this.points.length) {
+                    const curveSize = this.isCurve(
+                        {x: pi.x, y: pi.z},
+                        {x: pc.x, y: pc.z},
+                        {x: pc2.x, y: pc2.z},
+                        {x: pf.x, y: pf.z}
+                    );
 
-                if (curveSize === 1) {
-                    // console.log("1: ", i);
-                    for (let t = 0; t < LINE_DEFINITION; t++) {
-                        const time = t/(LINE_DEFINITION-1);
+                    if (curveSize === 1) {
+                        // console.log("1: ", i);
+                        for (let t = 0; t < LINE_DEFINITION; t++) {
+                            const time = t/(LINE_DEFINITION-1);
 
-                        var n1 = pi.clone().multiplyScalar((1-time)**2);
-                        var n2 = pc.clone().multiplyScalar(time*(2*(1-time)));
-                        var n3 = pc2.clone().multiplyScalar(time**2);
+                            var n1 = pi.clone().multiplyScalar((1-time)**2);
+                            var n2 = pc.clone().multiplyScalar(time*(2*(1-time)));
+                            var n3 = pc2.clone().multiplyScalar(time**2);
 
-                        var p = n1.add(n2).add(n3);
-                        this.vertices.push(p);
+                            var p = n1.add(n2).add(n3);
+                            this.vertices.push(p);
+                        }
+                        i++;
+                    }else if(curveSize === 2) {
+                        // console.log("2: ", i);
+                        for (let t = 0; t < LINE_DEFINITION; t++) {
+                            const time = t/(LINE_DEFINITION-1);
+
+                            var n1 = pi.clone().multiplyScalar((1-time)**3);
+                            var n2 = pc.clone().multiplyScalar(3*((1-time)**2)*time);
+                            var n3 = pc2.clone().multiplyScalar(3*(1-time)*(time**2));
+                            var n4 = pf.clone().multiplyScalar(time**3);
+
+                            var p = n1.add(n2).add(n3).add(n4);
+                            this.vertices.push(p);
+                        }
+                        i+=2;
+                    }else {
+                        this.vertices.push(pi.clone());
                     }
-                    i++;
-                }else if(curveSize === 2) {
-                    // console.log("2: ", i);
-                    for (let t = 0; t < LINE_DEFINITION; t++) {
-                        const time = t/(LINE_DEFINITION-1);
-
-                        var n1 = pi.clone().multiplyScalar((1-time)**3);
-                        var n2 = pc.clone().multiplyScalar(3*((1-time)**2)*time);
-                        var n3 = pc2.clone().multiplyScalar(3*(1-time)*(time**2));
-                        var n4 = pf.clone().multiplyScalar(time**3);
-
-                        var p = n1.add(n2).add(n3).add(n4);
-                        this.vertices.push(p);
-                    }
-                    i+=2;
                 }else {
                     this.vertices.push(pi.clone());
                 }
-            }else {
-                this.vertices.push(pi.clone());
             }
+            return;
+        }
+
+        for (let i = 0; i < this.points.length; i++) {
+            this.vertices.push(this.points[i]);
         }
         // console.log(this.vertices);
+    }
+
+    showRoadVerticecs(gameWin: GameController) {
+        for (let i = 0; i < this.vertices.length; i++) {
+            const mat = new THREE.MeshStandardMaterial({color: 0x0000ff})
+            const geo = new THREE.SphereGeometry(.25);
+            const mesh = new THREE.Mesh(geo, mat)
+            mesh.position.copy(this.vertices[i])
+
+            gameWin.threeScene.add(mesh);
+        }
     }
 
     isCurve(pos1: position, pos2: position, pos3: position, pos4: position) {
