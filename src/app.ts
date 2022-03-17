@@ -41,7 +41,7 @@ const cameraI = {
     height: CANVAS_HEIGHT,
     depth: DEPTH,
     cameraAngle: 1/4 * Math.PI,
-    cameraDistance: .75,
+    cameraDistance: .9,
     isLocked: true,
     quad: {
         left: -WIDTH*ASPECT_RATIO/1.5,
@@ -64,15 +64,15 @@ const planeI = {
     perlinPower2: 4,
     gridDefinition: GRID_DEFINITION,
     color: {r: 81/255, g: 146/255, b: 89/255},
-    seaLevel: 0
+    seaLevel: .1
 };
 
 const seaI = {
     // seed: 47187,
     // seed: 37055,
-    width: WIDTH,
+    width: WIDTH*10,
     height: HEIGHT,
-    depth: DEPTH,
+    depth: DEPTH*10,
     color: {r: 95/255, g: 152/255, b: 245/255},
     opacity: .75
 };

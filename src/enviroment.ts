@@ -22,6 +22,7 @@ export const DEBUG_INFO = {
         planify: false
     },
     city: {
+        //! Numbers above 4 cause crashes
         number: 4,
         dontLoadObj: false
     }

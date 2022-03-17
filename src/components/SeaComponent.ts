@@ -21,14 +21,12 @@ export default class SeaComponent implements ComponentInterface {
     private material: THREE.Material;
 
     public width: number;
-    public height: number;
     public depth: number;
     private color: THREE.Color;
     private opacity: number;
 
     constructor(seaI: SeaInterface){
         this.width = seaI.width;
-        this.height = seaI.height;
         this.depth = seaI.depth;
         this.opacity = seaI.opacity;
         this.color = new THREE.Color();
@@ -51,6 +49,7 @@ export default class SeaComponent implements ComponentInterface {
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.name = "sea";
+        this.mesh.receiveShadow = true;
         this.mesh.rotation.x = -Math.PI/2;
         this.mesh.position.x = -.5;
         this.mesh.position.z = -.5;

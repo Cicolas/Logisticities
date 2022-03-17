@@ -22,8 +22,8 @@ export default class CameraComponent implements ComponentInterface {
     name: string = "CameraComponent";
     private gw: GameController;
     public camera: THREE.Camera;
-    private perspectiveCam: THREE.Camera;
-    private orthoCam: THREE.Camera;
+    private perspectiveCam: THREE.PerspectiveCamera;
+    private orthoCam: THREE.OrthographicCamera;
 
     private cameraAngle: number;
     public cameraDistance: number;
@@ -54,7 +54,8 @@ export default class CameraComponent implements ComponentInterface {
             this.quad.left,
             this.quad.right,
             this.quad.top,
-            this.quad.bottom
+            this.quad.bottom,
+            -100,
         );
         this.resetOrthoCam();
         this.perspectiveCam = new THREE.PerspectiveCamera(75, this.width / this.height, 0.1, 10000);
@@ -69,6 +70,9 @@ export default class CameraComponent implements ComponentInterface {
         this.orthoCam.position.y = Math.sin(this.cameraAngle)*this.depth*this.cameraDistance;
         this.orthoCam.position.x = Math.sin(this.rotation)*this.depth*this.cameraDistance;
         this.orthoCam.position.z = Math.cos(this.rotation)*this.depth*this.cameraDistance;
+
+        console.log(this.orthoCam);
+
     }
 
     resetPerspectiveCam() {
@@ -148,6 +152,7 @@ export default class CameraComponent implements ComponentInterface {
         }else {
             this.resetOrthoCam();
             this.camera = this.orthoCam;
+            this.gw.threeCamera = this.orthoCam;
         }
         this.gw.threeCamera = this.camera;
     }

@@ -20,11 +20,11 @@ As demandas vão cada vez ficando maiores até o ponto em que é impossível sup
 
 Lista de suprimentos que podem ser necessários ou abundantes
 
-- Eletricidade
-- Água
-- Insumos Primários (Madeira, Pedra)
-- "Industria"
-- Pessoas
+- Eletricidade ⚡
+- Água 💧
+- Insumos Primários (Madeira, Pedra) 🌱
+- "Industria" 🧱
+- Pessoas 👨‍🏭
 
 ## Melhorias
 
@@ -32,13 +32,13 @@ Lista de suprimentos que podem ser necessários ou abundantes
 
 As melhorias que podem ser dadas nas *cidades*
 
-- Cidade Industrial: Mais industrias são produzidos
-- Megalópole: Mais pessoas são produzidas
-- Countryside: Mais insumos primários são produzidos
-- Hub: Rodovias que se ligam a essa cidade são mais rápidas
-- Cidade Maravilhosa: Mais pessoas são necessárias na cidade
-- Porto Seco: Mais caminhões saem da cidade
-- Cidade Pacífica: Limite de carência de Suprimentos maior para aquela cidade
+- Cidade Industrial: Mais industrias são produzidos 🏭
+- Megalópole: Mais pessoas são produzidas 🌇
+- Countryside: Mais insumos primários são produzidos 👨‍🌾
+- Hub: Rodovias que se ligam a essa cidade são mais rápidas 🚅
+- Cidade Maravilhosa: Mais pessoas são necessárias na cidade 🎢
+- Porto Seco: Mais caminhões saem da cidade 🚛
+- Cidade Pacífica: Limite de carência de Suprimentos maior para aquela cidade 🤍
 
 ## Progressão
 

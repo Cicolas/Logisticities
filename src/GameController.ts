@@ -32,8 +32,8 @@ export default class GameController extends GameWindow{
         this.threeScene = new THREE.Scene();
         const fog = new THREE.Fog(
             new Color("black"),
-            Math.cos(-this.cameraAngle)*this.depth*1*this.cameraDistance,
-            Math.cos(-this.cameraAngle)*this.depth*3*this.cameraDistance
+            Math.cos(-this.cameraAngle)*this.cameraDistance*this.depth*1.4,
+            Math.cos(-this.cameraAngle)*this.cameraDistance*this.depth*3
         );
         fog.color = new THREE.Color(0xe8e8e8);
         this.threeScene.background = new THREE.Color(0xe8e8e8);
@@ -60,7 +60,6 @@ export default class GameController extends GameWindow{
         this.dt = (Date.now()-this.lastFrameTime)/1000;
         this.fps = 1/(this.dt);
         this.lastFrameTime = Date.now();
-
 
         this.frame++;
         this.updateGame();
