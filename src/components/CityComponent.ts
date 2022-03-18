@@ -8,13 +8,26 @@ import cityOBJ from "../models/predio.obj";
 import { DEBUG_INFO } from '../enviroment';
 import { Color } from 'three';
 import RoadComponent from './RoadComponent';
-import Suply, { getRandomNeed, startRandomSuply } from '../scripts/suply';
-import { CityInterface } from './UI/box/BoxElement';
+import Suply, { addInventory, getRandomNeed, startRandomSuply, SuplyInventory, trainController } from '../scripts/suply';
+import TrainComponent, { Train } from './TrainComponent';
+import { pullToTop, pushToBottom } from '../scripts/utils';
 
 const CITY_SIZE = 3;
+const TRAIN_INTERVAL = 1;
+const TRAIN_LIMIT = 1;
+const TRAIN_CAPACITY = 1;
+
+export interface CityInterface {
+    UUID: string,
+    cityName: string,
+    roads?: RoadComponent[],
+    productionSuply?: Suply[],
+    trains: Train[],
+}
 
 export default class CityComponent implements ComponentInterface, CityInterface {
     name: string = "CityComponent";
+    private gw: GameController;
     public mesh: THREE.Mesh;
 
     public cityName: string;
@@ -23,11 +36,14 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     public position: THREE.Vector3;
     public coordinates: THREE.Vector2;
     public roads: RoadComponent[] = [];
-    public suplies: Suply[] = [];
+    public productionSuply: Suply[] = [];
+    public inventorySuply: SuplyInventory[] = [];
+    public trains: Train[] = [];
 
+    private lastSent: [CityInterface, RoadComponent, Suply][] = [];
     private plane: PlaneComponent;
     private definiton: number;
-    private n: number = 0;
+    private interval: number = 0;
 
     constructor(coordX: number = 0, coordY: number = 0, definition: number, options){
         this.coordinates = new THREE.Vector2(coordX, coordY);
@@ -38,6 +54,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     }
 
     init(gameWin: GameController) {
+        this.gw = gameWin;
         this.plane = gameWin.getScene().getObject("plano").getComponent(PlaneComponent) as PlaneComponent;
 
         if (DEBUG_INFO.city.dontLoadObj) {
@@ -53,6 +70,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
         }
 
         this.startSuply();
+        this.addTrain();
 
         setTimeout(this.postInit.bind(this), 10, gameWin);
     }
@@ -62,11 +80,22 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     }
 
     update(obj: GObject, gameWin: GameController) {
-        this.n += gameWin.dt;
+        this.interval += gameWin.dt;
 
-        for (let i = 0; i < this.suplies.length; i++) {
-            const element = this.suplies[i];
-            element.quantity += gameWin.dt
+        if (this.interval > TRAIN_INTERVAL) {
+            if (this.roads.length > 0 && this.trains.length > 0) {
+                this.interval = 0;
+                this.sendTrain(trainController(this));
+            }
+        }
+
+        for (let i = 0; i < this.productionSuply.length; i++) {
+            if (!this.productionSuply[i].need) {
+                addInventory(this.inventorySuply, {
+                    id: this.productionSuply[i].id,
+                    quantity: this.productionSuply[i].productionRate*gameWin.dt,
+                })
+            }
         }
     }
 
@@ -118,13 +147,75 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     }
 
     startSuply() {
-        this.suplies.push(startRandomSuply(this.cityName))
+        this.productionSuply.push(startRandomSuply(this))
     }
 
     getNeeds() {
-        const suply = {...getRandomNeed(this.cityName)[1]};
-        suply.need = true;
+        const suply = getRandomNeed(this)[1];
 
-        this.suplies.push(suply);
+        this.productionSuply.push(suply);
+    }
+
+    addTrain() {
+        this.trains.push({
+            velocity: 4,
+            carrying: 0,
+            capacity: 0,
+            suply: null
+        })
+    }
+
+    receiveTrain(t: Train) {
+        addInventory(this.inventorySuply, {
+            id: t.suply.id,
+            quantity: t.carrying
+        })
+    }
+
+    sendTrain(cities: [CityInterface, RoadComponent, Suply][]) {
+        if (cities.length > 0) {
+            var c: [CityInterface, RoadComponent, Suply];
+
+            for (let i = 0; i < cities.length; i++) {
+                if (this.neverSent(cities[i])) {
+                    c = cities[i]
+                }
+            }
+
+            if (!c) {
+                c = this.lastSent[0];
+                pushToBottom(this.lastSent);
+            }
+
+            if (this.trains.length > 0) {
+                const t = this.trains.pop();
+                t.capacity = TRAIN_CAPACITY;
+                t.carrying = 1;
+                t.suply = c[2];
+
+                this.gw.getScene().addObject(
+                    new GObject("trem").addComponent(
+                        new TrainComponent(t, this, c[1])
+                    ).initObject(this.gw)
+                )
+
+                this.addLastSent(c);
+            }
+        }
+    }
+
+    neverSent(item: [CityInterface, RoadComponent, Suply]) {
+        const index = this.lastSent.findIndex(value => {
+            return (value[0].UUID === item[0].UUID && value[2].id === item[2].id)
+        })
+
+        return (index===-1)?true: false;
+    }
+
+    addLastSent(item: [CityInterface, RoadComponent, Suply]) {
+        if (this.neverSent(item)) {
+            this.lastSent.push(item);
+            return;
+        }
     }
 }

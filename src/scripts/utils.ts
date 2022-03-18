@@ -34,3 +34,15 @@ export function getInRandomList<T>(list: [T, boolean][]): [T, boolean] {
 export function Clamp(num, min, max) {
     return Math.min(Math.max(num, min), max)
 };
+
+export function pullToTop<T>(arr: T[], i: number){
+    const item = arr.splice(i, 1)[0];
+
+    arr.unshift(item);
+}
+
+export function pushToBottom<T>(arr: T[]){
+    const item = arr.shift();
+
+    arr.push(item);
+}

@@ -8,16 +8,10 @@ import Suply from '../../../scripts/suply';
 import { position } from '../../../scripts/utils';
 import RoadComponent from '../../RoadComponent';
 import box from './BoxElement.html';
+import { CityInterface } from "../../CityComponent";
 
 const DEFAULT_CONFIG = {
     isCity: false
-}
-
-export interface CityInterface {
-    UUID: string,
-    cityName: string,
-    roads?: RoadComponent[],
-    suplies?: Suply[]
 }
 
 export interface BoxElementOptions {
@@ -59,9 +53,9 @@ export default class BoxElement implements UIObject{
             up.className = up.className+" hidden"
             info.className = up.className+" hidden"
         }else {
-            if (this.options.city.suplies) {
-                for (let i = 0; i < this.options.city.suplies.length; i++) {
-                    const element = this.options.city.suplies[i];
+            if (this.options.city.productionSuply) {
+                for (let i = 0; i < this.options.city.productionSuply.length; i++) {
+                    const element = this.options.city.productionSuply[i];
 
                     this.setSuply(element.need?needs: have, element)
                 }

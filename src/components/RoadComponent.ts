@@ -5,7 +5,7 @@ import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
-import CityComponent from './CityComponent';
+import CityComponent, { CityInterface } from './CityComponent';
 import PlaneComponent from './PlaneComponent';
 import jsAstar from 'javascript-astar';
 import { DEBUG_INFO } from '../enviroment';
@@ -19,7 +19,7 @@ export default class RoadComponent implements ComponentInterface {
     public vertices: THREE.Vector3[];
     public line;
 
-    public cities: [GObject, GObject] = [null, null];
+    public cities: [CityComponent, CityComponent] = [null, null];
     public distance: number = 0;
     private plane: PlaneComponent;
     private fromName: string;
@@ -44,8 +44,8 @@ export default class RoadComponent implements ComponentInterface {
 
     init(gameWin: GameController) {
         this.plane = gameWin.getScene().getObject("plano").getComponent(PlaneComponent) as PlaneComponent;
-        this.cities[0] = gameWin.getScene().getObject(this.fromName);
-        this.cities[1] = gameWin.getScene().getObject(this.toName);
+        this.cities[0] = gameWin.getScene().getObject(this.fromName).getComponent(CityComponent) as CityComponent;
+        this.cities[1] = gameWin.getScene().getObject(this.toName).getComponent(CityComponent) as CityComponent;
 
         if (this.updateCities()) {
             const material = new THREE.LineBasicMaterial({
@@ -53,8 +53,8 @@ export default class RoadComponent implements ComponentInterface {
                 linejoin: "bevel",
             })
 
-            const cc1 = this.cities[0].getComponent(CityComponent) as CityComponent;
-            const cc2 = this.cities[1].getComponent(CityComponent) as CityComponent;
+            const cc1 = this.cities[0];
+            const cc2 = this.cities[1];
 
             const cc1Pos = new THREE.Vector2().copy(cc1.coordinates);
             const cc2Pos = new THREE.Vector2().copy(cc2.coordinates);
@@ -90,11 +90,6 @@ export default class RoadComponent implements ComponentInterface {
     }
 
     postInit(gameWin: GameController) {
-        gameWin.getScene().addObject(
-            new GObject("train 1").addComponent(
-                new TrainComponent(this)
-            ).initObject(gameWin)
-        )
     }
 
     update(obj: GObject, gameWin: GameWindow) {
@@ -243,8 +238,8 @@ export default class RoadComponent implements ComponentInterface {
     }
 
     updateCities(): boolean {
-        const conf1 = (this.cities[0].getComponent(CityComponent) as CityComponent).addRoad(this);
-        const conf2 = (this.cities[1].getComponent(CityComponent) as CityComponent).addRoad(this);
+        const conf1 = (this.cities[0]).addRoad(this);
+        const conf2 = (this.cities[1]).addRoad(this);
         return conf1 && conf2;
     }
 }
