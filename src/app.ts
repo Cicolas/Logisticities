@@ -15,6 +15,7 @@ import UI from './lib/TELESCOPE/UI';
 import loading from './page/loading.html';
 import BoxElement from './components/UI/box/BoxElement';
 import UpgradeElement from './components/UI/upgradeSelection/UpgradeElement';
+import emojiMap from './scripts/emojiMap';
 
 if (!DEBUG_INFO.camera.dontChangeSize) {
     document.body.classList.add("resizable");
@@ -131,11 +132,35 @@ export function createNewScene() {
         new GObject("UIManager")
         .addComponent(_UI
             // .addElement(
-            // new BoxElement("Rosario", "Uma cidade normal, nada de especial", {isCity: true,
+            // new BoxElement("Rosario", "Uma cidade normal, nada de especial", {
+            //     isCity: true,
             //     city: {
             //         UUID: "100",
-            //         cityName: "Rosario"
-            //     }
+            //         cityName: "Rosario",
+            //         trains: [],
+            //         productionSuply: [
+            //             {
+            //                 id: 0,
+            //                 productionRate: 1,
+            //                 name: "Power",
+            //                 emoji: emojiMap.power,
+            //                 need: false
+            //             },
+            //             {
+            //                 id: 1,
+            //                 productionRate: 1,
+            //                 name: "Industry",
+            //                 emoji: emojiMap.industry,
+            //                 need: true
+            //             }
+            //         ]
+            //     },
+            //     cityInvetory: [
+            //         {
+            //             id: 0,
+            //             quantity: 1
+            //         },
+            //     ]
             // }),
             // {
             //     position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},

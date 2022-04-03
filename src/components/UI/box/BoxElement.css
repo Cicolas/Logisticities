@@ -41,7 +41,7 @@
 }
 
 .circle {
-    overflow: hidden;
+    overflow: visible;
     /* position: absolute; */
     background-color: #ffffff33;
     border-width: 2px;

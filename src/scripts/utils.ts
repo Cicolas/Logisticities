@@ -46,3 +46,10 @@ export function pushToBottom<T>(arr: T[]){
 
     arr.push(item);
 }
+
+export function formatNumber(number: number, minDec: number, maxDec: number){
+    return number.toLocaleString(undefined, {
+        minimumFractionDigits: minDec,
+        maximumFractionDigits: maxDec
+    })
+}

@@ -4,8 +4,8 @@ import GameController from '../../../GameController';
 import UI from '../../../lib/TELESCOPE/UI';
 import UIObject from '../../../lib/TELESCOPE/UIObject';
 import emojiMap from '../../../scripts/emojiMap';
-import Suply from '../../../scripts/suply';
-import { position } from '../../../scripts/utils';
+import Suply, { SuplyInventory } from '../../../scripts/suply';
+import { formatNumber, position } from '../../../scripts/utils';
 import RoadComponent from '../../RoadComponent';
 import box from './BoxElement.html';
 import { CityInterface } from "../../CityComponent";
@@ -16,7 +16,8 @@ const DEFAULT_CONFIG = {
 
 export interface BoxElementOptions {
     isCity: boolean,
-    city?: CityInterface
+    city?: CityInterface,
+    cityInvetory?: SuplyInventory[]
 }
 
 export default class BoxElement implements UIObject{
@@ -25,10 +26,12 @@ export default class BoxElement implements UIObject{
     public elem: HTMLElement;
     public position: position = {x: -Infinity, y: -Infinity};
 
+    private isToggled: boolean = false;
     private options: BoxElementOptions;
     private frame: number = 0;
     private title: string = "";
     private text: string = "";
+    private suplies: [HTMLElement, Suply][] = [];
 
     constructor(title: string, text: string, option: BoxElementOptions = DEFAULT_CONFIG){
         this.title = title;
@@ -70,6 +73,8 @@ export default class BoxElement implements UIObject{
     update(gameWin: GameController) {
         this.elem.style.left = this.position.x+"px";
         this.elem.style.top = this.position.y+"px";
+
+        this.updateValues();
     };
 
     destroy() {
@@ -84,12 +89,36 @@ export default class BoxElement implements UIObject{
         }, 90)
     };
 
+    updateValues() {
+        for (let i = 0; i < this.suplies.length; i++) {
+            const element = this.suplies[i];
+            const number = this.suplies[i][0].getElementsByClassName("$NUMBER")[0];
+            if (!element[1].need) {
+                if (this.options.cityInvetory) {
+                    number.innerHTML = formatNumber(this.options.cityInvetory.find(
+                        (value) => element[1].id === value.id
+                    ).quantity, 0, 0).toString();
+                }
+            }else {
+                number.innerHTML = formatNumber((element[1].needNumber??0), 0, 0).toString();
+            }
+        }
+    }
+
     setSuply(div: Element, suply: Suply) {
+        const d = document.createElement("div");
+        d.classList.add("circle", "circle-24px");
         const html = `
-            <div class="circle circle-24px">
-                ${suply.emoji}
+            ${suply.emoji}
+            <div class="$NUMBER">
             </div>
-        `
-        div.innerHTML += html;
+        `;
+        d.innerHTML += html;
+        div.appendChild(d);
+
+        this.suplies.push([d, suply]);
+    }
+
+    public toggle() {
     }
 }

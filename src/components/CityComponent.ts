@@ -8,14 +8,14 @@ import cityOBJ from "../models/predio.obj";
 import { DEBUG_INFO } from '../enviroment';
 import { Color } from 'three';
 import RoadComponent from './RoadComponent';
-import Suply, { addInventory, getRandomNeed, startRandomSuply, SuplyInventory, trainController } from '../scripts/suply';
+import Suply, { addInventory, getFromInventory, getRandomNeed, startRandomSuply, SuplyInventory, trainController } from '../scripts/suply';
 import TrainComponent, { Train } from './TrainComponent';
 import { pullToTop, pushToBottom } from '../scripts/utils';
 
 const CITY_SIZE = 3;
 const TRAIN_INTERVAL = 1;
 const TRAIN_LIMIT = 1;
-const TRAIN_CAPACITY = 1;
+const TRAIN_CAPACITY = 10;
 
 export interface CityInterface {
     UUID: string,
@@ -95,6 +95,8 @@ export default class CityComponent implements ComponentInterface, CityInterface 
                     id: this.productionSuply[i].id,
                     quantity: this.productionSuply[i].productionRate*gameWin.dt,
                 })
+            }else {
+                this.productionSuply[i].needNumber += this.productionSuply[i].productionRate*gameWin.dt;
             }
         }
     }
@@ -152,6 +154,8 @@ export default class CityComponent implements ComponentInterface, CityInterface 
 
     getNeeds() {
         const suply = getRandomNeed(this)[1];
+        suply.needNumber = 0;
+        suply.productionRate = 2;
 
         this.productionSuply.push(suply);
     }
@@ -166,6 +170,18 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     }
 
     receiveTrain(t: Train) {
+        const index = this.productionSuply.find(value => {
+            return (
+                value.need === true
+                && value.id === t.suply.id
+            )
+        });
+
+        if (index) {
+            index.needNumber -= t.carrying;
+            // console.log(this.productionSuply);
+        }
+
         addInventory(this.inventorySuply, {
             id: t.suply.id,
             quantity: t.carrying
@@ -190,7 +206,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
             if (this.trains.length > 0) {
                 const t = this.trains.pop();
                 t.capacity = TRAIN_CAPACITY;
-                t.carrying = 1;
+                t.carrying = getFromInventory(this.inventorySuply, c[2], c[0], t.capacity);
                 t.suply = c[2];
 
                 this.gw.getScene().addObject(

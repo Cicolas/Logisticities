@@ -50,6 +50,7 @@ export default interface Suply {
     name: string;
     emoji: string;
     need: boolean;
+    needNumber?: number;
 }
 
 export interface SuplyInventory {
@@ -98,6 +99,41 @@ export function addInventory(inv: SuplyInventory[], suply: SuplyInventory){
     }else {
         inv.push(suply);
     }
+}
+
+export function getFromInventory(inv: SuplyInventory[], suply: Suply, cityToSend: CityInterface, capacity: number) {
+    const index = inv.find(value => value.id === suply.id);
+    const need = needs.find(value => {
+        return (value[1].id === suply.id
+        && value[0].UUID === cityToSend.UUID)
+    })[1];
+
+    var number = 0;
+
+    if (need) {
+        if (need.needNumber < index.quantity) {
+            if (need.needNumber < capacity) {
+                number = need.needNumber;
+                index.quantity -= need.needNumber
+
+            }else {
+                number = capacity;
+                index.quantity -= capacity;
+            }
+        }else if(need.needNumber >= index.quantity) {
+            if (index.quantity < capacity) {
+                number = index.quantity;
+                index.quantity = 0;
+                console.log(index.quantity);
+            }else {
+                number = capacity;
+                index.quantity -= capacity
+                console.log(capacity);
+            }
+        }
+    }
+
+    return number;
 }
 
 export function trainController(citySending: CityInterface): [CityInterface, RoadComponent, Suply][] {
