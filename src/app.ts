@@ -78,7 +78,7 @@ const seaI = {
     height: HEIGHT,
     depth: DEPTH*10,
     color: {r: 95/255, g: 152/255, b: 245/255},
-    opacity: .75
+    opacity: 1
 };
 
 var _UI: UIManager;

@@ -2,6 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
+    mode: "development",
     entry: '../src/app.ts',
     output: {
         path: path.resolve(__dirname, '../dist'),
@@ -46,8 +47,7 @@ module.exports = {
         },
         compress: false,
         historyApiFallback: false,
-        hot: true,
-        overlay: true
+        hot: true
     },
 
     plugins: [new HtmlWebpackPlugin()]

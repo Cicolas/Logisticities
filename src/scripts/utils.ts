@@ -7,7 +7,8 @@ export interface Vertex {
 export interface color {
     r: number,
     g: number,
-    b: number
+    b: number,
+    a?: number
 }
 
 export interface position {
@@ -34,6 +35,10 @@ export function getInRandomList<T>(list: [T, boolean][]): [T, boolean] {
 export function Clamp(num, min, max) {
     return Math.min(Math.max(num, min), max)
 };
+
+export function InverseLerp(min, max, num) {
+    return Clamp((num - min) / (max - min), 0, 1);
+}
 
 export function pullToTop<T>(arr: T[], i: number){
     const item = arr.splice(i, 1)[0];

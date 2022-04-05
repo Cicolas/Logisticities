@@ -155,7 +155,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     getNeeds() {
         const suply = getRandomNeed(this)[1];
         suply.needNumber = 0;
-        suply.productionRate = 2;
+        suply.productionRate = 1;
 
         this.productionSuply.push(suply);
     }

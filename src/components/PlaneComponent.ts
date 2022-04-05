@@ -5,9 +5,13 @@ import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
-import { color, Vertex } from '../scripts/utils';
+import { color, InverseLerp, position, Vertex } from '../scripts/utils';
 const perlin = require('../lib/perlin').noise;
 
+const FALLOUT = {
+    min: .1,
+    max: .9
+}
 const MAX_STEPNESS = 17;
 
 export interface PlaneInterface {
@@ -67,6 +71,8 @@ export default class PlaneComponent implements ComponentInterface {
 
         const m1 = this.generatePerlin(0, 0, this.perlinScale1, this.seed);
         const m2 = this.generatePerlin(0, 0, this.perlinScale2, this.seed+10);
+        const fallout = this.createFallout(FALLOUT.min, FALLOUT.max);
+
         var highestPeak = 0;
 
         for (let x = 0; x < this.width; x++) {
@@ -78,6 +84,7 @@ export default class PlaneComponent implements ComponentInterface {
 
                 m1[x][z] *= this.height;
                 m2[x][z] *= this.height;
+                this.map[x][z] *= DEBUG_INFO.noMask?1:fallout[x][z];
                 this.map[x][z] *= this.height;
                 this.map[x][z] -= this.seaLevel;
 
@@ -95,7 +102,8 @@ export default class PlaneComponent implements ComponentInterface {
         });
         this.material.visible = true;
 
-        const shadow = this.rectangleGeometry(this.map, highestPeak, true);
+        //*OPTIMIZATION: De-duplicate this.rectangleGeometry
+        const shadow = this.geometry;
         const shadowMat = new THREE.MeshPhongMaterial({
             depthFunc: THREE.EqualDepth,
             transparent: true,
@@ -128,7 +136,7 @@ export default class PlaneComponent implements ComponentInterface {
 
     draw (context?: THREE.Scene) {};
 
-    rectangleGeometry(map: number[][], highestPeak: number, isShadow: boolean = false): BufferGeometry {
+    rectangleGeometry(map: number[][], highestPeak: number): BufferGeometry {
         const geometry = new THREE.BufferGeometry();
 
         const size = ((this.width-1) * (this.depth-1))*6*3;
@@ -141,53 +149,51 @@ export default class PlaneComponent implements ComponentInterface {
         for (let x = 0; x < map.length-1; x++) {
             for (let z = 0; z < map[x].length-1; z++) {
                 verticesArr.push(
-                    x+1, map[z+1][x+1], z+1,
-                    x+1, map[z][x+1],   z,
-                    x,   map[z][x],     z,
+                    x+1-(this.width/2), map[z+1][x+1], z+1-(this.depth/2),
+                    x+1-(this.width/2), map[z][x+1],   z-(this.depth/2),
+                    x-(this.width/2),   map[z][x],     z-(this.depth/2),
 
-                    x,   map[z+1][x],   z+1,
-                    x+1, map[z+1][x+1], z+1,
-                    x,   map[z][x],     z
+                    x-(this.width/2),   map[z+1][x],   z+1-(this.depth/2),
+                    x+1-(this.width/2), map[z+1][x+1], z+1-(this.depth/2),
+                    x-(this.width/2),   map[z][x],     z-(this.depth/2)
                 )
 
-                if (!isShadow) {
-                    const colors = [
-                        this.getColor(map[z+1][x+1], highestPeak),
-                        this.getColor(map[z][x+1], highestPeak),
-                        this.getColor(map[z][x], highestPeak),
+                const colors = [
+                    this.getColor(map[z+1][x+1], highestPeak),
+                    this.getColor(map[z][x+1], highestPeak),
+                    this.getColor(map[z][x], highestPeak),
 
-                        this.getColor(map[z+1][x], highestPeak),
-                    ]
+                    this.getColor(map[z+1][x], highestPeak),
+                ]
 
-                    if (DEBUG_INFO.showWireframe) {
-                        colorArr.push(
-                            map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
-                            map[z][x+1]/highestPeak, map[z][x+1]/highestPeak, map[z][x+1]/highestPeak,
-                            map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak,
+                if (DEBUG_INFO.showWireframe) {
+                    colorArr.push(
+                        map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
+                        map[z][x+1]/highestPeak, map[z][x+1]/highestPeak, map[z][x+1]/highestPeak,
+                        map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak,
 
-                            map[z+1][x]/highestPeak, map[z+1][x]/highestPeak, map[z+1][x]/highestPeak,
-                            map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
-                            map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak
-                        )
-                    }else {
-                        colorArr.push(
-                            colors[0].r, colors[0].g, colors[0].b,
-                            colors[0].r, colors[0].g, colors[0].b,
-                            colors[0].r, colors[0].g, colors[0].b,
+                        map[z+1][x]/highestPeak, map[z+1][x]/highestPeak, map[z+1][x]/highestPeak,
+                        map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
+                        map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak
+                    )
+                }else {
+                    colorArr.push(
+                        colors[0].r, colors[0].g, colors[0].b,
+                        colors[0].r, colors[0].g, colors[0].b,
+                        colors[0].r, colors[0].g, colors[0].b,
 
-                            colors[0].r, colors[0].g, colors[0].b,
-                            colors[0].r, colors[0].g, colors[0].b,
-                            colors[0].r, colors[0].g, colors[0].b,
+                        colors[0].r, colors[0].g, colors[0].b,
+                        colors[0].r, colors[0].g, colors[0].b,
+                        colors[0].r, colors[0].g, colors[0].b,
 
-                            // colors[0].r, colors[0].g, colors[0].b,
-                            // colors[1].r, colors[1].g, colors[1].b,
-                            // colors[2].r, colors[2].g, colors[2].b,
+                        // colors[0].r, colors[0].g, colors[0].b,
+                        // colors[1].r, colors[1].g, colors[1].b,
+                        // colors[2].r, colors[2].g, colors[2].b,
 
-                            // colors[3].r, colors[3].g, colors[3].b,
-                            // colors[0].r, colors[0].g, colors[0].b,
-                            // colors[2].r, colors[2].g, colors[2].b,
-                        )
-                    }
+                        // colors[3].r, colors[3].g, colors[3].b,
+                        // colors[0].r, colors[0].g, colors[0].b,
+                        // colors[2].r, colors[2].g, colors[2].b,
+                    )
                 }
             }
         }
@@ -195,11 +201,8 @@ export default class PlaneComponent implements ComponentInterface {
         vertices.set(verticesArr);
         colors.set(colorArr);
         geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-        if (!isShadow) {
-            geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-        }
+        geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
         geometry.computeVertexNormals();
-        geometry.translate(-this.width/2, 0, -this.depth/2);
 
         return geometry;
     }
@@ -213,7 +216,7 @@ export default class PlaneComponent implements ComponentInterface {
             m[x] = [];
             for (let z = 0; z < this.depth; z++) {
                 // m[x][z] = (perlin.simplex2(x/scale+offsetx, z/scale+offsety)+1)/2;
-                m[x][z] = DEBUG_INFO.map.planify?0:(perlin.perlin2(x/scale+offsetx, z/scale+offsety)+1)/2;
+                m[x][z] = DEBUG_INFO.map.planify?.9:(perlin.perlin2(x/scale+offsetx, z/scale+offsety)+1)/2;
             }
         }
 
@@ -221,7 +224,7 @@ export default class PlaneComponent implements ComponentInterface {
     }
 
     //* Doesn't work well for non integer coords
-    getPositionByCoordinates(coord: THREE.Vector2): THREE.Vector3 {
+    getPositionByCoordinates(coord: position): THREE.Vector3 {
         var posVec = new THREE.Vector3();
         posVec.x = Math.round(coord.x);
         posVec.z = Math.round(coord.y);
@@ -231,7 +234,7 @@ export default class PlaneComponent implements ComponentInterface {
 
         return posVec;
     }
-    getVertexByCoordinates(coord: THREE.Vector2): Vertex {
+    getVertexByCoordinates(coord: position): Vertex {
         var posVec = new THREE.Vector3();
         var normVec = new THREE.Vector3();
 
@@ -250,7 +253,7 @@ export default class PlaneComponent implements ComponentInterface {
 
         return v;
     }
-    getGridByCoordinates(coord: THREE.Vector2): THREE.Vector3 {
+    getGridByCoordinates(coord: position): THREE.Vector3 {
         var posVec = new THREE.Vector3();
         posVec.x = (coord.x/(this.width/2-.5))*(this.gridDefinition/2);
         posVec.y = (coord.y/(this.depth/2-.5))*(this.gridDefinition/2);
@@ -261,14 +264,13 @@ export default class PlaneComponent implements ComponentInterface {
         console.log(this.grid[posVec.x][posVec.y].position);
 
         return this.grid[posVec.x][posVec.y].position;
-        return this.getPositionByCoordinates(coord);
     }
 
     generateGrid() {
         for (let i = 0; i < this.gridDefinition; i++) {
             this.grid[i] = [];
             for (let j = 0; j < this.gridDefinition; j++) {
-                const p = new THREE.Vector2();
+                const p = {x: 0, y: 0};
                 // p.x = ((i/(this.gridDefinition-1))*2-1)*(this.width-1)/2-.5;
                 p.x = ((i/(this.gridDefinition-1))*2-1)*(this.width/2-.5);
                 p.y = ((j/(this.gridDefinition-1))*2-1)*(this.depth/2-.5);
@@ -277,6 +279,7 @@ export default class PlaneComponent implements ComponentInterface {
                 p.y = Math.floor(p.y);
 
                 this.grid[i][j] = this.getVertexByCoordinates(p);
+                // this.grid[i][j] = {position: this.getPositionByCoordinates(p), normal: new THREE.Vector3(0, 1, 0), apropiated: true};
             }
         }
     }
@@ -345,17 +348,53 @@ export default class PlaneComponent implements ComponentInterface {
 
     getColor(height: number, highestPeak: number): color {
         const actualHeight = (height*highestPeak);
+
         // if (height*highestPeak < 0) {
         //     return {r: 95/255, g: 152/255, b: 245/255}
         // }else
-        if (actualHeight < this.height/this.perlinPower1/20) {
+        if (actualHeight < this.height/80) {
             return {r: 240/255, g: 187/255, b: 98/255}
-        }else if (actualHeight < this.height/this.perlinPower1/2) {
+        }else if (actualHeight < this.height/4) {
             return {r: 81/255, g: 146/255, b: 89/255}
-        }else if (actualHeight < this.height/this.perlinPower1*2) {
+        }else if (actualHeight < this.height) {
             return {r: 100/255, g: 102/255, b: 107/255}
         }else {
-            return {r: 1, g: 1, b: 1}
+            return {r: 1, g: 1, b: 1, a: 0}
         }
+    }
+
+    createFallout(falloutStart: number, falloutEnd: number) {
+        const falloutMap: number[][] = [];
+
+        for (let x = 0; x < this.width; x++) {
+            falloutMap[x] = [];
+            for (let z = 0; z < this.depth; z++) {
+                const _x = (x-(this.width/2-.5))/(this.width/2-.5);
+                const _y = (z-(this.height/2-.5))/(this.height/2-.5);
+
+                const pos = new THREE.Vector2(_x, _y);
+                const f = pos.length();
+
+                // const f = Math.max(Math.abs(_x), Math.abs(_y));
+
+                if (f < falloutStart) {
+                    falloutMap[x][z] = 1;
+                }else if(f > falloutEnd){
+                    falloutMap[x][z] = 0;
+                }else {
+                    falloutMap[x][z] = Math.abs(InverseLerp(falloutStart, falloutEnd, f)-1);
+                }
+
+                // falloutMap[x][z] = f;
+
+                // falloutMap[x][z] = Math.abs((new THREE.Vector2(_x, _y)).length()-Math.SQRT2);
+                // falloutMap[x][z] *= falloutForce;
+                // falloutMap[x][z] -= falloutOffset;
+                // console.log(falloutMap[x][z]);
+
+            }
+        }
+
+        return falloutMap;
     }
 }

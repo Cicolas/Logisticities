@@ -1,9 +1,10 @@
 export const DEBUG_INFO = {
-    seed: 37055,
+    seed: -1,
 
     //plane related show/hide
     showGrid: false,
     showWireframe: false,
+    noMask: false,
 
     //engine related show/hide
     hideFog: false,
@@ -25,10 +26,8 @@ export const DEBUG_INFO = {
         planify: false
     },
     city: {
-        //! Numbers above 4 cause crashes
+        //! Numbers above 4 cause crashes due to name generator
         number: 4,
         dontLoadObj: false
     }
 }
-
-export const production = false;

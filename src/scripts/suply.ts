@@ -124,7 +124,6 @@ export function getFromInventory(inv: SuplyInventory[], suply: Suply, cityToSend
             if (index.quantity < capacity) {
                 number = index.quantity;
                 index.quantity = 0;
-                console.log(index.quantity);
             }else {
                 number = capacity;
                 index.quantity -= capacity
