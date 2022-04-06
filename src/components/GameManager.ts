@@ -12,6 +12,7 @@ import CityComponent from './CityComponent';
 import PlaneComponent from './PlaneComponent';
 import RoadComponent from './RoadComponent';
 import BoxElement from './UI/box/BoxElement';
+import SliderElement from './UI/slider/SliderElement';
 import UIManager from './UIManager';
 
 var ROAD_UUID = 100;
@@ -33,6 +34,7 @@ export default class GameManager implements ComponentInterface {
     private citySelected: number = -1;
 
     private box: BoxElement;
+    private slider: SliderElement;
 
     constructor(definition, mapSize, gridDefinition) {
         this.definition = definition;
@@ -51,7 +53,18 @@ export default class GameManager implements ComponentInterface {
         this.gw = gameWin;
         this.UIMgr = this.gw.getScene().getObject("UIManager").getComponent(UIManager) as UIManager;
 
-        setTimeout(this.postInit.bind(this), 10, gameWin);
+        //!resize isn't working
+        this.slider = new SliderElement(.5);
+        this.UIMgr.addElement(this.slider,  {
+            position: {x: 400, y: gameWin.height-25},
+            size: {x: gameWin.width-800, y: 10}
+        })
+
+        setTimeout(this.postInit.bind(this, gameWin), 10, gameWin);
+    }
+
+    postInit(gameWin: GameController) {
+        this.generateCity(gameWin);
 
         gameWin.canvas.addEventListener("click", this.mouseClick.bind(this));
         gameWin.canvas.addEventListener("mousemove", this.mouseMove);
@@ -101,10 +114,6 @@ export default class GameManager implements ComponentInterface {
 
     mouseMove = (e: MouseEvent) => {
         this.getMousePosition(e);
-    }
-
-    postInit(gameWin) {
-        this.generateCity(gameWin);
     }
 
     update(obj: GObject, gameWin: GameController) {

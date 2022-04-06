@@ -170,16 +170,15 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     }
 
     receiveTrain(t: Train) {
-        const index = this.productionSuply.find(value => {
+        const suply = this.productionSuply.find(value => {
             return (
                 value.need === true
                 && value.id === t.suply.id
             )
         });
 
-        if (index) {
-            index.needNumber -= t.carrying;
-            // console.log(this.productionSuply);
+        if (suply) {
+            suply.needNumber -= t.carrying;
         }
 
         addInventory(this.inventorySuply, {

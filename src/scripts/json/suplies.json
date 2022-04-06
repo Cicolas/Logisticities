@@ -1,0 +1,28 @@
+{
+    "suplies": [{
+            "id": 0,
+            "name": "Power",
+            "emoji": "&#x26A1"
+        },
+        {
+            "id": 1,
+            "name": "Water",
+            "emoji": "&#x1F4A7"
+        },
+        {
+            "id": 2,
+            "name": "Goods",
+            "emoji": "&#x1F331"
+        },
+        {
+            "id": 3,
+            "name": "Industry",
+            "emoji": "&#x1F9F1"
+        },
+        {
+            "id": 4,
+            "name": "Persons",
+            "emoji": "&#x1F477"
+        }
+    ]
+}

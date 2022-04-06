@@ -1,5 +1,5 @@
 export const DEBUG_INFO = {
-    seed: -1,
+    seed: 14405,
 
     //plane related show/hide
     showGrid: false,
@@ -20,10 +20,11 @@ export const DEBUG_INFO = {
     camera: {
         topDown: false,
         emitLight: false,
-        dontChangeSize: true,
+        dontChangeSize: false,
     },
     map: {
-        planify: false
+        planify: false,
+        fastLoad: false
     },
     city: {
         //! Numbers above 4 cause crashes due to name generator

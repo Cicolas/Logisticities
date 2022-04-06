@@ -13,9 +13,7 @@ import SeaComponent from './components/SeaComponent';
 import UIManager from './components/UIManager';
 import UI from './lib/TELESCOPE/UI';
 import loading from './page/loading.html';
-import BoxElement from './components/UI/box/BoxElement';
-import UpgradeElement from './components/UI/upgradeSelection/UpgradeElement';
-import emojiMap from './scripts/emojiMap';
+import SliderElement from './components/UI/slider/SliderElement';
 
 if (!DEBUG_INFO.camera.dontChangeSize) {
     document.body.classList.add("resizable");
@@ -39,6 +37,7 @@ const WIDTH = 8*DEFINITION*MAPSIZE;
 const DEPTH = 8*DEFINITION*MAPSIZE;
 const HEIGHT = 8*DEFINITION;
 const GRID_DEFINITION = 20*(MAPSIZE);
+console.log((2-((MAPSIZE-1)*.5)));
 
 const cameraI = {
     width: CANVAS_WIDTH,
@@ -48,10 +47,10 @@ const cameraI = {
     cameraDistance: .9,
     isLocked: true,
     quad: {
-        left: -WIDTH/1.5,
-        right: WIDTH/1.5,
-        top: HEIGHT/1.5,
-        bottom: -HEIGHT/1.5,
+        left: -WIDTH/2,
+        right: WIDTH/2,
+        top: HEIGHT/(2-((MAPSIZE-1)*.5)),
+        bottom: -HEIGHT/(2-((MAPSIZE-1)*.5))
     }
 }
 
@@ -91,10 +90,13 @@ const gw: GameController = new GameController("", cameraI)
         CANVAS_WIDTH,
         CANVAS_HEIGHT,
         new UI(gameWin.canvas, CANVAS_WIDTH, CANVAS_HEIGHT, gameWin)
-    ).addElement({name: "loading", html: loading, init: () => {}}, {
-        position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},
-        time: 100
-    });
+    ).addElement(
+        { name: "loading", html: loading, init: () => {} },
+        {
+            position: { x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2 },
+            time: 100,
+        }
+    );
 
     gameWin.getScene().addObject(
         new GObject("UIManager")
@@ -131,6 +133,12 @@ export function createNewScene() {
     ).initScene(gw).addObject(
         new GObject("UIManager")
         .addComponent(_UI
+            // .addElement(
+            //     new SliderElement(0), {
+            //         position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},
+            //         size: {x: 300, y: 20}
+            //     }
+            // )
             // .addElement(
             // new BoxElement("Rosario", "Uma cidade normal, nada de especial", {
             //     isCity: true,

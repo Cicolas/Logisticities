@@ -24,7 +24,11 @@ export default class CameraMovement implements ComponentInterface {
     init(gameWin: GameController) {
         this.gw = gameWin;
 
-        setTimeout(this.postInit.bind(this), 100);
+        setTimeout(this.postInit.bind(this, gameWin), 100);
+    }
+
+    postInit(gameWin: GameController) {
+        this.camera = this.gw.getScene().getObject("camera").getComponent(CameraComponent) as CameraComponent;
 
         gameWin.canvas.addEventListener("mousedown", this.mouseDown);
         gameWin.canvas.addEventListener("mousemove", this.mouseMove);
@@ -32,10 +36,6 @@ export default class CameraMovement implements ComponentInterface {
         gameWin.canvas.addEventListener("wheel", this.mouseZoom);
         document.addEventListener("keydown", this.keyEnter.bind(this));
         document.addEventListener("keyup", this.keyExit.bind(this));
-    }
-
-    postInit() {
-        this.camera = this.gw.getScene().getObject("camera").getComponent(CameraComponent) as CameraComponent;
     }
 
     mouseMove = (e) => {

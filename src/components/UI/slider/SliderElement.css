@@ -1,0 +1,13 @@
+.SliderElement {
+    background-color: #29282ebe;
+    border-radius: 10px;
+    backdrop-filter: blur(2px) brightness(50%);
+    overflow: hidden;
+}
+
+.SliderElement>.slider {
+    background: #fff;
+    width: 50%;
+    height: 100%;
+    border-radius: 10px;
+}

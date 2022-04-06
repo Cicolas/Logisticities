@@ -2,44 +2,9 @@ import { CityInterface } from "../components/CityComponent";
 import RoadComponent from "../components/RoadComponent";
 import emojiMap from "./emojiMap";
 import { getInRandomList } from "./utils";
+import sup from './json/suplies.json';
 
-const suplies: [Suply, boolean][] = [
-    [{
-        id: 0,
-        productionRate: 1,
-        name: "Power",
-        emoji: emojiMap.power,
-        need: false
-    }, false],
-    [{
-        id: 1,
-        productionRate: 1,
-        name: "Water",
-        emoji: emojiMap.water,
-        need: false
-    }, false],
-    [{
-        id: 2,
-        productionRate: 1,
-        name: "Goods",
-        emoji: emojiMap.goods,
-        need: false
-    }, false],
-    [{
-        id: 3,
-        productionRate: 1,
-        name: "Industry",
-        emoji: emojiMap.industry,
-        need: false
-    }, false],
-    [{
-        id: 4,
-        productionRate: 1,
-        name: "Persons",
-        emoji: emojiMap.persons,
-        need: false
-    }, false],
-]
+var supliesTaken: [Suply, boolean][] = [];
 
 var production: [CityInterface, Suply][] = [];
 var needs: [CityInterface, Suply][] = [];
@@ -58,13 +23,27 @@ export interface SuplyInventory {
     quantity: number;
 }
 
+startSuplies();
+function startSuplies() {
+    sup.suplies.forEach(value => {
+        const obj: Suply = {
+            id: value.id,
+            productionRate: 1,
+            name: value.name,
+            emoji: value.emoji,
+            need: false
+        }
+
+        supliesTaken.push([obj, false]);
+    });
+}
+
 export function startRandomSuply(city: CityInterface) {
-    var s = getInRandomList<Suply>(suplies);
+    var s = getInRandomList<Suply>(supliesTaken);
     s[1] = true;
 
     const prodSup = {...s[0]};
     production.push([city, prodSup]);
-    // console.log(s[0]);
 
     return prodSup;
 }
@@ -73,8 +52,8 @@ export function resetSuply(){
     production = [];
     needs = [];
 
-    for (let i = 0; i < suplies.length; i++) {
-        const c = suplies[i];
+    for (let i = 0; i < supliesTaken.length; i++) {
+        const c = supliesTaken[i];
         c[1] = false;
     }
 }

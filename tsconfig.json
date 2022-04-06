@@ -9,6 +9,7 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "outDir": "lib/",
-    "declaration": true
+    "declaration": true,
+    "resolveJsonModule": true
   }
 }

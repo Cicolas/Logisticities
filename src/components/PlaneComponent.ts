@@ -12,7 +12,7 @@ const FALLOUT = {
     min: .1,
     max: .9
 }
-const MAX_STEPNESS = 17;
+const MAX_STEPNESS = 15;
 
 export interface PlaneInterface {
     seed: number;
@@ -102,7 +102,6 @@ export default class PlaneComponent implements ComponentInterface {
         });
         this.material.visible = true;
 
-        //*OPTIMIZATION: De-duplicate this.rectangleGeometry
         const shadow = this.geometry;
         const shadowMat = new THREE.MeshPhongMaterial({
             depthFunc: THREE.EqualDepth,
@@ -267,23 +266,24 @@ export default class PlaneComponent implements ComponentInterface {
     }
 
     generateGrid() {
-        for (let i = 0; i < this.gridDefinition; i++) {
+        for (let i = 0; i <= this.gridDefinition; i++) {
             this.grid[i] = [];
-            for (let j = 0; j < this.gridDefinition; j++) {
+            for (let j = 0; j <= this.gridDefinition; j++) {
                 const p = {x: 0, y: 0};
-                // p.x = ((i/(this.gridDefinition-1))*2-1)*(this.width-1)/2-.5;
-                p.x = ((i/(this.gridDefinition-1))*2-1)*(this.width/2-.5);
-                p.y = ((j/(this.gridDefinition-1))*2-1)*(this.depth/2-.5);
+                p.x = ((i/(this.gridDefinition))*2-1)*(this.width/2);
+                p.y = ((j/(this.gridDefinition))*2-1)*(this.depth/2);
 
-                p.x = Math.floor(p.x);
-                p.y = Math.floor(p.y);
+                p.x = Math.round(p.x);
+                p.y = Math.round(p.y);
 
-                this.grid[i][j] = this.getVertexByCoordinates(p);
-                // this.grid[i][j] = {position: this.getPositionByCoordinates(p), normal: new THREE.Vector3(0, 1, 0), apropiated: true};
+                if (DEBUG_INFO.map.fastLoad)
+                    this.grid[i][j] = {position: this.getPositionByCoordinates(p), normal: new THREE.Vector3(0, 1, 0), apropiated: true};
+                else
+                    this.grid[i][j] = this.getVertexByCoordinates(p);
             }
         }
     }
-    //TODO: check areas that is inaccessible
+    // TODO: check areas that is inaccessible
     optimizeGrid() {
         for (let i = 1; i < this.gridDefinition-1; i++) {
             for (let j = 1; j < this.gridDefinition-1; j++) {
@@ -370,7 +370,7 @@ export default class PlaneComponent implements ComponentInterface {
             falloutMap[x] = [];
             for (let z = 0; z < this.depth; z++) {
                 const _x = (x-(this.width/2-.5))/(this.width/2-.5);
-                const _y = (z-(this.height/2-.5))/(this.height/2-.5);
+                const _y = (z-(this.depth/2-.5))/(this.depth/2-.5);
 
                 const pos = new THREE.Vector2(_x, _y);
                 const f = pos.length();
@@ -384,14 +384,6 @@ export default class PlaneComponent implements ComponentInterface {
                 }else {
                     falloutMap[x][z] = Math.abs(InverseLerp(falloutStart, falloutEnd, f)-1);
                 }
-
-                // falloutMap[x][z] = f;
-
-                // falloutMap[x][z] = Math.abs((new THREE.Vector2(_x, _y)).length()-Math.SQRT2);
-                // falloutMap[x][z] *= falloutForce;
-                // falloutMap[x][z] -= falloutOffset;
-                // console.log(falloutMap[x][z]);
-
             }
         }
 
