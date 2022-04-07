@@ -13,13 +13,24 @@ export default class SliderElement implements UIObject{
     public progress: number;
 
     private slider: HTMLElement;
+    //TODO: CREATE AN INTERFACE
+    private opt: any;
 
-    constructor(percent: number = 0){
+    constructor(percent: number = 0, opt: any){
         this.progress = percent;
+        this.opt = opt;
     }
 
     init(ui: UI, gameWin: GameController) {
         this.slider = this.elem.getElementsByClassName("$SLIDER")[0] as HTMLElement;
+
+        if (this.opt) {
+            if (this.opt.isGUI) {
+                this.elem.style.bottom = `${15}px`;
+                this.elem.style.left = `50%`;
+                this.elem.style.transform = "translate(-50%, 0)";
+            }
+        }
     };
 
     update(gameWin: GameController) {

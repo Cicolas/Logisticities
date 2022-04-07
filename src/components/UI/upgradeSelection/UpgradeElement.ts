@@ -20,4 +20,19 @@ export default class UpgradeElement implements UIObject{
 
     destroy() {
     };
+
+    click(n: number) {
+        const c = this.elem.getElementsByClassName("cards")[n];
+
+        c.animate(
+            [
+                { transform: "scale(110%)" },
+                { transform: "scale(100%)" },
+                { transform: "scale(110%)" },
+            ],
+            {
+                duration: 200,
+            }
+        );
+    }
 }

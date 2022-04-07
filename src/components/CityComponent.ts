@@ -11,6 +11,7 @@ import RoadComponent from './RoadComponent';
 import Suply, { addInventory, getFromInventory, getRandomNeed, startRandomSuply, SuplyInventory, trainController } from '../scripts/suply';
 import TrainComponent, { Train } from './TrainComponent';
 import { pullToTop, pushToBottom } from '../scripts/utils';
+import GameManager from './GameManager';
 
 const CITY_SIZE = 3;
 const TRAIN_INTERVAL = 1;
@@ -170,6 +171,9 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     }
 
     receiveTrain(t: Train) {
+        const gm: GameManager = this.gw.getScene().getObject("gameManager").getComponent(GameManager) as GameManager;
+        gm.addExp(t.carrying);
+
         const suply = this.productionSuply.find(value => {
             return (
                 value.need === true

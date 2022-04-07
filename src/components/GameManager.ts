@@ -14,9 +14,11 @@ import RoadComponent from './RoadComponent';
 import BoxElement from './UI/box/BoxElement';
 import SliderElement from './UI/slider/SliderElement';
 import UIManager from './UIManager';
+import UpgradeComponent from './UpgradeComponent';
 
 var ROAD_UUID = 100;
 var CITY_UUID = 200;
+const EXP_NEXT_LEVEL_BASE = 50;
 
 export default class GameManager implements ComponentInterface {
     name: string = "GameManager";
@@ -27,6 +29,8 @@ export default class GameManager implements ComponentInterface {
     private definition: number;
     private gridDefinition: number;
     public cities: GObject[];
+    public exp: number = 0;
+    public expToNextLevel: number = EXP_NEXT_LEVEL_BASE;
 
     private mousePos: position;
     private rawMousePos: position;
@@ -35,6 +39,7 @@ export default class GameManager implements ComponentInterface {
 
     private box: BoxElement;
     private slider: SliderElement;
+    private upgradeComponent: UpgradeComponent;
 
     constructor(definition, mapSize, gridDefinition) {
         this.definition = definition;
@@ -54,11 +59,14 @@ export default class GameManager implements ComponentInterface {
         this.UIMgr = this.gw.getScene().getObject("UIManager").getComponent(UIManager) as UIManager;
 
         //!resize isn't working
-        this.slider = new SliderElement(.5);
+        this.slider = new SliderElement(0, {isGUI: true});
         this.UIMgr.addElement(this.slider,  {
-            position: {x: 400, y: gameWin.height-25},
+            // position: {x: 400, y: gameWin.height-25},
             size: {x: gameWin.width-800, y: 10}
         })
+
+        this.upgradeComponent = new UpgradeComponent(this.UIMgr);
+        this.upgradeComponent.init(gameWin);
 
         setTimeout(this.postInit.bind(this, gameWin), 10, gameWin);
     }
@@ -116,7 +124,12 @@ export default class GameManager implements ComponentInterface {
         this.getMousePosition(e);
     }
 
+    private firstUpdate = true;
     update(obj: GObject, gameWin: GameController) {
+        if (this.firstUpdate) {
+            obj.addComponent(this.upgradeComponent);
+        }
+
         const ray = new THREE.Raycaster();
         ray.setFromCamera(this.mousePos, this.gw.threeCamera);
 
@@ -216,5 +229,21 @@ export default class GameManager implements ComponentInterface {
             this.box.destroy();
             this.box = null;
         }
+    }
+
+    public addExp(e: number) {
+        this.exp += e;
+
+        this.slider.progress = this.exp/this.expToNextLevel;
+
+        if (this.exp>this.expToNextLevel)
+            setTimeout(this.nextLevel.bind(this), 100);
+    }
+
+    nextLevel() {
+        this.gw.pause = true;
+        this.exp = 0;
+        this.expToNextLevel *= 2;
+        this.upgradeComponent.toggle();
     }
 }

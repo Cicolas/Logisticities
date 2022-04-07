@@ -11,6 +11,7 @@ export default interface UIObject {
     destroy?: () => void;
 }
 
+// TODO: SET AN OPTION FOR POSITIONING RELATIVE TO THE CANVAS SIZE FOR RESPOSIVITY
 export interface UIConfig {
     position?: {x: number, y: number};
     size?: {x: number, y: number};

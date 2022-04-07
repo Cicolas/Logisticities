@@ -12,6 +12,7 @@ export default class GameController extends GameWindow{
     public frame: number = 0;
     public fps: number = 0;
     public dt: number = 0;
+    public pause: boolean;
 
     private lastFrameTime;
     private cameraAngle: number;
@@ -69,8 +70,10 @@ export default class GameController extends GameWindow{
         this.lastFrameTime = Date.now();
 
         this.frame++;
-        this.updateGame();
-        this.drawGame(this.threeScene);
+        if (!this.pause) {
+            this.updateGame();
+            this.drawGame(this.threeScene);
+        }
 
         requestAnimationFrame(this.updateTHREE);
     }
