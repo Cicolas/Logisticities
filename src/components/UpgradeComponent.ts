@@ -1,21 +1,21 @@
 import * as THREE from "three";
-import { Camera, Vector2 } from "three";
-import { DEBUG_INFO } from "../enviroment";
-import GameController from "../GameController";
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
-import { cameraQuad, position } from "../scripts/utils";
-import PlaneComponent from "./PlaneComponent";
+import { getUpgradeSet, Upgrade } from "../scripts/upgrades";
+import GameManager from "./GameManager";
 import UpgradeElement from "./UI/upgradeSelection/UpgradeElement";
 import UIManager from "./UIManager";
 
 export default class UpgradeComponent implements ComponentInterface {
     name: string = "UpgradeComponent";
+    private gm: GameManager;
 
     private visible = true;
     private upgradeElem: UpgradeElement;
     private cards: HTMLCollection;
+
+    private upgrades: Upgrade[];
 
     constructor(ui: UIManager){
         this.upgradeElem = new UpgradeElement();
@@ -24,14 +24,19 @@ export default class UpgradeComponent implements ComponentInterface {
     }
 
     init(gameWin: GameWindow) {
-        this.toggle();
-
         this.cards = this.upgradeElem.elem.getElementsByClassName("cards");
 
         for (let i = 0; i < this.cards.length; i++) {
             this.cards[i].addEventListener("click", this.checkClick.bind(this, i));
         }
+        this.toggle();
+
+        setTimeout(this.postInit.bind(this, gameWin), 100);
     }
+    postInit(gameWin: GameWindow) {
+        this.gm = gameWin.getScene().getObject("gameManager")?.getComponent(GameManager) as GameManager;
+    }
+
     update(obj: GObject, gameWin: GameWindow) {
 
     }
@@ -44,7 +49,7 @@ export default class UpgradeComponent implements ComponentInterface {
 
         if (this.visible){
             this.upgradeElem.elem.classList.remove("hidden")
-            this.getUpgrade();
+            this.getUpgrades();
         }
         else
             this.upgradeElem.elem.classList.add("hidden")
@@ -52,9 +57,23 @@ export default class UpgradeComponent implements ComponentInterface {
 
     checkClick(n: number) {
         this.upgradeElem.click(n);
+
+        this.gm.pickUpgrade(this.upgrades[n]);
     }
 
-    getUpgrade() {
+    getUpgrades() {
+        this.upgrades = getUpgradeSet(3);
 
+        for (let i = 0; i < this.cards.length; i++) {
+            const element = this.cards[i];
+
+            const title = element.getElementsByClassName("$TITLE")[0];
+            const upgrade = element.getElementsByClassName("$UPGRADE")[0];
+            const text = element.getElementsByClassName("$TEXT")[0];
+
+            title.innerHTML = this.upgrades[i].name;
+            upgrade.innerHTML = this.upgrades[i].emoji;
+            text.innerHTML = this.upgrades[i].description;
+        }
     }
 }

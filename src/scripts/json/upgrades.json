@@ -1,0 +1,81 @@
+{
+    "upgrades": [{
+            "id": 0,
+            "name": "Industrial City",
+            "emoji": "&#x1F3ED",
+            "description": "Increase industries production",
+            "consumable": false,
+
+            "productionBuff": 1,
+            "needBuff": 0,
+            "suply": 3,
+            "speedBuff": 0,
+            "trainBuff": 0
+        },
+        {
+            "id": 1,
+            "name": "Megalopolis",
+            "emoji": "&#x1F307",
+            "description": "Increase people production",
+            "consumable": false,
+
+            "productionBuff": 1,
+            "needBuff": 0,
+            "suply": 4,
+            "speedBuff": 0,
+            "trainBuff": 0
+        },
+        {
+            "id": 2,
+            "name": "Countryside",
+            "emoji": "&#x1F468&#x200D&#x1F33E",
+            "description": "Increase goods production",
+            "consumable": false,
+
+            "productionBuff": 1,
+            "needBuff": 0,
+            "suply": 2,
+            "speedBuff": 0,
+            "trainBuff": 0
+        },
+        {
+            "id": 3,
+            "name": "Hub",
+            "emoji": "&#x1F685",
+            "description": "Rails conected to this city moves faster",
+            "consumable": false,
+
+            "productionBuff": 0,
+            "needBuff": 0,
+            "suply": -1,
+            "speedBuff": 1,
+            "trainBuff": 0
+        },
+        {
+            "id": 4,
+            "name": "Wonderful city",
+            "emoji": "&#x1F3A2",
+            "description": "Increase people need",
+            "consumable": false,
+
+            "productionBuff": 0,
+            "needBuff": 1,
+            "suply": 4,
+            "speedBuff": 0,
+            "trainBuff": 0
+        },
+        {
+            "id": 5,
+            "name": "Train",
+            "emoji": "&#x1F69B",
+            "description": "Add one train",
+            "consumable": true,
+
+            "productionBuff": 0,
+            "needBuff": 0,
+            "suply": 0,
+            "speedBuff": 0,
+            "trainBuff": 1
+        }
+    ]
+}

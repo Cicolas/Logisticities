@@ -1,6 +1,5 @@
 import { CityInterface } from "../components/CityComponent";
 import RoadComponent from "../components/RoadComponent";
-import emojiMap from "./emojiMap";
 import { getInRandomList } from "./utils";
 import sup from './json/suplies.json';
 

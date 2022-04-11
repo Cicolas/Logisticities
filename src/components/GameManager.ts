@@ -7,6 +7,7 @@ import ComponentInterface from "../lib/CUASAR/Component";
 import GObject from "../lib/CUASAR/GObject";
 import { getCityName, resetCityName } from '../scripts/cityNames';
 import { resetSuply } from '../scripts/suply';
+import { Upgrade } from '../scripts/upgrades';
 import { position } from '../scripts/utils';
 import CityComponent from './CityComponent';
 import PlaneComponent from './PlaneComponent';
@@ -20,10 +21,18 @@ var ROAD_UUID = 100;
 var CITY_UUID = 200;
 const EXP_NEXT_LEVEL_BASE = 50;
 
+enum State {
+    NONE,
+    PLAYING,
+    UPGRADING,
+    PAUSED
+}
+
 export default class GameManager implements ComponentInterface {
     name: string = "GameManager";
     private gw: GameController;
     private UIMgr: UIManager;
+    public state: State;
 
     private cityCount: number;
     private definition: number;
@@ -31,6 +40,7 @@ export default class GameManager implements ComponentInterface {
     public cities: GObject[];
     public exp: number = 0;
     public expToNextLevel: number = EXP_NEXT_LEVEL_BASE;
+    private upgrades: Upgrade[]  = [];
 
     private mousePos: position;
     private rawMousePos: position;
@@ -57,6 +67,7 @@ export default class GameManager implements ComponentInterface {
     init(gameWin: GameController) {
         this.gw = gameWin;
         this.UIMgr = this.gw.getScene().getObject("UIManager").getComponent(UIManager) as UIManager;
+        this.state = State.PLAYING;
 
         //!resize isn't working
         this.slider = new SliderElement(0, {isGUI: true});
@@ -240,10 +251,19 @@ export default class GameManager implements ComponentInterface {
             setTimeout(this.nextLevel.bind(this), 100);
     }
 
-    nextLevel() {
+    private nextLevel() {
         this.gw.pause = true;
+        this.state = State.UPGRADING;
         this.exp = 0;
         this.expToNextLevel *= 2;
+        this.upgradeComponent.toggle();
+    }
+
+    public pickUpgrade(upgrade: Upgrade) {
+        this.upgrades.push(upgrade);
+
+        this.gw.pause = false;
+        this.state = State.PLAYING;
         this.upgradeComponent.toggle();
     }
 }
