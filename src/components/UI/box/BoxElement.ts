@@ -53,6 +53,7 @@ export default class BoxElement implements UIObject{
         needs.innerHTML = "";
 
         if (!this.options.isCity) {
+            text.classList.remove("hidden");
             up.className = up.className+" hidden"
             info.className = up.className+" hidden"
         }else {
@@ -90,17 +91,19 @@ export default class BoxElement implements UIObject{
     };
 
     updateValues() {
-        for (let i = 0; i < this.suplies.length; i++) {
-            const element = this.suplies[i];
-            const number = this.suplies[i][0].getElementsByClassName("$NUMBER")[0];
-            if (!element[1].need) {
-                if (this.options.cityInvetory) {
-                    number.innerHTML = formatNumber(this.options.cityInvetory.find(
-                        (value) => element[1].id === value.id
-                    ).quantity, 0, 0).toString();
+        if (this.options.isCity) {
+            for (let i = 0; i < this.suplies.length; i++) {
+                const element = this.suplies[i];
+                const number = this.suplies[i][0].getElementsByClassName("$NUMBER")[0];
+                if (!element[1].need) {
+                    if (this.options.cityInvetory) {
+                        number.innerHTML = formatNumber(this.options.cityInvetory.find(
+                            (value) => element[1].id === value.id
+                        ).quantity, 0, 0).toString();
+                    }
+                }else {
+                    number.innerHTML = formatNumber((element[1].needNumber??0), 0, 0).toString();
                 }
-            }else {
-                number.innerHTML = formatNumber((element[1].needNumber??0), 0, 0).toString();
             }
         }
     }

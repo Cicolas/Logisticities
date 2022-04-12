@@ -51,14 +51,15 @@ export default class UpgradeComponent implements ComponentInterface {
             this.upgradeElem.elem.classList.remove("hidden")
             this.getUpgrades();
         }
-        else
+        else{
             this.upgradeElem.elem.classList.add("hidden")
+        }
     }
 
     checkClick(n: number) {
         this.upgradeElem.click(n);
 
-        this.gm.pickUpgrade(this.upgrades[n]);
+        this.gm.addUpgrade(this.upgrades[n]);
     }
 
     getUpgrades() {

@@ -215,7 +215,14 @@ export default class PlaneComponent implements ComponentInterface {
             m[x] = [];
             for (let z = 0; z < this.depth; z++) {
                 // m[x][z] = (perlin.simplex2(x/scale+offsetx, z/scale+offsety)+1)/2;
-                m[x][z] = DEBUG_INFO.map.planify?.9:(perlin.perlin2(x/scale+offsetx, z/scale+offsety)+1)/2;
+                m[x][z] = DEBUG_INFO.map.planify
+                    ? (DEBUG_INFO.noMask?0:.9)
+                    : (perlin.perlin2(
+                          x / scale + offsetx,
+                          z / scale + offsety
+                      ) +
+                          1) /
+                      2;
             }
         }
 

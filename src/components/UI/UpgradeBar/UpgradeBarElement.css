@@ -1,0 +1,25 @@
+.UpgradeBarElement {
+    transform: translate(-50%, 0);
+    background-color: #29282ebe;
+    padding-top: 10px;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-bottom: 7px;
+    border-radius: 10px;
+    pointer-events: all;
+}
+
+.upgrades-list {
+    display: flex;
+    gap: 5px;
+}
+
+.upgradeTitle {
+    position: absolute;
+    top: -1.25em;
+    color: #29282e;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

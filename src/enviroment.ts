@@ -4,11 +4,11 @@ export const DEBUG_INFO = {
     //plane related show/hide
     showGrid: false,
     showWireframe: false,
-    noMask: false,
+    noMask: true,
 
     //engine related show/hide
     hideFog: false,
-    hideSea: false,
+    hideSea: true,
 
     //game related show/hide
     noCities: false,

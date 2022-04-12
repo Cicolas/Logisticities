@@ -8,12 +8,14 @@ import GObject from "../lib/CUASAR/GObject";
 import { getCityName, resetCityName } from '../scripts/cityNames';
 import { resetSuply } from '../scripts/suply';
 import { Upgrade } from '../scripts/upgrades';
-import { position } from '../scripts/utils';
+import { position, pullToTop, pushToBottom } from '../scripts/utils';
 import CityComponent from './CityComponent';
 import PlaneComponent from './PlaneComponent';
 import RoadComponent from './RoadComponent';
 import BoxElement from './UI/box/BoxElement';
+import FloatingElement from './UI/floatingIcon/FloatingElement';
 import SliderElement from './UI/slider/SliderElement';
+import UpgradeBarElement from './UI/UpgradeBar/UpgradeBarElement';
 import UIManager from './UIManager';
 import UpgradeComponent from './UpgradeComponent';
 
@@ -25,6 +27,7 @@ enum State {
     NONE,
     PLAYING,
     UPGRADING,
+    UPGRADE_PICKING,
     PAUSED
 }
 
@@ -41,6 +44,7 @@ export default class GameManager implements ComponentInterface {
     public exp: number = 0;
     public expToNextLevel: number = EXP_NEXT_LEVEL_BASE;
     private upgrades: Upgrade[]  = [];
+    private upgradePick: Upgrade;
 
     private mousePos: position;
     private rawMousePos: position;
@@ -49,7 +53,9 @@ export default class GameManager implements ComponentInterface {
 
     private box: BoxElement;
     private slider: SliderElement;
+    private upgradeBar: UpgradeBarElement;
     private upgradeComponent: UpgradeComponent;
+    private floatingIcon: FloatingElement;
 
     constructor(definition, mapSize, gridDefinition) {
         this.definition = definition;
@@ -76,6 +82,9 @@ export default class GameManager implements ComponentInterface {
             size: {x: gameWin.width-800, y: 10}
         })
 
+        this.upgradeBar = new UpgradeBarElement();
+        this.UIMgr.addElement(this.upgradeBar);
+
         this.upgradeComponent = new UpgradeComponent(this.UIMgr);
         this.upgradeComponent.init(gameWin);
 
@@ -86,6 +95,7 @@ export default class GameManager implements ComponentInterface {
         this.generateCity(gameWin);
 
         gameWin.canvas.addEventListener("click", this.mouseClick.bind(this));
+        gameWin.canvas.addEventListener("contextmenu", this.rightMouseClick.bind(this));
         gameWin.canvas.addEventListener("mousemove", this.mouseMove);
         document.addEventListener("keydown", this.reset);
     }
@@ -102,28 +112,42 @@ export default class GameManager implements ComponentInterface {
     mouseClick(e: MouseEvent) {
         this.getMousePosition(e);
 
+        if (this.upgradePick) {
+            if (this.cities[this.cityHovering]) {
+
+                return;
+            }
+            this.addUpgrade(this.upgradePick);
+            this.upgradePick = undefined;
+            return;
+        }
+
         if (this.cityHovering >= 0) {
             if (this.citySelected === -1) {
                 this.citySelected = this.cityHovering;
-                const city = this.cities[this.citySelected].getComponent(CityComponent) as CityComponent;
+                const city = this.cities[this.citySelected].getComponent(
+                    CityComponent
+                ) as CityComponent;
                 city.isSelected = true;
-            }
-            else if(this.citySelected !== this.cityHovering) {
+            } else if (this.citySelected !== this.cityHovering) {
                 const c1 = this.cities[this.citySelected];
                 const c2 = this.cities[this.cityHovering];
 
-                const go = new GObject((++ROAD_UUID).toString()).addComponent(
-                    new RoadComponent(c1.name, c2.name)
-                ).initObject(this.gw)
+                const go = new GObject((++ROAD_UUID).toString())
+                    .addComponent(new RoadComponent(c1.name, c2.name))
+                    .initObject(this.gw);
                 this.gw.getScene().addObject(go);
 
-                const city = this.cities[this.citySelected].getComponent(CityComponent) as CityComponent;
+                const city = this.cities[this.citySelected].getComponent(
+                    CityComponent
+                ) as CityComponent;
                 city.isSelected = false;
                 this.citySelected = -1;
                 this.cityHovering = -1;
-            }
-            else {
-                const city = this.cities[this.citySelected].getComponent(CityComponent) as CityComponent;
+            } else {
+                const city = this.cities[this.citySelected].getComponent(
+                    CityComponent
+                ) as CityComponent;
                 city.isSelected = false;
                 this.citySelected = -1;
                 this.cityHovering = -1;
@@ -135,10 +159,20 @@ export default class GameManager implements ComponentInterface {
         this.getMousePosition(e);
     }
 
+    rightMouseClick = (e: MouseEvent) => {
+        e.preventDefault();
+
+        if (this.state === State.UPGRADE_PICKING) {
+            this.addUpgrade(this.upgradePick);
+            this.upgradePick = undefined;
+        }
+    }
+
     private firstUpdate = true;
     update(obj: GObject, gameWin: GameController) {
         if (this.firstUpdate) {
             obj.addComponent(this.upgradeComponent);
+            this.firstUpdate = false;
         }
 
         const ray = new THREE.Raycaster();
@@ -165,7 +199,17 @@ export default class GameManager implements ComponentInterface {
         this.updateBoxes();
     }
 
-    draw (context?: THREE.Scene) {};
+    draw (context?: THREE.Scene) {
+        if (this.state === State.UPGRADE_PICKING && !this.floatingIcon) {
+            this.floatingIcon = new FloatingElement(this.upgradePick.emoji);
+            this.UIMgr.addElement(this.floatingIcon);
+        }
+
+        if (this.state !== State.UPGRADE_PICKING && this.floatingIcon) {
+            this.floatingIcon.destroy();
+            this.floatingIcon = null;
+        }
+    };
 
     generateCity(gameWin: GameController) {
         for (let i = 0; i < this.cityCount; i++) {
@@ -248,10 +292,15 @@ export default class GameManager implements ComponentInterface {
         this.slider.progress = this.exp/this.expToNextLevel;
 
         if (this.exp>this.expToNextLevel)
-            setTimeout(this.nextLevel.bind(this), 100);
+            this.nextLevel();
     }
 
     private nextLevel() {
+        if (this.state === State.UPGRADE_PICKING) {
+            this.addUpgrade(this.upgradePick);
+            this.upgradePick = undefined;
+        }
+
         this.gw.pause = true;
         this.state = State.UPGRADING;
         this.exp = 0;
@@ -259,11 +308,26 @@ export default class GameManager implements ComponentInterface {
         this.upgradeComponent.toggle();
     }
 
-    public pickUpgrade(upgrade: Upgrade) {
+    public addUpgrade(upgrade: Upgrade) {
         this.upgrades.push(upgrade);
 
         this.gw.pause = false;
+        if (this.state !== State.UPGRADE_PICKING) {
+            this.upgradeComponent.toggle();
+        }
         this.state = State.PLAYING;
-        this.upgradeComponent.toggle();
+        this.upgradeBar.addUpgrade(upgrade);
+    }
+
+    public pickUpgrade(i: number) {
+        if (this.state !== State.UPGRADE_PICKING) {
+            this.state = State.UPGRADE_PICKING;
+
+            pullToTop(this.upgrades, i);
+            this.upgradePick = this.upgrades.shift();
+            // console.log(this.upgrades);
+
+            this.upgradeBar.updateUpgrades(this.upgrades);
+        }
     }
 }

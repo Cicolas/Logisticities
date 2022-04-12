@@ -17,6 +17,7 @@ export default class UI {
         this.boundingBox = canvas.getBoundingClientRect();
         this.width = width;
         this.height = height;
+        this.gw = gameWin;
         this.start();
 
         document.body.appendChild(this.div);

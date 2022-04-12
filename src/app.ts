@@ -14,6 +14,9 @@ import UIManager from './components/UIManager';
 import UI from './lib/TELESCOPE/UI';
 import loading from './page/loading.html';
 import SliderElement from './components/UI/slider/SliderElement';
+import UpgradeBar from './components/UI/UpgradeBar/UpgradeBarElement';
+import UpgradeBarElement from './components/UI/UpgradeBar/UpgradeBarElement';
+import FloatingElement from './components/UI/floatingIcon/FloatingElement';
 
 if (!DEBUG_INFO.camera.dontChangeSize) {
     document.body.classList.add("resizable");
@@ -37,7 +40,6 @@ const WIDTH = 8*DEFINITION*MAPSIZE;
 const DEPTH = 8*DEFINITION*MAPSIZE;
 const HEIGHT = 8*DEFINITION;
 const GRID_DEFINITION = 20*(MAPSIZE);
-console.log((2-((MAPSIZE-1)*.5)));
 
 const cameraI = {
     width: CANVAS_WIDTH,
@@ -67,7 +69,7 @@ const planeI = {
     perlinPower2: 4,
     gridDefinition: GRID_DEFINITION,
     color: {r: 81/255, g: 146/255, b: 89/255},
-    seaLevel: .1
+    seaLevel: 0
 };
 
 const seaI = {
@@ -133,8 +135,9 @@ export function createNewScene() {
     ).initScene(gw).addObject(
         new GObject("UIManager")
         .addComponent(_UI
+            // .addElement(new FloatingElement("&#x1F307"))
             // .addElement(
-            //     new SliderElement(0), {
+            //     new SliderElement(0, {}), {
             //         position: {x: CANVAS_WIDTH/2, y: CANVAS_HEIGHT/2},
             //         size: {x: 300, y: 20}
             //     }
