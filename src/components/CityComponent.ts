@@ -12,11 +12,13 @@ import Suply, { addInventory, getFromInventory, getRandomNeed, startRandomSuply,
 import TrainComponent, { Train } from './TrainComponent';
 import { pullToTop, pushToBottom } from '../scripts/utils';
 import GameManager from './GameManager';
+import { Upgrade } from '../scripts/upgrades';
 
 const CITY_SIZE = 3;
 const TRAIN_INTERVAL = 1;
 const TRAIN_LIMIT = 1;
 const TRAIN_CAPACITY = 10;
+const MAX_UPGRADES = 3;
 
 export interface CityInterface {
     UUID: string,
@@ -40,6 +42,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     public productionSuply: Suply[] = [];
     public inventorySuply: SuplyInventory[] = [];
     public trains: Train[] = [];
+    public upgrades: Upgrade[] = [];
 
     private lastSent: [CityInterface, RoadComponent, Suply][] = [];
     private plane: PlaneComponent;
@@ -236,5 +239,11 @@ export default class CityComponent implements ComponentInterface, CityInterface 
             this.lastSent.push(item);
             return;
         }
+    }
+
+    public addUpgrade(up: Upgrade): boolean {
+        if (this.upgrades.length >= MAX_UPGRADES) return false;
+        this.upgrades.push(up);
+        return true;
     }
 }

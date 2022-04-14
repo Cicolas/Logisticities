@@ -57,7 +57,7 @@ export default class GameManager implements ComponentInterface {
     private upgradeComponent: UpgradeComponent;
     private floatingIcon: FloatingElement;
 
-    constructor(definition, mapSize, gridDefinition) {
+    constructor(definition: number, mapSize: number, gridDefinition: number) {
         this.definition = definition;
         this.gridDefinition = gridDefinition;
         this.cityCount = DEBUG_INFO.noCities?0:Math.ceil(mapSize*DEBUG_INFO.city.number);
@@ -114,8 +114,15 @@ export default class GameManager implements ComponentInterface {
 
         if (this.upgradePick) {
             if (this.cities[this.cityHovering]) {
-
-                return;
+                const city = this.cities[this.cityHovering].getComponent(
+                    CityComponent
+                ) as CityComponent;
+                if (city.addUpgrade(this.upgradePick)) {
+                    this.state = State.PLAYING
+                    this.upgradePick = undefined;
+                    this.addBoxUpgrade(city);
+                    return;
+                }
             }
             this.addUpgrade(this.upgradePick);
             this.upgradePick = undefined;
@@ -270,7 +277,8 @@ export default class GameManager implements ComponentInterface {
                     {
                         isCity: true,
                         city: cityComp,
-                        cityInvetory: cityComp.inventorySuply
+                        cityInvetory: cityComp.inventorySuply,
+                        upgrades: cityComp.upgrades
                     }
                 );
                 this.UIMgr.addElement(this.box, {
@@ -283,6 +291,12 @@ export default class GameManager implements ComponentInterface {
         }else if(this.box){
             this.box.destroy();
             this.box = null;
+        }
+    }
+
+    addBoxUpgrade(city: CityComponent) {
+        if (this.box) {
+            this.box.addUpgrade(city.upgrades);
         }
     }
 

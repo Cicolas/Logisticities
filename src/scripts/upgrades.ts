@@ -1,9 +1,3 @@
-// ,
-//         {
-//             "id": 5,
-//             "name": "Quiet City",
-//             "emoji": "&#x1F90D"
-//         }
 import ups from './json/upgrades.json';
 import { getInRandomList } from './utils';
 
@@ -20,8 +14,8 @@ export interface Upgrade {
     trainBuff: number
 }
 
-export function getUpgradeSet(n: number) {
-    const set = []
+export function getUpgradeSet(n: number): Upgrade[] {
+    const set: Upgrade[] = []
 
     const taken = []
     ups.upgrades.forEach(value => {

@@ -3,12 +3,11 @@ import "./BoxElement.css";
 import GameController from '../../../GameController';
 import UI from '../../../lib/TELESCOPE/UI';
 import UIObject from '../../../lib/TELESCOPE/UIObject';
-import emojiMap from '../../../scripts/emojiMap';
 import Suply, { SuplyInventory } from '../../../scripts/suply';
 import { formatNumber, position } from '../../../scripts/utils';
-import RoadComponent from '../../RoadComponent';
 import box from './BoxElement.html';
 import { CityInterface } from "../../CityComponent";
+import { Upgrade } from "../../../scripts/upgrades";
 
 const DEFAULT_CONFIG = {
     isCity: false
@@ -17,7 +16,8 @@ const DEFAULT_CONFIG = {
 export interface BoxElementOptions {
     isCity: boolean,
     city?: CityInterface,
-    cityInvetory?: SuplyInventory[]
+    cityInvetory?: SuplyInventory[],
+    upgrades?: Upgrade[]
 }
 
 export default class BoxElement implements UIObject{
@@ -62,6 +62,11 @@ export default class BoxElement implements UIObject{
                     const element = this.options.city.productionSuply[i];
 
                     this.setSuply(element.need?needs: have, element)
+                }
+            }
+            if (this.options.upgrades) {
+                if (this.options.upgrades[0]) {
+                    this.addUpgrade(this.options.upgrades);
                 }
             }
         }
@@ -123,5 +128,12 @@ export default class BoxElement implements UIObject{
     }
 
     public toggle() {
+    }
+
+    public addUpgrade(ups: Upgrade[]) {
+        const up = this.elem.getElementsByClassName("$UPGRADE")[0];
+        this.options.upgrades = ups;
+
+        up.innerHTML = this.options.upgrades[0].emoji;
     }
 }
