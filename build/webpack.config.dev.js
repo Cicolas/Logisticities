@@ -2,6 +2,7 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
+    mode: "development",
     entry: '../src/app.ts',
     output: {
         path: path.resolve(__dirname, '../dist'),
@@ -9,8 +10,7 @@ module.exports = {
     },
 
     module: {
-        rules: [
-            {
+        rules: [{
                 test: /\.tsx?$/,
                 loader: 'ts-loader'
             },
@@ -20,14 +20,12 @@ module.exports = {
             },
             {
                 test: /\.html$/,
-                use: [
-                    {
-                        loader: 'html-loader'
-                    }
-                ]
+                use: [{
+                    loader: 'html-loader'
+                }]
             },
             {
-                test: /\.(woff2?|eot|ttf|otf|png|gif|jpg|jpeg)(\?.*)?$/,
+                test: /\.(woff2?|eot|ttf|otf|png|gif|jpg|jpeg|obj)(\?.*)?$/,
                 loader: 'file-loader'
             }
         ]
@@ -49,8 +47,7 @@ module.exports = {
         },
         compress: false,
         historyApiFallback: false,
-        hot: true,
-        overlay: true
+        hot: true
     },
 
     plugins: [new HtmlWebpackPlugin()]
