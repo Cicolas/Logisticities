@@ -1,5 +1,5 @@
 export const DEBUG_INFO = {
-    seed: 14405,
+    seed: -1,
 
     //plane related show/hide
     showGrid: false,
@@ -24,7 +24,8 @@ export const DEBUG_INFO = {
     },
     map: {
         planify: false,
-        fastLoad: false
+        fastLoad: false,
+        altitudeColor: true,
     },
     city: {
         //! Numbers above 4 cause crashes due to name generator

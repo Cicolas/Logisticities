@@ -14,6 +14,13 @@ const FALLOUT = {
 }
 const MAX_STEPNESS = 15;
 
+export interface colorMap {
+    sand: color,
+    grass: color,
+    rock: color,
+    snow: color,
+}
+
 export interface PlaneInterface {
     seed: number;
     width: number;
@@ -24,7 +31,7 @@ export interface PlaneInterface {
     perlinPower1: number;
     perlinPower2: number;
     gridDefinition: number;
-    color: color;
+    color: colorMap
     seaLevel: number;
 }
 
@@ -42,7 +49,7 @@ export default class PlaneComponent implements ComponentInterface {
     private perlinScale2: number;
     private perlinPower1: number;
     private perlinPower2: number;
-    private color: color;
+    private colors: colorMap;
 
     private gw: GameController;
 
@@ -61,7 +68,7 @@ export default class PlaneComponent implements ComponentInterface {
         this.perlinPower1 = planeI.perlinPower1;
         this.perlinPower2 = planeI.perlinPower2;
         this.gridDefinition = planeI.gridDefinition;
-        this.color = planeI.color;
+        this.colors = planeI.color;
         this.seaLevel = planeI.seaLevel;
     }
 
@@ -164,7 +171,6 @@ export default class PlaneComponent implements ComponentInterface {
         vertices.set(verticesArr);
         geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
         geometry.computeVertexNormals();
-        geometry.translate(-this.width / 2, 0, -this.depth / 2);
 
         return geometry;
     }
@@ -419,21 +425,17 @@ export default class PlaneComponent implements ComponentInterface {
     getColor(vert: Vertex, height: number, highestPeak: number): color {
         const actualHeight = (height*highestPeak);
 
-        if (actualHeight < this.height/this.perlinPower1/20) return {r: 240/255, g: 187/255, b: 98/255};
-        if (actualHeight > this.height/this.perlinPower1*2) return {r: 1, g: 1, b: 1}
-        if (vert.apropiated) return { r: 81 / 255, g: 146 / 255, b: 89 / 255 };
+        if (!DEBUG_INFO.map.altitudeColor) {
+            if (actualHeight < this.height/80) return this.colors.sand;
+            if (actualHeight > this.height) return this.colors.snow
+            if (vert.apropiated) return this.colors.grass;
+            return this.colors.rock;
+        }
 
-        return { r: 100 / 255, g: 102 / 255, b: 107 / 255 };
-
-        // if (actualHeight < this.height/this.perlinPower1/20) {
-        //     return {r: 240/255, g: 187/255, b: 98/255}
-        // }else if (actualHeight < this.height/this.perlinPower1/2) {
-        //     return {r: 81/255, g: 146/255, b: 89/255}
-        // }else if (actualHeight < this.height/this.perlinPower1*2) {
-        //     return {r: 100/255, g: 102/255, b: 107/255}
-        // }else {
-        //     return {r: 1, g: 1, b: 1}
-        // }
+        if (actualHeight < this.height/80) return this.colors.sand;
+        if (actualHeight < this.height/4) return this.colors.grass;
+        if (actualHeight < this.height) return this.colors.rock;
+        return this.colors.snow;
     }
 
     createFallout(falloutStart: number, falloutEnd: number) {

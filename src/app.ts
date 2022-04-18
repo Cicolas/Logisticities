@@ -68,7 +68,12 @@ const planeI = {
     perlinPower1: 1,
     perlinPower2: 4,
     gridDefinition: GRID_DEFINITION,
-    color: {r: 81/255, g: 146/255, b: 89/255},
+    color: {
+        sand: {r: 240/255, g: 187/255, b: 98/255},
+        grass: {r: 81/255, g: 146/255, b: 89/255},
+        rock: {r: 100/255, g: 102/255, b: 107/255},
+        snow: {r: 1, g: 1, b: 1, a: 0},
+    },
     seaLevel: 0
 };
 
