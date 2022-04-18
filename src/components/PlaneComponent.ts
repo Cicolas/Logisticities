@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { BufferGeometry, Color, TextureLoader, Vector2 } from "three";
+import { BufferGeometry, Color, TextureLoader, Vector2, Vector3 } from "three";
 import { DEBUG_INFO } from '../enviroment';
 import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
@@ -58,7 +58,7 @@ export default class PlaneComponent implements ComponentInterface {
     private gridDefinition: number;
     private seaLevel: number;
 
-    constructor(planeI: PlaneInterface){
+    constructor(planeI: PlaneInterface) {
         this.seed = Math.floor(planeI.seed);
         this.width = planeI.width;
         this.height = planeI.height;
@@ -74,10 +74,10 @@ export default class PlaneComponent implements ComponentInterface {
 
     init(gameWin: GameController) {
         this.gw = gameWin;
-        console.log("seed: "+this.seed);
+        console.log("seed: " + this.seed);
 
         const m1 = this.generatePerlin(0, 0, this.perlinScale1, this.seed);
-        const m2 = this.generatePerlin(0, 0, this.perlinScale2, this.seed+10);
+        const m2 = this.generatePerlin(0, 0, this.perlinScale2, this.seed + 10);
         var highestPeak = 0;
 
         for (let x = 0; x < this.width; x++) {
@@ -85,7 +85,7 @@ export default class PlaneComponent implements ComponentInterface {
             for (let z = 0; z < this.depth; z++) {
                 m1[x][z] **= this.perlinPower1;
                 m2[x][z] **= this.perlinPower2;
-                this.map[x][z] = m2[x][z]*m1[x][z];
+                this.map[x][z] = m2[x][z] * m1[x][z];
 
                 m1[x][z] *= this.height;
                 m2[x][z] *= this.height;
@@ -100,22 +100,17 @@ export default class PlaneComponent implements ComponentInterface {
 
         // console.log(this.map);
         this.geometry = this.rectangleGeometry(this.map, highestPeak);
-        this.material = new THREE.MeshBasicMaterial({
-            vertexColors: true,
-            wireframe: DEBUG_INFO.showWireframe
-        });
-        this.material.visible = true;
 
         const shadow = this.rectangleGeometry(this.map, highestPeak, true);
         const shadowMat = new THREE.MeshPhongMaterial({
             depthFunc: THREE.EqualDepth,
             transparent: true,
             blending: THREE.MultiplyBlending,
-            shininess: 0
+            shininess: 0,
         });
         const shadowMesh = new THREE.Mesh(shadow, shadowMat);
 
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh = new THREE.Mesh(this.geometry);
         this.mesh.name = "plano";
 
         gameWin.threeScene.add(this.mesh);
@@ -127,6 +122,15 @@ export default class PlaneComponent implements ComponentInterface {
         if (DEBUG_INFO.showGrid) {
             this.drawGrid();
         }
+
+        this.mesh.material = new THREE.MeshBasicMaterial({
+            vertexColors: true,
+            wireframe: DEBUG_INFO.showWireframe,
+        });
+        this.mesh.geometry = this.setColor(this.map, this.geometry, highestPeak);
+
+        // this.setColor(this.grid);
+        // this.mesh.geometry = this.geometry;
         // console.log(this.grid);
     }
 
@@ -135,94 +139,119 @@ export default class PlaneComponent implements ComponentInterface {
         // (this.mesh.material as THREE.MeshStandardMaterial).color = new Color(0x3b9126);
     }
 
-    draw (context?: THREE.Scene) {};
+    draw(context?: THREE.Scene) {}
 
-    rectangleGeometry(map: number[][], highestPeak: number, isShadow: boolean = false): BufferGeometry {
+    rectangleGeometry(
+        map: number[][],
+        highestPeak: number,
+        isShadow: boolean = false
+    ): BufferGeometry {
         const geometry = new THREE.BufferGeometry();
 
-        const size = ((this.width-1) * (this.depth-1))*6*3;
+        const size = (this.width - 1) * (this.depth - 1) * 6 * 3;
         const vertices = new Float32Array(size);
-        const colors = new Float32Array(size);
 
         let verticesArr = [];
-        let colorArr = [];
 
-        for (let x = 0; x < map.length-1; x++) {
-            for (let z = 0; z < map[x].length-1; z++) {
+        for (let x = 0; x < map.length - 1; x++) {
+            for (let z = 0; z < map[x].length - 1; z++) {
                 verticesArr.push(
-                    x+1, map[z+1][x+1], z+1,
-                    x+1, map[z][x+1],   z,
-                    x,   map[z][x],     z,
+                    x + 1,
+                    map[z + 1][x + 1],
+                    z + 1,
+                    x + 1,
+                    map[z][x + 1],
+                    z,
+                    x,
+                    map[z][x],
+                    z,
 
-                    x,   map[z+1][x],   z+1,
-                    x+1, map[z+1][x+1], z+1,
-                    x,   map[z][x],     z
-                )
+                    x,
+                    map[z + 1][x],
+                    z + 1,
+                    x + 1,
+                    map[z + 1][x + 1],
+                    z + 1,
+                    x,
+                    map[z][x],
+                    z
+                );
 
-                if (!isShadow) {
-                    const colors = [
-                        this.getColor(map[z+1][x+1], highestPeak),
-                        this.getColor(map[z][x+1], highestPeak),
-                        this.getColor(map[z][x], highestPeak),
+                // if (!isShadow) {
+                //     const colors = [
+                //         this.getColor(map[z+1][x+1], highestPeak),
+                //         this.getColor(map[z][x+1], highestPeak),
+                //         this.getColor(map[z][x], highestPeak),
 
-                        this.getColor(map[z+1][x], highestPeak),
-                    ]
+                //         this.getColor(map[z+1][x], highestPeak),
+                //     ]
 
-                    if (DEBUG_INFO.showWireframe) {
-                        colorArr.push(
-                            map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
-                            map[z][x+1]/highestPeak, map[z][x+1]/highestPeak, map[z][x+1]/highestPeak,
-                            map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak,
+                //     if (DEBUG_INFO.showWireframe) {
+                //         colorArr.push(
+                //             map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
+                //             map[z][x+1]/highestPeak, map[z][x+1]/highestPeak, map[z][x+1]/highestPeak,
+                //             map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak,
 
-                            map[z+1][x]/highestPeak, map[z+1][x]/highestPeak, map[z+1][x]/highestPeak,
-                            map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
-                            map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak
-                        )
-                    }else {
-                        colorArr.push(
-                            colors[0].r, colors[0].g, colors[0].b,
-                            colors[0].r, colors[0].g, colors[0].b,
-                            colors[0].r, colors[0].g, colors[0].b,
+                //             map[z+1][x]/highestPeak, map[z+1][x]/highestPeak, map[z+1][x]/highestPeak,
+                //             map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak, map[z+1][x+1]/highestPeak,
+                //             map[z][x]/highestPeak, map[z][x]/highestPeak, map[z][x]/highestPeak
+                //         )
+                //     }else {
+                //         colorArr.push(
+                //             colors[0].r, colors[0].g, colors[0].b,
+                //             colors[0].r, colors[0].g, colors[0].b,
+                //             colors[0].r, colors[0].g, colors[0].b,
 
-                            colors[0].r, colors[0].g, colors[0].b,
-                            colors[0].r, colors[0].g, colors[0].b,
-                            colors[0].r, colors[0].g, colors[0].b,
+                //             colors[0].r, colors[0].g, colors[0].b,
+                //             colors[0].r, colors[0].g, colors[0].b,
+                //             colors[0].r, colors[0].g, colors[0].b,
 
-                            // colors[0].r, colors[0].g, colors[0].b,
-                            // colors[1].r, colors[1].g, colors[1].b,
-                            // colors[2].r, colors[2].g, colors[2].b,
+                //             // colors[0].r, colors[0].g, colors[0].b,
+                //             // colors[1].r, colors[1].g, colors[1].b,
+                //             // colors[2].r, colors[2].g, colors[2].b,
 
-                            // colors[3].r, colors[3].g, colors[3].b,
-                            // colors[0].r, colors[0].g, colors[0].b,
-                            // colors[2].r, colors[2].g, colors[2].b,
-                        )
-                    }
-                }
+                //             // colors[3].r, colors[3].g, colors[3].b,
+                //             // colors[0].r, colors[0].g, colors[0].b,
+                //             // colors[2].r, colors[2].g, colors[2].b,
+                //         )
+                //     }
+                // }
             }
         }
 
         vertices.set(verticesArr);
-        colors.set(colorArr);
-        geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
-        if (!isShadow) {
-            geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-        }
+        geometry.setAttribute(
+            "position",
+            new THREE.BufferAttribute(vertices, 3)
+        );
         geometry.computeVertexNormals();
-        geometry.translate(-this.width/2, 0, -this.depth/2);
+        geometry.translate(-this.width / 2, 0, -this.depth / 2);
 
         return geometry;
     }
 
-    generatePerlin(offsetx: number = 0, offsety: number = 0, scale: number = 1, seed: number = 0): number[][] {
+    generatePerlin(
+        offsetx: number = 0,
+        offsety: number = 0,
+        scale: number = 1,
+        seed: number = 0
+    ): number[][] {
         perlin.seed(seed);
 
-        const m = []
+        const m = [];
 
         for (let x = 0; x < this.width; x++) {
             m[x] = [];
             for (let z = 0; z < this.depth; z++) {
                 // m[x][z] = (perlin.simplex2(x/scale+offsetx, z/scale+offsety)+1)/2;
-                m[x][z] = DEBUG_INFO.map.planify?0:(perlin.perlin2(x/scale+offsetx, z/scale+offsety)+1)/2;
+                m[x][z] = DEBUG_INFO.map.planify
+                    ? 0
+                    : (perlin.perlin2(
+                          x / scale + offsetx,
+                          z / scale + offsety
+                      ) +
+                          1) /
+                      2;
             }
         }
 
@@ -235,7 +264,10 @@ export default class PlaneComponent implements ComponentInterface {
         posVec.x = Math.round(coord.x);
         posVec.z = Math.round(coord.y);
 
-        const y = this.map[Math.round(coord.y+this.depth/2)][Math.round(coord.x+this.width/2)];
+        const y =
+            this.map[Math.round(coord.y + this.depth / 2)][
+                Math.round(coord.x + this.width / 2)
+            ];
         posVec.y = y;
 
         return posVec;
@@ -245,7 +277,10 @@ export default class PlaneComponent implements ComponentInterface {
         var normVec = new THREE.Vector3();
 
         const ray = new THREE.Raycaster();
-        ray.set(new THREE.Vector3(coord.x, this.height*10, coord.y), new THREE.Vector3(0, -1, 0));
+        ray.set(
+            new THREE.Vector3(coord.x, this.height * 10, coord.y),
+            new THREE.Vector3(0, -1, 0)
+        );
 
         const intersect = ray.intersectObject(this.mesh)[0];
 
@@ -254,18 +289,20 @@ export default class PlaneComponent implements ComponentInterface {
             normVec = intersect.face.normal;
         }
 
-        const v: Vertex = {position: posVec, normal: normVec};
+        const v: Vertex = { position: posVec, normal: normVec };
         v.apropiated = this.checkStepness(v);
 
         return v;
     }
     getGridByCoordinates(coord: THREE.Vector2): THREE.Vector3 {
         var posVec = new THREE.Vector3();
-        posVec.x = (coord.x/(this.width/2-.5))*(this.gridDefinition/2);
-        posVec.y = (coord.y/(this.depth/2-.5))*(this.gridDefinition/2);
+        posVec.x =
+            (coord.x / (this.width / 2 - 0.5)) * (this.gridDefinition / 2);
+        posVec.y =
+            (coord.y / (this.depth / 2 - 0.5)) * (this.gridDefinition / 2);
 
-        posVec.x = Math.round(posVec.x)+10;
-        posVec.y = Math.round(posVec.y)+10;
+        posVec.x = Math.round(posVec.x) + 10;
+        posVec.y = Math.round(posVec.y) + 10;
 
         console.log(this.grid[posVec.x][posVec.y].position);
 
@@ -279,8 +316,12 @@ export default class PlaneComponent implements ComponentInterface {
             for (let j = 0; j < this.gridDefinition; j++) {
                 const p = new THREE.Vector2();
                 // p.x = ((i/(this.gridDefinition-1))*2-1)*(this.width-1)/2-.5;
-                p.x = ((i/(this.gridDefinition-1))*2-1)*(this.width/2-.5);
-                p.y = ((j/(this.gridDefinition-1))*2-1)*(this.depth/2-.5);
+                p.x =
+                    ((i / (this.gridDefinition - 1)) * 2 - 1) *
+                    (this.width / 2 - 0.5);
+                p.y =
+                    ((j / (this.gridDefinition - 1)) * 2 - 1) *
+                    (this.depth / 2 - 0.5);
 
                 p.x = Math.floor(p.x);
                 p.y = Math.floor(p.y);
@@ -291,12 +332,12 @@ export default class PlaneComponent implements ComponentInterface {
     }
     //TODO: check areas that is inaccessible
     optimizeGrid() {
-        for (let i = 1; i < this.gridDefinition-1; i++) {
-            for (let j = 1; j < this.gridDefinition-1; j++) {
+        for (let i = 1; i < this.gridDefinition - 1; i++) {
+            for (let j = 1; j < this.gridDefinition - 1; j++) {
                 var neighborhood = 0;
                 for (let k = 0; k < 9; k++) {
-                    const x = i-((k%3)-1);
-                    const y = j-(Math.floor(k/3)-1);
+                    const x = i - ((k % 3) - 1);
+                    const y = j - (Math.floor(k / 3) - 1);
                     const v = this.grid[x][y];
 
                     if (!v.apropiated) {
@@ -306,7 +347,7 @@ export default class PlaneComponent implements ComponentInterface {
 
                 if (neighborhood <= 3) {
                     this.grid[i][j].apropiated = true;
-                }else if (neighborhood >= 6) {
+                } else if (neighborhood >= 6) {
                     this.grid[i][j].apropiated = false;
                 }
                 if (this.grid[i][j].position.y < 0) {
@@ -318,16 +359,18 @@ export default class PlaneComponent implements ComponentInterface {
         for (let i = 0; i < this.gridDefinition; i++) {
             this.grid[0][i].apropiated = false;
             this.grid[i][0].apropiated = false;
-            this.grid[this.gridDefinition-1][i].apropiated = false;
-            this.grid[i][this.gridDefinition-1].apropiated = false;
+            this.grid[this.gridDefinition - 1][i].apropiated = false;
+            this.grid[i][this.gridDefinition - 1].apropiated = false;
         }
     }
     drawGrid() {
         for (let i = 0; i < this.gridDefinition; i++) {
             for (let j = 0; j < this.gridDefinition; j++) {
                 const g = this.grid[i][j];
-                const geometry = new THREE.SphereGeometry(.25);
-                const material = new THREE.MeshStandardMaterial({color: g.apropiated?"green":"red"});
+                const geometry = new THREE.SphereGeometry(0.25);
+                const material = new THREE.MeshStandardMaterial({
+                    color: g.apropiated ? "green" : "red",
+                });
                 const mesh = new THREE.Mesh(geometry, material);
                 mesh.position.x = g.position.x;
                 mesh.position.y = g.position.y;
@@ -340,11 +383,12 @@ export default class PlaneComponent implements ComponentInterface {
     checkStepness(vertex: Vertex) {
         const rotation = new THREE.Vector2();
         rotation.x = -Math.atan2(vertex.normal.y, vertex.normal.z);
-        rotation.y = 1/2*Math.PI-Math.atan2(vertex.normal.y, vertex.normal.x);
+        rotation.y =
+            (1 / 2) * Math.PI - Math.atan2(vertex.normal.y, vertex.normal.x);
 
         if (
-            Math.abs(rotation.x*180/Math.PI+90)>MAX_STEPNESS ||
-            Math.abs(rotation.y*180/Math.PI)>MAX_STEPNESS
+            Math.abs((rotation.x * 180) / Math.PI + 90) > MAX_STEPNESS ||
+            Math.abs((rotation.y * 180) / Math.PI) > MAX_STEPNESS
         ) {
             return false;
         }
@@ -352,19 +396,136 @@ export default class PlaneComponent implements ComponentInterface {
         return true;
     }
 
-    getColor(height: number, highestPeak: number): color {
-        const actualHeight = (height*highestPeak);
-        // if (height*highestPeak < 0) {
-        //     return {r: 95/255, g: 152/255, b: 245/255}
-        // }else
-        if (actualHeight < this.height/this.perlinPower1/20) {
-            return {r: 240/255, g: 187/255, b: 98/255}
-        }else if (actualHeight < this.height/this.perlinPower1/2) {
-            return {r: 81/255, g: 146/255, b: 89/255}
-        }else if (actualHeight < this.height/this.perlinPower1*2) {
-            return {r: 100/255, g: 102/255, b: 107/255}
-        }else {
-            return {r: 1, g: 1, b: 1}
+    setColor(map: number[][], geo: THREE.BufferGeometry, highestPeak: number) {
+        const size = (this.width - 1) * (this.depth - 1) * 6 * 3;
+        const colors = new Float32Array(size);
+        let colorArr = [];
+
+        const f = (i, j) => {
+            return {
+                x: i - this.width / 2,
+                y: j - this.height / 2,
+            };
+        };
+
+        for (let x = 0; x < map.length - 1; x++) {
+            for (let z = 0; z < map[x].length - 1; z++) {
+                const pos = [
+                    // new THREE.Vector2(z+1, x+1),
+                    // new THREE.Vector2(z, x+1),
+                    // new THREE.Vector2(z, x),
+                    // new THREE.Vector2(z+1, x),
+
+                    f(x + 1, z + 1),
+                    f(x + 1, z),
+                    f(x, z),
+                    f(x, z + 1),
+                ].map((value) => {
+                    return new THREE.Vector2(value.x, value.y);
+                });
+
+                const colors = [
+                    this.getColor(
+                        this.getVertexByCoordinates(pos[0]),
+                        map[z + 1][x + 1],
+                        highestPeak
+                    ),
+                    this.getColor(
+                        this.getVertexByCoordinates(pos[1]),
+                        map[z][x + 1],
+                        highestPeak
+                    ),
+                    this.getColor(
+                        this.getVertexByCoordinates(pos[2]),
+                        map[z][x],
+                        highestPeak
+                    ),
+                    this.getColor(
+                        this.getVertexByCoordinates(pos[3]),
+                        map[z + 1][x],
+                        highestPeak
+                    ),
+                ];
+
+                if (DEBUG_INFO.showWireframe) {
+                    colorArr.push(
+                        map[z + 1][x + 1],
+                        map[z + 1][x + 1],
+                        map[z + 1][x + 1],
+                        map[z][x + 1],
+                        map[z][x + 1],
+                        map[z][x + 1],
+                        map[z][x],
+                        map[z][x],
+                        map[z][x],
+
+                        map[z + 1][x],
+                        map[z + 1][x],
+                        map[z + 1][x],
+                        map[z + 1][x + 1],
+                        map[z + 1][x + 1],
+                        map[z + 1][x + 1],
+                        map[z][x],
+                        map[z][x],
+                        map[z][x]
+                    );
+                } else {
+                    colorArr.push(
+                        colors[0].r,
+                        colors[0].g,
+                        colors[0].b,
+                        colors[0].r,
+                        colors[0].g,
+                        colors[0].b,
+                        colors[0].r,
+                        colors[0].g,
+                        colors[0].b,
+
+                        colors[0].r,
+                        colors[0].g,
+                        colors[0].b,
+                        colors[0].r,
+                        colors[0].g,
+                        colors[0].b,
+                        colors[0].r,
+                        colors[0].g,
+                        colors[0].b
+
+                        // colors[0].r, colors[0].g, colors[0].b,
+                        // colors[1].r, colors[1].g, colors[1].b,
+                        // colors[2].r, colors[2].g, colors[2].b,
+
+                        // colors[3].r, colors[3].g, colors[3].b,
+                        // colors[0].r, colors[0].g, colors[0].b,
+                        // colors[2].r, colors[2].g, colors[2].b,
+                    );
+                }
+            }
         }
+
+        colors.set(colorArr);
+        geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+        geo.computeVertexNormals();
+        return geo;
+    }
+
+    getColor(vert: Vertex, height: number, highestPeak: number): color {
+        const actualHeight = (height*highestPeak);
+
+        if (actualHeight < this.height/this.perlinPower1/20) return {r: 240/255, g: 187/255, b: 98/255};
+        if (actualHeight > this.height/this.perlinPower1*2) return {r: 1, g: 1, b: 1}
+        if (vert.apropiated) return { r: 81 / 255, g: 146 / 255, b: 89 / 255 };
+
+        return { r: 100 / 255, g: 102 / 255, b: 107 / 255 };
+
+        // if (actualHeight < this.height/this.perlinPower1/20) {
+        //     return {r: 240/255, g: 187/255, b: 98/255}
+        // }else if (actualHeight < this.height/this.perlinPower1/2) {
+        //     return {r: 81/255, g: 146/255, b: 89/255}
+        // }else if (actualHeight < this.height/this.perlinPower1*2) {
+        //     return {r: 100/255, g: 102/255, b: 107/255}
+        // }else {
+        //     return {r: 1, g: 1, b: 1}
+        // }
     }
 }
