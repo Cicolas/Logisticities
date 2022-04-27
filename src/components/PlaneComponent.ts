@@ -6,6 +6,7 @@ import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 import { color, InverseLerp, position, Vertex } from '../scripts/utils';
+import util from 'util';
 const perlin = require('../lib/perlin').noise;
 
 const FALLOUT = {
@@ -54,6 +55,7 @@ export default class PlaneComponent implements ComponentInterface {
     private gw: GameController;
 
     private map: number[][] = [];
+    private vertexMap: Vertex[][] = [];
     public grid: Vertex[][] = [];
     private gridDefinition: number;
     private seaLevel: number;
@@ -217,27 +219,42 @@ export default class PlaneComponent implements ComponentInterface {
 
         return posVec;
     }
+    //TODO: reimplement like in wasm branch
     getVertexByCoordinates(coord: position): Vertex {
-        var posVec = new THREE.Vector3();
-        var normVec = new THREE.Vector3();
+        //caches every vertex into this.vertexMap
+        if (this.vertexMap.length <= 0) {
+            for (let x = 0; x < this.width; x++) {
+                this.vertexMap[x] = [];
+                for (let z = 0; z < this.depth; z++) {
+                    let posVec = new THREE.Vector3();
+                    let normVec = new THREE.Vector3();
 
-        const ray = new THREE.Raycaster();
-        ray.set(
-            new THREE.Vector3(coord.x, this.height * 10, coord.y),
-            new THREE.Vector3(0, -1, 0)
-        );
+                    const ray = new THREE.Raycaster();
+                    const rx = x+.5-this.width/2;
+                    const rz = z+.5-this.depth/2;
 
-        const intersect = ray.intersectObject(this.mesh)[0];
+                    ray.set(
+                        new THREE.Vector3(rx, this.height * 10, rz),
+                        new THREE.Vector3(0, -1, 0)
+                    );
 
-        if (intersect) {
-            posVec = intersect.point;
-            normVec = intersect.face.normal;
+                    const intersect = ray.intersectObject(this.mesh)[0];
+                    if (intersect) {
+                        posVec = intersect.point;
+                        normVec = intersect.face.normal;
+                    }
+
+                    const v: Vertex = { position: posVec, normal: normVec };
+                    v.apropiated = this.checkStepness(v);
+
+                    this.vertexMap[x][z] = v;
+                }
+            }
         }
+        const ix = Math.round(coord.x+this.width/2);
+        const iz = Math.round(coord.y+this.depth/2);
 
-        const v: Vertex = { position: posVec, normal: normVec };
-        v.apropiated = this.checkStepness(v);
-
-        return v;
+        return this.vertexMap[ix===this.width?this.width-1:ix][iz===this.depth?this.depth-1:iz];
     }
     getGridByCoordinates(coord: position): THREE.Vector3 {
         var posVec = new THREE.Vector3();
@@ -342,6 +359,8 @@ export default class PlaneComponent implements ComponentInterface {
         const size = (this.width - 1) * (this.depth - 1) * 6 * 3;
         const colors = new Float32Array(size);
         let colorArr = [];
+
+        let allVertex;
 
         const f = (i, j) => {
             return {
