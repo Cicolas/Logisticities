@@ -17,7 +17,7 @@ import SliderElement from './components/UI/slider/SliderElement';
 import UpgradeBar from './components/UI/UpgradeBar/UpgradeBarElement';
 import UpgradeBarElement from './components/UI/UpgradeBar/UpgradeBarElement';
 import FloatingElement from './components/UI/floatingIcon/FloatingElement';
-// import AmbientLightComponent from './components/AmbientLightComponent';
+import AmbientLightComponent from './components/AmbientLightComponent';
 
 if (!DEBUG_INFO.camera.dontChangeSize) {
     document.body.classList.add("resizable");
