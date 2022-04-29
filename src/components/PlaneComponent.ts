@@ -107,12 +107,12 @@ export default class PlaneComponent implements ComponentInterface {
         this.geometry = this.rectangleGeometry(this.map, highestPeak);
 
         const shadow = this.geometry;
-        const shadowMat = new THREE.MeshPhongMaterial({
+        const shadowMat = new THREE.MeshLambertMaterial({
             depthFunc: THREE.EqualDepth,
             transparent: true,
             blending: THREE.MultiplyBlending,
-            shininess: 0,
-            reflectivity: 0
+            // shininess: 0,
+            // reflectivity: 0
         });
         const shadowMesh = new THREE.Mesh(shadow, shadowMat);
         shadowMesh.name = "shadow";

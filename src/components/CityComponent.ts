@@ -32,6 +32,8 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     name: string = "CityComponent";
     private gw: GameController;
     public mesh: THREE.Mesh;
+    public material: THREE.Material;
+    public geometry: THREE.ShapeGeometry | THREE.BoxGeometry;
 
     public cityName: string;
     public isSelected: boolean;
@@ -60,11 +62,14 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     init(gameWin: GameController) {
         this.gw = gameWin;
         this.plane = gameWin.getScene().getObject("plano").getComponent(PlaneComponent) as PlaneComponent;
+        this.material = new THREE.MeshStandardMaterial({
+            color: "white",
+        });
 
         if (DEBUG_INFO.city.dontLoadObj) {
-            const geometry = new THREE.BoxGeometry(this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE);
-            const material = new THREE.MeshStandardMaterial({color: "purple"});
-            this.mesh = new THREE.Mesh(geometry, material);
+            this.geometry = new THREE.BoxGeometry(this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE);
+            // const material = new THREE.MeshStandardMaterial({color: "purple"});
+            this.mesh = new THREE.Mesh(this.geometry, this.material);
             this.mesh.name = this.UUID;
             this.mesh.rotation.x = 3/2*Math.PI;
             this.setCity();
@@ -135,7 +140,10 @@ export default class CityComponent implements ComponentInterface, CityInterface 
             const c = obj.children[0] as THREE.Mesh;
             c.parent = null;
 
-            this.mesh = c;
+            this.geometry = c.geometry;
+            this.mesh = new THREE.Mesh(this.geometry, this.material);
+            this.mesh.castShadow = true;
+            this.mesh.receiveShadow = true;
             this.mesh.name = this.UUID;
             this.setCity();
             this.mesh.scale.x = this.definiton/80;
