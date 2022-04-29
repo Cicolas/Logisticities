@@ -17,6 +17,9 @@ import SliderElement from './components/UI/slider/SliderElement';
 import UpgradeBar from './components/UI/UpgradeBar/UpgradeBarElement';
 import UpgradeBarElement from './components/UI/UpgradeBar/UpgradeBarElement';
 import FloatingElement from './components/UI/floatingIcon/FloatingElement';
+import ShaderBoxComponent from './test/components/ShaderBoxComponent';
+import { AmbientLight } from 'three';
+import AmbientLightComponent from './components/AmbientLightComponent';
 
 if (!DEBUG_INFO.camera.dontChangeSize) {
     document.body.classList.add("resizable");
@@ -45,7 +48,7 @@ const cameraI = {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     depth: DEPTH,
-    cameraAngle: 1/4 * Math.PI,
+    cameraAngle: DEBUG_INFO.testMode?0:1/4 * Math.PI,
     cameraDistance: .9,
     isLocked: true,
     quad: {
@@ -53,7 +56,8 @@ const cameraI = {
         right: WIDTH/2,
         top: HEIGHT/(2-((MAPSIZE-1)*.5)),
         bottom: -HEIGHT/(2-((MAPSIZE-1)*.5))
-    }
+    },
+    rotation: DEBUG_INFO.testMode?0:1/4 * Math.PI
 };
 
 const planeI = {
@@ -110,14 +114,12 @@ const gw: GameController = new GameController("", cameraI)
         .addComponent(_UI)
     );
 }).initGame() as GameController;
-setTimeout(createNewScene, 10);
+setTimeout(DEBUG_INFO.testMode?createNewTestScene:createNewScene, 10);
 
 gw.updateTHREE();
 
 export function createNewScene() {
-    if (gw.getScene().name === "cena") {
-        gw.threeScene.clear();
-    }
+    gw.threeScene?.clear();
 
     planeI.seed = DEBUG_INFO.seed>0?DEBUG_INFO.seed:Math.random()*100000;
 
@@ -128,6 +130,7 @@ export function createNewScene() {
     ).addObject(
         new GObject("luz")
         .addComponent(new LightComponent(HEIGHT))
+        .addComponent(new AmbientLightComponent())
     ).addObject(
         new GObject("gameManager")
         .addComponent(new GameManager(DEFINITION*8, MAPSIZE, GRID_DEFINITION))
@@ -184,6 +187,28 @@ export function createNewScene() {
             // })
         )
     );
+
+    gw.popScene();
+    gw.pushScene(scene);
+}
+
+function createNewTestScene() {
+    gw.threeScene?.clear();
+
+    const scene = new Scene("teste")
+        .addObject(
+            new GObject("camera")
+                .addComponent(new CameraComponent(cameraI))
+                .addComponent(new CameraMovement())
+        )
+        .addObject(new GObject("luz").addComponent(new LightComponent(HEIGHT)))
+        .addObject(new GObject("test").addComponent(new ShaderBoxComponent()))
+        .initScene(gw)
+        .addObject(
+            new GObject("UIManager").addComponent(
+                _UI
+            )
+        );
 
     gw.popScene();
     gw.pushScene(scene);

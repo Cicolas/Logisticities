@@ -15,7 +15,8 @@ export interface CameraInterface{
     height: number,
     depth: number,
     isLocked: boolean,
-    quad: cameraQuad
+    quad: cameraQuad,
+    rotation?: number,
 }
 
 export default class CameraComponent implements ComponentInterface {
@@ -45,7 +46,7 @@ export default class CameraComponent implements ComponentInterface {
         this.depth = cameraI.depth;
         this.quad = cameraI.quad;
         this.isLocked = cameraI.isLocked;
-        this.rotation = -Math.PI/4;
+        this.rotation = cameraI.rotation??-Math.PI/4;
         this.anchor = new THREE.Vector3();
     }
 

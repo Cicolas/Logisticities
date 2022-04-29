@@ -6,23 +6,19 @@ import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 
-export default class LightComponent implements ComponentInterface {
-    name: string = "LightComponent";
-    public light: THREE.DirectionalLight;
+export default class AmbientLightComponent implements ComponentInterface {
+    name: string = "AmbientLightComponent";
+    public light: THREE.AmbientLightProbe;
     public ambientLight: THREE.AmbientLight;
 
-    private height: number;
     private camera: THREE.Camera;
 
-    constructor(height: number){
-        this.height = height;
+    constructor(){
     }
 
     init(gameWin: GameController) {
         this.camera = gameWin.threeCamera;
-        this.light = new THREE.DirectionalLight(0xffffff, .7);
-        this.light.position.y = this.height;
-        this.light.castShadow = true;
+        this.light = new THREE.AmbientLightProbe(0xe8e8e8, .4);
 
         if (!DEBUG_INFO.noLight)
             (gameWin as GameController).threeScene.add(this.light);

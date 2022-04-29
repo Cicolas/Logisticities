@@ -1,10 +1,12 @@
 export const DEBUG_INFO = {
     seed: -1,
+    testMode: false,
 
     //plane related show/hide
     showGrid: false,
     showWireframe: false,
     noMask: true,
+    noLight: false,
 
     //engine related show/hide
     hideFog: false,

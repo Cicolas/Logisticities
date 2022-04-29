@@ -27,6 +27,10 @@ module.exports = {
             {
                 test: /\.(woff2?|eot|ttf|otf|png|gif|jpg|jpeg|obj)(\?.*)?$/,
                 loader: 'file-loader'
+            },
+            {
+                test: /\.(vert|frag)$/,
+                loader: 'raw-loader'
             }
         ]
     },
@@ -35,7 +39,7 @@ module.exports = {
         alias: {
             three: path.resolve('./node_modules/three')
         },
-        extensions: ['.js', '.ejs', '.json', '.jsx', '.ts', '.tsx', '.css', '.jpg', '.jpeg', '.png', '.gif']
+        extensions: ['.js', '.ejs', '.json', '.jsx', '.ts', '.tsx', '.css', '.jpg', '.jpeg', '.png', '.obj', '.gif', '.vert', '.frag']
     },
 
     devtool: 'source-map',
