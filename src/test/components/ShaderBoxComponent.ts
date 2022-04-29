@@ -8,14 +8,14 @@ import { color, InverseLerp, position, Vertex } from '../../scripts/utils';
 import util from 'util';
 
 import vertShader from "../shaders/default.vert";
-import directionalShader from "../shaders/directionalLight.frag";
+import fragShader from "../shaders/default.frag";
 
 const SMOOTHNESS = 300;
 
 export default class ShaderBoxComponent implements ComponentInterface {
     name: string = "ShaderBoxComponent";
     public mesh: THREE.Mesh;
-    private geometry: THREE.BoxGeometry;
+    private geometry: any;
     private material: THREE.Material;
     private gw: GameController;
 
@@ -26,35 +26,43 @@ export default class ShaderBoxComponent implements ComponentInterface {
     public uniformsTable = {
         "time": { value: 1.0 },
         "resolution": {value: new THREE.Vector2()},
-        "color": {value: new THREE.Vector3(1, 1, 1)},
+        "color": {value: new THREE.Vector3(1, .2, 1)},
         "directionalLightColor": {value: new THREE.Vector3(1, 1, 1)},
-        "directionalLightDirection": {value: new THREE.Vector3(0, 0, 1)}
+        "directionalLightDirection": {value: new THREE.Vector3(0, 1, 0)},
+        "directionalLightIntensity": {value: .7},
+        "ambientLightColor": {value: new THREE.Vector3(171/255, 220/255, 255/255)},
+        "ambientLightIntensity": {value: .3},
+        "pointLightColors": {value: []},
+        "pointLightIntensity": {value: []},
+        "pointLightPosition": {value: []},
+        "fogColor": { value: new THREE.Vector3()},
+        "fog": {value: new THREE.Vector3()},
+        "fogNear": {value: 0},
+        "fogFar": {value: 0},
     }
 
     constructor() {}
 
-    async init(gameWin: GameController) {
+    init(gameWin: GameController) {
         this.gw = gameWin;
 
-        this.geometry = new THREE.BoxGeometry(10, 10, 10);
-        // this.material = new THREE.ShaderMaterial({
-        //     defines: {
-        //         PI: Math.PI
-        //     },
-        //     uniforms: this.uniformsTable,
-        //     fragmentShader: directionalShader,
-        //     vertexShader: vertShader
-        // });
-        this.material = new THREE.MeshToonMaterial({
-            color: "#fff"
+        this.geometry = new THREE.IcosahedronGeometry(10, 1);
+        this.material = new THREE.ShaderMaterial({
+            defines: {
+                PI: Math.PI
+            },
+            uniforms: this.uniformsTable,
+            fragmentShader: fragShader,
+            vertexShader: vertShader
         });
         this.mesh = new THREE.Mesh(this.geometry, this.material);
 
+        this.setFog(this.uniformsTable, gameWin.threeScene);
         this.uniformsTable["resolution"].value =
             new THREE.Vector2(gameWin.width, gameWin.height);
         this.gw.threeScene.add(this.mesh);
 
-        setTimeout(this.postInit.bind(this, gameWin), 100);
+        // setTimeout(this.postInit.bind(this, gameWin), 100);
     }
 
     postInit(gameWin: GameController) {
@@ -98,5 +106,24 @@ export default class ShaderBoxComponent implements ComponentInterface {
     rotate(move: position) {
         this.mesh.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), -move.x);
         this.mesh.rotateOnWorldAxis(new THREE.Vector3(1, 0, 0), -move.y);
+    }
+
+    setFog(uniforms, threeScene: THREE.Scene) {
+        uniforms["fogColor"].value = new THREE.Vector3(
+            threeScene.fog.color.r,
+            threeScene.fog.color.g,
+            threeScene.fog.color.b
+            // 0, 0, 0
+        );
+        uniforms["fog"].value = new THREE.Vector3(
+            threeScene.fog.color.r,
+            threeScene.fog.color.g,
+            threeScene.fog.color.b
+            // 0, 0, 0
+        );
+        //@ts-ignore
+        uniforms["fogNear"].value = threeScene.fog.near;
+        //@ts-ignore
+        uniforms["fogFar"].value = threeScene.fog.far;
     }
 }

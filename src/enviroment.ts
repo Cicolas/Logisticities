@@ -1,6 +1,6 @@
 export const DEBUG_INFO = {
     seed: -1,
-    testMode: false,
+    testMode: true,
 
     //plane related show/hide
     showGrid: false,
@@ -13,7 +13,7 @@ export const DEBUG_INFO = {
     hideSea: false,
 
     //game related show/hide
-    noCities: false,
+    noCities: true,
     noRoadSmooth: false,
     showRoadGuides: false,
     showRoadVertices: false,

@@ -48,7 +48,7 @@ const cameraI = {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     depth: DEPTH,
-    cameraAngle: DEBUG_INFO.testMode?0:1/4 * Math.PI,
+    cameraAngle: 1/4 * Math.PI,
     cameraDistance: .9,
     isLocked: true,
     quad: {

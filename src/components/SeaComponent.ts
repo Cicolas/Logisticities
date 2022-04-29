@@ -6,6 +6,9 @@ import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 import { color } from '../scripts/utils';
 
+import fragShader from '../shaders/water/water.frag';
+import vertShader from '../shaders/water/water.vert';
+
 export interface SeaInterface {
     width: number;
     height: number;
@@ -25,7 +28,20 @@ export default class SeaComponent implements ComponentInterface {
     private color: THREE.Color;
     private opacity: number;
 
-    constructor(seaI: SeaInterface){
+    public uniforms = {
+        time: { value: 0 },
+        resolution: { value: new THREE.Vector2() },
+        color: { value: new THREE.Vector3() },
+        fogColor: { value: new THREE.Vector3() },
+        fog: { value: new THREE.Vector3() },
+        fogNear: { value: 0 },
+        fogFar: { value: 0 },
+        // "fogColor":    {value: scene.fog.color },
+        // "fogNear":     {value: scene.fog.near },
+        // "fogFar":      {value: scene.fog.far }
+    };
+
+    constructor(seaI: SeaInterface) {
         this.width = seaI.width;
         this.depth = seaI.depth;
         this.opacity = seaI.opacity;
@@ -36,33 +52,57 @@ export default class SeaComponent implements ComponentInterface {
     }
 
     init(gameWin: GameController) {
-        // console.log(this.map);
-        this.geometry = new THREE.PlaneGeometry(this.width-1, this.depth-1);
-        this.material = new THREE.MeshStandardMaterial({
-            color: this.color,
-            opacity: this.opacity,
-            // depthFunc: THREE.NotEqualDepth,
-            transparent: true
-            // blending: THREE.MultiplyBlending,
+        this.geometry = new THREE.PlaneGeometry(this.width - 1, this.depth - 1);
+        this.uniforms["resolution"].value = new THREE.Vector2(
+            gameWin.width,
+            gameWin.height
+        );
+        this.uniforms["color"].value = new THREE.Vector3(
+            this.color.r,
+            this.color.g,
+            this.color.b
+        );
+        this.uniforms["fogColor"].value = new THREE.Vector3(
+            gameWin.threeScene.fog.color.r,
+            gameWin.threeScene.fog.color.g,
+            gameWin.threeScene.fog.color.b
+            // 0, 0, 0
+        );
+        this.uniforms["fog"].value = new THREE.Vector3(
+            gameWin.threeScene.fog.color.r,
+            gameWin.threeScene.fog.color.g,
+            gameWin.threeScene.fog.color.b
+            // 0, 0, 0
+        );
+        //@ts-ignore
+        this.uniforms["fogNear"].value = gameWin.threeScene.fog.near;
+        //@ts-ignore
+        this.uniforms["fogFar"].value = gameWin.threeScene.fog.far;
+
+        this.material = new THREE.ShaderMaterial({
+            uniforms: this.uniforms,
+            fragmentShader: fragShader,
+            vertexShader: vertShader,
+            fog: true,
         });
+
         this.material.visible = true;
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
         this.mesh.name = "sea";
         this.mesh.receiveShadow = true;
-        this.mesh.rotation.x = -Math.PI/2;
-        this.mesh.position.x = -.5;
-        this.mesh.position.z = -.5;
+        this.mesh.rotation.x = -Math.PI / 2;
+        this.mesh.position.x = -0.5;
+        this.mesh.position.z = -0.5;
 
         if (!DEBUG_INFO.hideSea) {
             gameWin.threeScene.add(this.mesh);
         }
     }
 
-    update(obj: GObject, gameWin: GameWindow) {
-        // this.mesh.rotation.y += 0.01;
-        // (this.mesh.material as THREE.MeshStandardMaterial).color = new Color(0x3b9126);
+    update(obj: GObject, gameWin: GameController) {
+        this.uniforms["time"].value = gameWin.frame;
     }
 
-    draw (context?: THREE.Scene) {};
+    draw(context?: THREE.Scene) {}
 }
