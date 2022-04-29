@@ -54,7 +54,7 @@ const cameraI = {
         top: HEIGHT/(2-((MAPSIZE-1)*.5)),
         bottom: -HEIGHT/(2-((MAPSIZE-1)*.5))
     }
-}
+};
 
 const planeI = {
     // seed: 47187,
@@ -108,7 +108,7 @@ const gw: GameController = new GameController("", cameraI)
     gameWin.getScene().addObject(
         new GObject("UIManager")
         .addComponent(_UI)
-    )
+    );
 }).initGame() as GameController;
 setTimeout(createNewScene, 10);
 

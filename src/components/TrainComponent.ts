@@ -71,7 +71,7 @@ export default class TrainComponent implements ComponentInterface, Train {
     draw (context?: THREE.Scene) {};
 
     setPosition(t: number) {
-        var percent = t
+        var percent = t;
         if(this.direction === -1){
             percent = -1*(percent-1);
         }
@@ -91,7 +91,7 @@ export default class TrainComponent implements ComponentInterface, Train {
     }
 
     finishCourse() {
-        this.gw.threeScene.remove(this.mesh)
+        this.gw.threeScene.remove(this.mesh);
         this.city.addTrain();
 
         const city2 =

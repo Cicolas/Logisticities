@@ -48,11 +48,11 @@ export default class UpgradeComponent implements ComponentInterface {
         this.visible = !this.visible;
 
         if (this.visible){
-            this.upgradeElem.elem.classList.remove("hidden")
+            this.upgradeElem.elem.classList.remove("hidden");
             this.getUpgrades();
         }
         else{
-            this.upgradeElem.elem.classList.add("hidden")
+            this.upgradeElem.elem.classList.add("hidden");
         }
     }
 

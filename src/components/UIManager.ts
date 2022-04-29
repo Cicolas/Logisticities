@@ -31,7 +31,7 @@ export default class UIManager implements ComponentInterface {
             if (value.update) {
                 value.update(gameWin);
             }
-        })
+        });
     }
     draw (context?: THREE.Scene) {};
 

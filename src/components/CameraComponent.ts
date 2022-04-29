@@ -69,7 +69,7 @@ export default class CameraComponent implements ComponentInterface {
         this.camera = this.isLocked?this.orthoCam:this.perspectiveCam;
         this.gw.threeCamera = this.camera;
 
-        window.addEventListener("resize", this.resize.bind(this))
+        window.addEventListener("resize", this.resize.bind(this));
     }
 
     resetOrthoCam() {
@@ -116,7 +116,7 @@ export default class CameraComponent implements ComponentInterface {
             velz.x = dir.y*velocity/Math.SQRT2*Math.sin(this.rotation);
             velz.y = dir.y*velocity/Math.SQRT2*Math.cos(this.rotation);
 
-            this.camera.translateOnAxis(new THREE.Vector3(1, 0, 0), dir.x*velocity)
+            this.camera.translateOnAxis(new THREE.Vector3(1, 0, 0), dir.x*velocity);
             this.camera.position.x += velz.x;
             this.camera.position.z += velz.y;
         }

@@ -12,7 +12,7 @@ const perlin = require('../lib/perlin').noise;
 const FALLOUT = {
     min: .1,
     max: .9
-}
+};
 const MAX_STEPNESS = 15;
 
 export interface colorMap {
@@ -115,7 +115,7 @@ export default class PlaneComponent implements ComponentInterface {
             reflectivity: 0
         });
         const shadowMesh = new THREE.Mesh(shadow, shadowMat);
-        shadowMesh.name = "shadow"
+        shadowMesh.name = "shadow";
 
         this.mesh = new THREE.Mesh(this.geometry);
         this.mesh.name = "plano";
@@ -166,7 +166,7 @@ export default class PlaneComponent implements ComponentInterface {
                     x-(this.width/2),   map[z+1][x],   z+1-(this.depth/2),
                     x+1-(this.width/2), map[z+1][x+1], z+1-(this.depth/2),
                     x-(this.width/2),   map[z][x],     z-(this.depth/2)
-                )
+                );
             }
         }
 
@@ -443,15 +443,14 @@ export default class PlaneComponent implements ComponentInterface {
 
     getColor(vert: Vertex, height: number, highestPeak: number): color {
         const actualHeight = (height*highestPeak);
+        if (actualHeight < this.height/80) return this.colors.sand;
 
         if (!DEBUG_INFO.map.altitudeColor) {
-            if (actualHeight < this.height/80) return this.colors.sand;
-            if (actualHeight > this.height) return this.colors.snow
+            if (actualHeight > this.height) return this.colors.snow;
             if (vert.apropiated) return this.colors.grass;
             return this.colors.rock;
         }
 
-        if (actualHeight < this.height/80) return this.colors.sand;
         if (actualHeight < this.height/4) return this.colors.grass;
         if (actualHeight < this.height) return this.colors.rock;
         return this.colors.snow;

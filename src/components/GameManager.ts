@@ -80,7 +80,7 @@ export default class GameManager implements ComponentInterface {
         this.UIMgr.addElement(this.slider,  {
             // position: {x: 400, y: gameWin.height-25},
             size: {x: gameWin.width-800, y: 10}
-        })
+        });
 
         this.upgradeBar = new UpgradeBarElement();
         this.UIMgr.addElement(this.upgradeBar);
@@ -118,7 +118,7 @@ export default class GameManager implements ComponentInterface {
                     CityComponent
                 ) as CityComponent;
                 if (city.addUpgrade(this.upgradePick)) {
-                    this.state = State.PLAYING
+                    this.state = State.PLAYING;
                     this.upgradePick = undefined;
                     this.addBoxUpgrade(city);
                     return;
@@ -191,7 +191,7 @@ export default class GameManager implements ComponentInterface {
             this.cityHovering = -1;
         }else{
             for (let i = 0; i < intersects.length; i++) {
-                const obj = this.gw.getScene().getObject(intersects[i].object.name.toString())
+                const obj = this.gw.getScene().getObject(intersects[i].object.name.toString());
 
                 if (obj) {
                     if (obj.name.startsWith("2")) {
@@ -224,9 +224,9 @@ export default class GameManager implements ComponentInterface {
             var y;
 
             do {
-                x = Math.floor(Math.random()*1000)%this.gridDefinition
-                y = Math.floor(Math.random()*1000)%this.gridDefinition
-            } while (!this.isValidCityPlace(x, y))
+                x = Math.floor(Math.random()*1000)%this.gridDefinition;
+                y = Math.floor(Math.random()*1000)%this.gridDefinition;
+            } while (!this.isValidCityPlace(x, y));
 
             const go = new GObject((++CITY_UUID).toString())
                         .addComponent(
@@ -284,7 +284,7 @@ export default class GameManager implements ComponentInterface {
                 this.UIMgr.addElement(this.box, {
                     position: {x: this.rawMousePos.x, y: this.rawMousePos.y-125},
                     size: {x: 300, y: 150},
-                })
+                });
             }else{
                 this.box.position = {x: this.rawMousePos.x, y: this.rawMousePos.y-125};
             }

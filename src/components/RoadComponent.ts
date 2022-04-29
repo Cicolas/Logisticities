@@ -51,7 +51,7 @@ export default class RoadComponent implements ComponentInterface {
             const material = new THREE.LineBasicMaterial({
                 color: 0x000000,
                 linejoin: "bevel",
-            })
+            });
 
             const cc1 = this.cities[0];
             const cc2 = this.cities[1];
@@ -74,7 +74,7 @@ export default class RoadComponent implements ComponentInterface {
                 const planeMat = new THREE.LineBasicMaterial({
                     color: 0xff0000,
                     linejoin: "bevel",
-                })
+                });
                 const planeGeo = new THREE.BufferGeometry().setFromPoints(this.points);
                 const planeLine = new THREE.Line(planeGeo, planeMat);
                 gameWin.threeScene.add(planeLine);
@@ -114,16 +114,16 @@ export default class RoadComponent implements ComponentInterface {
         const start = graph.grid[startPos.x][startPos.y];
         const end = graph.grid[finalPos.x][finalPos.y];
 
-        this.finalPath = jsAstar.astar.search(graph, start, end)
+        this.finalPath = jsAstar.astar.search(graph, start, end);
 
         const s = grid[startPos.x][startPos.y].position.clone();
-        s.y += .5
+        s.y += 0.5;
         this.points.push(s);
         for (let i = 0; i < this.finalPath.length; i++) {
             const element = this.finalPath[i];
 
             const pos = grid[element.x][element.y].position.clone();
-            pos.y += .5
+            pos.y += 0.5;
             this.points.push(pos);
         }
     }
@@ -201,10 +201,10 @@ export default class RoadComponent implements ComponentInterface {
 
     showRoadVerticecs(gameWin: GameController) {
         for (let i = 0; i < this.vertices.length; i++) {
-            const mat = new THREE.MeshStandardMaterial({color: 0x0000ff})
+            const mat = new THREE.MeshStandardMaterial({color: 0x0000ff});
             const geo = new THREE.SphereGeometry(.25);
-            const mesh = new THREE.Mesh(geo, mat)
-            mesh.position.copy(this.vertices[i])
+            const mesh = new THREE.Mesh(geo, mat);
+            mesh.position.copy(this.vertices[i]);
 
             gameWin.threeScene.add(mesh);
         }
@@ -243,27 +243,3 @@ export default class RoadComponent implements ComponentInterface {
         return conf1 && conf2;
     }
 }
-
-// calculateLine(cityPos1: THREE.Vector3, cityPos2: THREE.Vector3) {
-//     const definition = LINE_DEFINITION*((this.definition/(8*5))**1/2)*(this.distance/Math.SQRT2)*2;
-//     // console.log(definition);
-
-//     this.points.push(cityPos1);
-//     for (let i = 1; i <= Math.floor(definition); i++) {
-//         const step = definition/i;
-//         const x = (cityPos2.x - cityPos1.x)/step+cityPos1.x;
-//         const z = (cityPos2.z - cityPos1.z)/step+cityPos1.z;
-
-//         const pos = this.plane.getPositionByCoordinates(
-//             new THREE.Vector2(x, z)
-//         );
-
-//         // const pos = this.plane.getGridByCoordinates(
-//         //     new THREE.Vector2(x, z)
-//         // )
-
-//         pos.y += .5;
-//         this.points.push(pos);
-//     }
-//     this.points.push(cityPos2);
-// }

@@ -98,7 +98,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
                 addInventory(this.inventorySuply, {
                     id: this.productionSuply[i].id,
                     quantity: this.productionSuply[i].productionRate*gameWin.dt,
-                })
+                });
             }else {
                 this.productionSuply[i].needNumber += this.productionSuply[i].productionRate*gameWin.dt;
             }
@@ -142,7 +142,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
             this.mesh.scale.y = this.definiton/80;
             this.mesh.scale.z = this.definiton/80;
             gameWin.threeScene.add(this.mesh);
-        })
+        });
 
         return;
     }
@@ -153,7 +153,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     }
 
     startSuply() {
-        this.productionSuply.push(startRandomSuply(this))
+        this.productionSuply.push(startRandomSuply(this));
     }
 
     getNeeds() {
@@ -170,7 +170,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
             carrying: 0,
             capacity: 0,
             suply: null
-        })
+        });
     }
 
     receiveTrain(t: Train) {
@@ -181,7 +181,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
             return (
                 value.need === true
                 && value.id === t.suply.id
-            )
+            );
         });
 
         if (suply) {
@@ -191,7 +191,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
         addInventory(this.inventorySuply, {
             id: t.suply.id,
             quantity: t.carrying
-        })
+        });
     }
 
     sendTrain(cities: [CityInterface, RoadComponent, Suply][]) {
@@ -200,7 +200,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
 
             for (let i = 0; i < cities.length; i++) {
                 if (this.neverSent(cities[i])) {
-                    c = cities[i]
+                    c = cities[i];
                 }
             }
 
@@ -219,7 +219,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
                     new GObject("trem").addComponent(
                         new TrainComponent(t, this, c[1])
                     ).initObject(this.gw)
-                )
+                );
 
                 this.addLastSent(c);
             }
@@ -228,8 +228,8 @@ export default class CityComponent implements ComponentInterface, CityInterface 
 
     neverSent(item: [CityInterface, RoadComponent, Suply]) {
         const index = this.lastSent.findIndex(value => {
-            return (value[0].UUID === item[0].UUID && value[2].id === item[2].id)
-        })
+            return (value[0].UUID === item[0].UUID && value[2].id === item[2].id);
+        });
 
         return (index===-1)?true: false;
     }

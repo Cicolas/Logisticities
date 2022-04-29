@@ -8,7 +8,7 @@ export const DEBUG_INFO = {
 
     //engine related show/hide
     hideFog: false,
-    hideSea: true,
+    hideSea: false,
 
     //game related show/hide
     noCities: false,
@@ -32,4 +32,4 @@ export const DEBUG_INFO = {
         number: 4,
         dontLoadObj: false
     }
-}
+};
