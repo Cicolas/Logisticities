@@ -13,6 +13,8 @@ import TrainComponent, { Train } from './TrainComponent';
 import { pullToTop, pushToBottom } from '../scripts/utils/utils';
 import GameManager from './GameManager';
 import { Upgrade } from '../scripts/upgrades';
+import DefaultMaterial from '../test/materials/DefaultMaterial';
+import { RGBtoVEC3 } from '../scripts/utils/shadersUtil';
 
 const CITY_SIZE = 3;
 const TRAIN_INTERVAL = 1;
@@ -32,7 +34,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     name: string = "CityComponent";
     private gw: GameController;
     public mesh: THREE.Mesh;
-    public material: THREE.Material;
+    public material: DefaultMaterial;
     public geometry: THREE.ShapeGeometry | THREE.BoxGeometry;
 
     public cityName: string;
@@ -62,14 +64,18 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     init(gameWin: GameController) {
         this.gw = gameWin;
         this.plane = gameWin.getScene().getObject("plano").getComponent(PlaneComponent) as PlaneComponent;
-        this.material = new THREE.MeshStandardMaterial({
-            color: "white",
-        });
-
+        this.material = new DefaultMaterial();
+        this.material.uniformsTable["color"].value = RGBtoVEC3(new THREE.Color("#777"));
+        this.material.uniformsTable["directionalLightDirection"].value =
+            new THREE.Vector3(0, 1, 0);
+        this.material.uniformsTable["directionalLightIntensity"].value =
+            .5;
+        this.material.uniformsTable["ambientLightIntensity"].value =
+            .5;
         if (DEBUG_INFO.city.dontLoadObj) {
             this.geometry = new THREE.BoxGeometry(this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE);
             // const material = new THREE.MeshStandardMaterial({color: "purple"});
-            this.mesh = new THREE.Mesh(this.geometry, this.material);
+            this.mesh = new THREE.Mesh(this.geometry, this.material.material);
             this.mesh.name = this.UUID;
             this.mesh.rotation.x = 3/2*Math.PI;
             this.setCity();
@@ -112,7 +118,9 @@ export default class CityComponent implements ComponentInterface, CityInterface 
 
     draw (context?: THREE.Scene) {
         if (this.mesh) {
-            (this.mesh.material as THREE.MeshStandardMaterial).color = this.isSelected?new Color("#fff"): new Color("#777");
+            this.material.uniformsTable["color"].value = this.isSelected
+                ? RGBtoVEC3(new THREE.Color("#fff"))
+                : RGBtoVEC3(new THREE.Color("#777"));
         }
     }
 
@@ -141,7 +149,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
             c.parent = null;
 
             this.geometry = c.geometry;
-            this.mesh = new THREE.Mesh(this.geometry, this.material);
+            this.mesh = new THREE.Mesh(this.geometry, this.material.material);
             this.mesh.castShadow = true;
             this.mesh.receiveShadow = true;
             this.mesh.name = this.UUID;

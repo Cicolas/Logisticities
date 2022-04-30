@@ -25,6 +25,9 @@ export default class DefaultMaterial{
     }
 
     constructor(frag: string = fragShader, vert: string = vertShader, useFog: boolean = false, maxPointLight: number = 0) {
+        frag = frag??fragShader;
+        vert = vert??vertShader;
+
         this.material = new THREE.ShaderMaterial({
             uniforms: this.uniformsTable as any,
             defines: {

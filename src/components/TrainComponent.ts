@@ -4,7 +4,9 @@ import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 import Suply from '../scripts/suply';
+import { DefaultUniformsTable, RGBtoVEC3 } from '../scripts/utils/shadersUtil';
 import { Clamp } from '../scripts/utils/utils';
+import DefaultMaterial from '../test/materials/DefaultMaterial';
 import CityComponent from './CityComponent';
 import PlaneComponent from './PlaneComponent';
 import RoadComponent from './RoadComponent';
@@ -45,8 +47,13 @@ export default class TrainComponent implements ComponentInterface, Train {
     init(gameWin: GameController) {
         this.gw = gameWin;
         const geometry = new THREE.BoxGeometry(1, .5, .5);
-        const material = new THREE.MeshStandardMaterial({color: "orange"});
-        this.mesh = new THREE.Mesh(geometry, material);
+        const material = new DefaultMaterial();
+        material.uniformsTable["directionalLightIntensity"].value =
+            .5;
+        material.uniformsTable["ambientLightIntensity"].value =
+            .8;
+        material.uniformsTable["color"].value = RGBtoVEC3(new THREE.Color("#f2a011"));
+        this.mesh = new THREE.Mesh(geometry, material.material);
 
         gameWin.threeScene.add(this.mesh);
 

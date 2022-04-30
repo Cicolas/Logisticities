@@ -13,7 +13,7 @@ export const DEBUG_INFO = {
     hideSea: false,
 
     //game related show/hide
-    noCities: true,
+    noCities: false,
     noRoadSmooth: false,
     showRoadGuides: false,
     showRoadVertices: false,
@@ -27,7 +27,6 @@ export const DEBUG_INFO = {
     map: {
         planify: false,
         fastLoad: false,
-        altitudeColor: true,
     },
     city: {
         //! Numbers above 4 cause crashes due to name generator
