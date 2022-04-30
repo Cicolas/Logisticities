@@ -1,13 +1,16 @@
 import * as THREE from 'three';
+import { Vector3 } from 'three';
 import { DEBUG_INFO } from '../enviroment';
 import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
+import { DefaultUniformsTable } from '../scripts/utils/shadersUtil';
 import { color } from '../scripts/utils/utils';
 
 import fragShader from '../shaders/water/water.frag';
 import vertShader from '../shaders/water/water.vert';
+import DefaultMaterial from '../test/materials/DefaultMaterial';
 
 export interface SeaInterface {
     width: number;
@@ -21,25 +24,12 @@ export default class SeaComponent implements ComponentInterface {
     name: string = "SeaComponent";
     public mesh: THREE.Mesh;
     private geometry: THREE.BufferGeometry;
-    private material: THREE.Material;
+    private material: DefaultMaterial;
 
     public width: number;
     public depth: number;
     private color: THREE.Color;
     private opacity: number;
-
-    public uniforms = {
-        time: { value: 0 },
-        resolution: { value: new THREE.Vector2() },
-        color: { value: new THREE.Vector3() },
-        fogColor: { value: new THREE.Vector3() },
-        fog: { value: new THREE.Vector3() },
-        fogNear: { value: 0 },
-        fogFar: { value: 0 },
-        // "fogColor":    {value: scene.fog.color },
-        // "fogNear":     {value: scene.fog.near },
-        // "fogFar":      {value: scene.fog.far }
-    };
 
     constructor(seaI: SeaInterface) {
         this.width = seaI.width;
@@ -53,42 +43,17 @@ export default class SeaComponent implements ComponentInterface {
 
     init(gameWin: GameController) {
         this.geometry = new THREE.PlaneGeometry(this.width - 1, this.depth - 1);
-        this.uniforms["resolution"].value = new THREE.Vector2(
-            gameWin.width,
-            gameWin.height
+        this.material = new DefaultMaterial(fragShader, vertShader, true);
+        this.material.material.visible = true;
+        this.setFog(this.material.uniformsTable, gameWin.threeScene);
+        this.material.uniformsTable["directionalLightDirection"].value =
+            new Vector3(0, 1, 1);
+        this.material.uniformsTable["resolution"].value = new THREE.Vector2(gameWin.width, gameWin.height);
+        this.material.uniformsTable["color"].value = new THREE.Vector3(
+            this.color.r, this.color.g, this.color.b
         );
-        this.uniforms["color"].value = new THREE.Vector3(
-            this.color.r,
-            this.color.g,
-            this.color.b
-        );
-        this.uniforms["fogColor"].value = new THREE.Vector3(
-            gameWin.threeScene.fog.color.r,
-            gameWin.threeScene.fog.color.g,
-            gameWin.threeScene.fog.color.b
-            // 0, 0, 0
-        );
-        this.uniforms["fog"].value = new THREE.Vector3(
-            gameWin.threeScene.fog.color.r,
-            gameWin.threeScene.fog.color.g,
-            gameWin.threeScene.fog.color.b
-            // 0, 0, 0
-        );
-        //@ts-ignore
-        this.uniforms["fogNear"].value = gameWin.threeScene.fog.near;
-        //@ts-ignore
-        this.uniforms["fogFar"].value = gameWin.threeScene.fog.far;
 
-        this.material = new THREE.ShaderMaterial({
-            uniforms: this.uniforms,
-            fragmentShader: fragShader,
-            vertexShader: vertShader,
-            fog: true,
-        });
-
-        this.material.visible = true;
-
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
+        this.mesh = new THREE.Mesh(this.geometry, this.material.material);
         this.mesh.name = "sea";
         this.mesh.receiveShadow = true;
         this.mesh.rotation.x = -Math.PI / 2;
@@ -101,8 +66,27 @@ export default class SeaComponent implements ComponentInterface {
     }
 
     update(obj: GObject, gameWin: GameController) {
-        this.uniforms["time"].value = gameWin.frame;
+        this.material.uniformsTable["time"].value = gameWin.frame;
     }
 
     draw(context?: THREE.Scene) {}
+
+    setFog(uniforms, threeScene: THREE.Scene) {
+        uniforms["fogColor"].value = new THREE.Vector3(
+            threeScene.fog.color.r,
+            threeScene.fog.color.g,
+            threeScene.fog.color.b
+            // 0, 0, 0
+        );
+        uniforms["fog"].value = new THREE.Vector3(
+            threeScene.fog.color.r,
+            threeScene.fog.color.g,
+            threeScene.fog.color.b
+            // 0, 0, 0
+        );
+        //@ts-ignore
+        uniforms["fogNear"].value = threeScene.fog.near;
+        //@ts-ignore
+        uniforms["fogFar"].value = threeScene.fog.far;
+    }
 }

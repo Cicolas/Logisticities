@@ -1,6 +1,6 @@
 export const DEBUG_INFO = {
     seed: -1,
-    testMode: true,
+    testMode: false,
 
     //plane related show/hide
     showGrid: false,

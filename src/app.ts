@@ -87,7 +87,7 @@ const seaI = {
     width: WIDTH*10,
     height: HEIGHT,
     depth: DEPTH*10,
-    color: {r: 95/255, g: 152/255, b: 245/255},
+    color: {r: 20/255, g: 134/255, b: 222/255},
     opacity: 1
 };
 

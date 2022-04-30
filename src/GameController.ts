@@ -31,7 +31,7 @@ export default class GameController extends GameWindow{
         this.threeScene = new THREE.Scene();
         const fog = new THREE.Fog(
             new Color("black"),
-            Math.cos(-this.cameraAngle)*this.cameraDistance*this.depth*1.4,
+            Math.cos(-this.cameraAngle)*this.cameraDistance*this.depth*1,
             Math.cos(-this.cameraAngle)*this.cameraDistance*this.depth*3
         );
         fog.color = new THREE.Color(0xe8e8e8);

@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { color, InverseLerp, position, Vertex } from '../../scripts/utils/utils';
 
 export interface ShaderUniformInterface {
     "time": { value: number };
@@ -16,6 +17,10 @@ export interface ShaderUniformInterface {
     "fog": { value: THREE.Vector3 };
     "fogNear": { value: number };
     "fogFar": { value: number };
+}
+
+export function RGBtoVEC3(c: color) {
+    return new THREE.Vector3(c.r, c.g, c.b);
 }
 
 export const DefaultUniformsTable: ShaderUniformInterface = {

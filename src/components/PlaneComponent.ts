@@ -7,6 +7,10 @@ import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 import { color, InverseLerp, position, Vertex } from '../scripts/utils/utils';
 import util from 'util';
+import DefaultMaterial from '../test/materials/DefaultMaterial';
+import vertShader from "../shaders/default/default.vert";
+import fragShader from "../shaders/plane/plane.frag";
+import { RGBtoVEC3 } from '../scripts/utils/shadersUtil';
 const perlin = require('../lib/perlin').noise;
 
 const FALLOUT = {
@@ -40,7 +44,7 @@ export default class PlaneComponent implements ComponentInterface {
     name: string = "PlaneComponent";
     public mesh: THREE.Mesh;
     private geometry: THREE.BufferGeometry;
-    private material: THREE.Material;
+    private material: DefaultMaterial;
 
     public width: number;
     public height: number;
@@ -103,25 +107,39 @@ export default class PlaneComponent implements ComponentInterface {
             }
         }
 
-        // console.log(this.map);
         this.geometry = this.rectangleGeometry(this.map, highestPeak);
 
-        const shadow = this.geometry;
-        const shadowMat = new THREE.MeshLambertMaterial({
-            depthFunc: THREE.EqualDepth,
-            transparent: true,
-            blending: THREE.MultiplyBlending,
-            // shininess: 0,
-            // reflectivity: 0
-        });
-        const shadowMesh = new THREE.Mesh(shadow, shadowMat);
-        shadowMesh.name = "shadow";
+        this.material = new DefaultMaterial(fragShader, vertShader, true);
+        this.material.material.visible = true;
+        this.setFog(this.material.uniformsTable, gameWin.threeScene);
+        this.material.uniformsTable["directionalLightDirection"].value =
+            new Vector3(0, 1, 0);
+        this.material.uniformsTable["directionalLightIntensity"].value =
+            .8;
+        this.material.uniformsTable["ambientLightIntensity"].value =
+            .3;
+        this.material.uniformsTable["resolution"].value = new THREE.Vector2(gameWin.width, gameWin.height);
+        this.material.uniformsTable["color"].value = new THREE.Vector3(
+            0, 1, 0
+        );
+        this.material.uniformsTable["highestPeak"] = {value: highestPeak};
+        this.material.uniformsTable["height"] = {value: this.height};
+        this.material.uniformsTable["colors"] = {value: [
+            RGBtoVEC3(this.colors.sand),
+            RGBtoVEC3(this.colors.grass),
+            RGBtoVEC3(this.colors.rock),
+            RGBtoVEC3(this.colors.snow),
+        ]};
 
-        this.mesh = new THREE.Mesh(this.geometry);
+        this.mesh = new THREE.Mesh(this.geometry, new THREE.ShaderMaterial({
+            uniforms: this.material.uniformsTable as any,
+            fragmentShader: fragShader,
+            vertexShader: vertShader,
+            fog: true
+        }));
         this.mesh.name = "plano";
-
         gameWin.threeScene.add(this.mesh);
-        gameWin.threeScene.add(shadowMesh);
+        this.mesh.material = this.material.material;
 
         this.generateGrid();
         this.optimizeGrid();
@@ -129,21 +147,9 @@ export default class PlaneComponent implements ComponentInterface {
         if (DEBUG_INFO.showGrid) {
             this.drawGrid();
         }
-
-        this.mesh.material = new THREE.MeshBasicMaterial({
-            vertexColors: true,
-            wireframe: DEBUG_INFO.showWireframe,
-        });
-        this.mesh.geometry = this.setColor(this.map, this.geometry, highestPeak);
-
-        // this.setColor(this.grid);
-        // this.mesh.geometry = this.geometry;
-        // console.log(this.grid);
     }
 
     update(obj: GObject, gameWin: GameWindow) {
-        // this.mesh.rotation.y += 0.01;
-        // (this.mesh.material as THREE.MeshStandardMaterial).color = new Color(0x3b9126);
     }
 
     draw(context?: THREE.Scene) {}
@@ -355,107 +361,6 @@ export default class PlaneComponent implements ComponentInterface {
         return true;
     }
 
-    setColor(map: number[][], geo: THREE.BufferGeometry, highestPeak: number) {
-        const size = (this.width - 1) * (this.depth - 1) * 6 * 3;
-        const colors = new Float32Array(size);
-        let colorArr = [];
-
-        let allVertex;
-
-        const f = (i, j) => {
-            return {
-                x: i - this.width / 2,
-                y: j - this.height / 2,
-            };
-        };
-
-        for (let x = 0; x < map.length - 1; x++) {
-            for (let z = 0; z < map[x].length - 1; z++) {
-                const pos = [
-                    f(x + 1, z + 1),
-                    f(x + 1, z),
-                    f(x, z),
-                    f(x, z + 1),
-                ].map((value) => {
-                    return new THREE.Vector2(value.x, value.y);
-                });
-
-                const colors = [
-                    this.getColor(
-                        this.getVertexByCoordinates(pos[0]),
-                        map[z + 1][x + 1],
-                        highestPeak
-                    ),
-                    this.getColor(
-                        this.getVertexByCoordinates(pos[1]),
-                        map[z][x + 1],
-                        highestPeak
-                    ),
-                    this.getColor(
-                        this.getVertexByCoordinates(pos[2]),
-                        map[z][x],
-                        highestPeak
-                    ),
-                    this.getColor(
-                        this.getVertexByCoordinates(pos[3]),
-                        map[z + 1][x],
-                        highestPeak
-                    ),
-                ];
-
-                if (DEBUG_INFO.showWireframe) {
-                    colorArr.push(
-                        map[z + 1][x + 1], map[z + 1][x + 1], map[z + 1][x + 1],
-                        map[z][x + 1], map[z][x + 1], map[z][x + 1],
-                        map[z][x], map[z][x], map[z][x],
-
-                        map[z + 1][x], map[z + 1][x], map[z + 1][x],
-                        map[z + 1][x + 1], map[z + 1][x + 1], map[z + 1][x + 1],
-                        map[z][x], map[z][x], map[z][x]
-                    );
-                } else {
-                    colorArr.push(
-                        colors[0].r, colors[0].g, colors[0].b,
-                        colors[0].r, colors[0].g, colors[0].b,
-                        colors[0].r, colors[0].g, colors[0].b,
-
-                        colors[0].r, colors[0].g, colors[0].b,
-                        colors[0].r, colors[0].g, colors[0].b,
-                        colors[0].r, colors[0].g, colors[0].b
-
-                        // colors[0].r, colors[0].g, colors[0].b,
-                        // colors[1].r, colors[1].g, colors[1].b,
-                        // colors[2].r, colors[2].g, colors[2].b,
-
-                        // colors[3].r, colors[3].g, colors[3].b,
-                        // colors[0].r, colors[0].g, colors[0].b,
-                        // colors[2].r, colors[2].g, colors[2].b,
-                    );
-                }
-            }
-        }
-
-        colors.set(colorArr);
-        geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-        geo.computeVertexNormals();
-        return geo;
-    }
-
-    getColor(vert: Vertex, height: number, highestPeak: number): color {
-        const actualHeight = (height*highestPeak);
-        if (actualHeight < this.height/80) return this.colors.sand;
-
-        if (!DEBUG_INFO.map.altitudeColor) {
-            if (actualHeight > this.height) return this.colors.snow;
-            if (vert.apropiated) return this.colors.grass;
-            return this.colors.rock;
-        }
-
-        if (actualHeight < this.height/4) return this.colors.grass;
-        if (actualHeight < this.height) return this.colors.rock;
-        return this.colors.snow;
-    }
-
     createFallout(falloutStart: number, falloutEnd: number) {
         const falloutMap: number[][] = [];
 
@@ -481,5 +386,24 @@ export default class PlaneComponent implements ComponentInterface {
         }
 
         return falloutMap;
+    }
+
+    setFog(uniforms, threeScene: THREE.Scene) {
+        uniforms["fogColor"].value = new THREE.Vector3(
+            threeScene.fog.color.r,
+            threeScene.fog.color.g,
+            threeScene.fog.color.b
+            // 0, 0, 0
+        );
+        uniforms["fog"].value = new THREE.Vector3(
+            threeScene.fog.color.r,
+            threeScene.fog.color.g,
+            threeScene.fog.color.b
+            // 0, 0, 0
+        );
+        //@ts-ignore
+        uniforms["fogNear"].value = threeScene.fog.near;
+        //@ts-ignore
+        uniforms["fogFar"].value = threeScene.fog.far;
     }
 }
