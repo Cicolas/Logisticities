@@ -1,7 +1,7 @@
 import GameController from '../../../GameController';
 import UI from '../../../lib/TELESCOPE/UI';
 import UIObject from '../../../lib/TELESCOPE/UIObject';
-import { formatNumber, position } from '../../../scripts/utils';
+import { formatNumber, position } from '../../../scripts/utils/utils';
 import box from './FloatingElement.html';
 
 export default class FloatingElement implements UIObject{

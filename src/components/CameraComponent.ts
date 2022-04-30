@@ -5,7 +5,7 @@ import GameController from "../GameController";
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
-import { cameraQuad, position } from "../scripts/utils";
+import { cameraQuad, position } from "../scripts/utils/utils";
 import PlaneComponent from "./PlaneComponent";
 
 export interface CameraInterface{

@@ -1,4 +1,4 @@
-import { getInRandomList } from "./utils";
+import { getInRandomList } from "./utils/utils";
 
 const cityNamesTaken: [string, boolean][] = [
     ["Roseira", false],

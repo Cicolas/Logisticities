@@ -7,7 +7,7 @@ import upgrade from './UpgradeBarElement.html';
 import { Upgrade } from "../../../scripts/upgrades";
 import GameManager from "../../GameManager";
 import BoxElement from "../box/BoxElement";
-import { position } from "../../../scripts/utils";
+import { position } from "../../../scripts/utils/utils";
 import { collapseTextChangeRangesAcrossMultipleVersions } from "typescript";
 
 export default class UpgradeBarElement implements UIObject{

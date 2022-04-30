@@ -8,7 +8,7 @@ import GObject from "../lib/CUASAR/GObject";
 import { getCityName, resetCityName } from '../scripts/cityNames';
 import { resetSuply } from '../scripts/suply';
 import { Upgrade } from '../scripts/upgrades';
-import { position, pullToTop, pushToBottom } from '../scripts/utils';
+import { position, pullToTop, pushToBottom } from '../scripts/utils/utils';
 import CityComponent from './CityComponent';
 import PlaneComponent from './PlaneComponent';
 import RoadComponent from './RoadComponent';

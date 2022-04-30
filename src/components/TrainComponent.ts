@@ -4,7 +4,7 @@ import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
 import Suply from '../scripts/suply';
-import { Clamp } from '../scripts/utils';
+import { Clamp } from '../scripts/utils/utils';
 import CityComponent from './CityComponent';
 import PlaneComponent from './PlaneComponent';
 import RoadComponent from './RoadComponent';

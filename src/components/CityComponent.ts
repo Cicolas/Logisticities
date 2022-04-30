@@ -10,7 +10,7 @@ import { Color } from 'three';
 import RoadComponent from './RoadComponent';
 import Suply, { addInventory, getFromInventory, getRandomNeed, startRandomSuply, SuplyInventory, trainController } from '../scripts/suply';
 import TrainComponent, { Train } from './TrainComponent';
-import { pullToTop, pushToBottom } from '../scripts/utils';
+import { pullToTop, pushToBottom } from '../scripts/utils/utils';
 import GameManager from './GameManager';
 import { Upgrade } from '../scripts/upgrades';
 

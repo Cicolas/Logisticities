@@ -21,7 +21,7 @@
         "build": "webpack --config \"./build/webpack.config.dev.js\""
     },
     "dependencies": {
-        "@types/three": "^0.128.0",
+        "@types/three": "^0.139.0",
         "@typescript-eslint/eslint-plugin": "^4.32.0",
         "@typescript-eslint/parser": "^4.32.0",
         "astar-typescript": "^1.2.5",
@@ -30,7 +30,7 @@
         "javascript-astar": "^0.4.1",
         "keycode-js": "^3.1.0",
         "perlin": "^1.0.0",
-        "three": "^0.128.0",
+        "three": "^0.139.0",
         "util": "^0.12.4"
     }
 }

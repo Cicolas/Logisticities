@@ -4,7 +4,7 @@ import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
-import { color } from '../scripts/utils';
+import { color } from '../scripts/utils/utils';
 
 import fragShader from '../shaders/water/water.frag';
 import vertShader from '../shaders/water/water.vert';

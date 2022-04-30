@@ -1,5 +1,5 @@
 import ups from './json/upgrades.json';
-import { getInRandomList } from './utils';
+import { getInRandomList } from './utils/utils';
 
 export interface Upgrade {
     id: number,

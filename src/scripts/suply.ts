@@ -1,6 +1,6 @@
 import { CityInterface } from "../components/CityComponent";
 import RoadComponent from "../components/RoadComponent";
-import { getInRandomList } from "./utils";
+import { getInRandomList } from "./utils/utils";
 import sup from './json/suplies.json';
 
 var supliesTaken: [Suply, boolean][] = [];

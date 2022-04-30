@@ -4,7 +4,7 @@ import GameController from '../../../GameController';
 import UI from '../../../lib/TELESCOPE/UI';
 import UIObject from '../../../lib/TELESCOPE/UIObject';
 import Suply, { SuplyInventory } from '../../../scripts/suply';
-import { formatNumber, position } from '../../../scripts/utils';
+import { formatNumber, position } from '../../../scripts/utils/utils';
 import box from './BoxElement.html';
 import { CityInterface } from "../../CityComponent";
 import { Upgrade } from "../../../scripts/upgrades";

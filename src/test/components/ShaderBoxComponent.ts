@@ -4,11 +4,9 @@ import GameController from '../../GameController';
 import ComponentInterface from "../../lib/CUASAR/Component";
 import GameWindow from "../../lib/CUASAR/GameWindow";
 import GObject from "../../lib/CUASAR/GObject";
-import { color, InverseLerp, position, Vertex } from '../../scripts/utils';
-import util from 'util';
+import { color, InverseLerp, position, Vertex } from '../../scripts/utils/utils';
 
-import vertShader from "../shaders/default.vert";
-import fragShader from "../shaders/default.frag";
+import DefaultMaterial from '../materials/DefaultMaterial';
 
 const SMOOTHNESS = 300;
 
@@ -16,53 +14,24 @@ export default class ShaderBoxComponent implements ComponentInterface {
     name: string = "ShaderBoxComponent";
     public mesh: THREE.Mesh;
     private geometry: any;
-    private material: THREE.Material;
+    private material: DefaultMaterial;
     private gw: GameController;
 
     private firstClick: THREE.Vector2 = new THREE.Vector2();
     private mousePos: THREE.Vector2 = new THREE.Vector2();
     private isRotating: boolean;
 
-    public uniformsTable = {
-        "time": { value: 1.0 },
-        "resolution": {value: new THREE.Vector2()},
-        "color": {value: new THREE.Vector3(1, 1, 1)},
-        "directionalLightColor": {value: new THREE.Vector3(1, 1, 1)},
-        "directionalLightDirection": {value: new THREE.Vector3(0, 1, 0)},
-        "directionalLightIntensity": {value: 0},
-        "ambientLightColor": {value: new THREE.Vector3(171/255, 220/255, 255/255)},
-        // "ambientLightColor": {value: new THREE.Vector3(1, 1, 1)},
-        "ambientLightIntensity": {value: .3},
-        "pointLightColors": {type: 'fv', value: []},
-        "pointLightPosition": {type: 'fv', value: []},
-        "pointLightIntensity": {type: 'v4v', value: []},
-        "fogColor": { value: new THREE.Vector3()},
-        "fog": {value: new THREE.Vector3()},
-        "fogNear": {value: 0},
-        "fogFar": {value: 0},
-    }
-
     constructor() {}
 
     init(gameWin: GameController) {
         this.gw = gameWin;
-
-        this.geometry = new THREE.BoxGeometry(10, 10, 10);
-        this.material = new THREE.ShaderMaterial({
-            defines: {
-                PI: Math.PI,
-                MAX_POINT_LIGHT: 3,
-            },
-            uniforms: this.uniformsTable,
-            fragmentShader: fragShader,
-            vertexShader: vertShader
-        });
-        this.mesh = new THREE.Mesh(this.geometry, this.material);
-
-        this.setLights(this.uniformsTable, null, null);
-        this.setFog(this.uniformsTable, gameWin.threeScene);
-        this.uniformsTable["resolution"].value =
-            new THREE.Vector2(gameWin.width, gameWin.height);
+        this.geometry = new THREE.OctahedronGeometry(10, 2);
+        this.material = new DefaultMaterial();
+        this.mesh = new THREE.Mesh(this.geometry, this.material.material);
+        this.setLights(this.material.uniformsTable, null, null);
+        this.setFog(this.material.uniformsTable, gameWin.threeScene);
+        this.material.uniformsTable["resolution"].value = new THREE.Vector2(gameWin.width, gameWin.height);
+        this.material.uniformsTable["color"].value = new THREE.Vector3(1, .9, .3);
         this.gw.threeScene.add(this.mesh);
 
         // setTimeout(this.postInit.bind(this, gameWin), 100);
@@ -89,6 +58,7 @@ export default class ShaderBoxComponent implements ComponentInterface {
             this.isRotating = false;
         }
     };
+
     update(obj: GObject, gameWin: GameController) {
         if (this.isRotating && this.mesh) {
             const move = {x: this.firstClick.x, y: this.firstClick.y};
@@ -97,11 +67,12 @@ export default class ShaderBoxComponent implements ComponentInterface {
             this.rotate(move);
             this.firstClick.copy(this.mousePos);
         }else {
-            // this.mesh?.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), .01);
+            this.mesh?.rotateOnWorldAxis(new THREE.Vector3(0, 1, 0), .01);
         }
 
-        this.uniformsTable["time"].value = gameWin.frame;
+        this.material.uniformsTable["time"].value = gameWin.frame;
     }
+
     draw(context?: THREE.Scene) {}
 
     rotate(move: position) {
@@ -129,16 +100,16 @@ export default class ShaderBoxComponent implements ComponentInterface {
     }
 
     setLights(uniforms, color: THREE.Vector3, position: THREE.Vector3) {
-        uniforms["pointLightColors"].value.push(new THREE.Vector3(1, 0, 0));
-        uniforms["pointLightPosition"].value.push(new THREE.Vector3(20, 0, 0));
-        uniforms["pointLightIntensity"].value.push(1);
+        uniforms["pointLightColors"].value.push(new THREE.Vector3(1, 1, 1));
+        uniforms["pointLightPosition"].value.push(new THREE.Vector3(0, 0, 0));
+        uniforms["pointLightIntensity"].value.push(.7);
 
-        uniforms["pointLightColors"].value.push(new THREE.Vector3(0, 0, 1));
-        uniforms["pointLightPosition"].value.push(new THREE.Vector3(0, 0, 20));
-        uniforms["pointLightIntensity"].value.push(1);
+        // uniforms["pointLightColors"].value.push(new THREE.Vector3(0, 0, 1));
+        // uniforms["pointLightPosition"].value.push(new THREE.Vector3(0, 0, 50));
+        // uniforms["pointLightIntensity"].value.push(.7);
 
-        uniforms["pointLightColors"].value.push(new THREE.Vector3(0, 1, 0));
-        uniforms["pointLightPosition"].value.push(new THREE.Vector3(0, 20, 0));
-        uniforms["pointLightIntensity"].value.push(1);
+        // uniforms["pointLightColors"].value.push(new THREE.Vector3(0, 1, 0));
+        // uniforms["pointLightPosition"].value.push(new THREE.Vector3(0, 50, 0));
+        // uniforms["pointLightIntensity"].value.push(.7);
     }
 }

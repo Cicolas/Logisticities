@@ -9,7 +9,7 @@ import CityComponent, { CityInterface } from './CityComponent';
 import PlaneComponent from './PlaneComponent';
 import jsAstar from 'javascript-astar';
 import { DEBUG_INFO } from '../enviroment';
-import { position, Vertex } from '../scripts/utils';
+import { position, Vertex } from '../scripts/utils/utils';
 import TrainComponent from './TrainComponent';
 
 const LINE_DEFINITION = 10;

@@ -5,7 +5,7 @@ import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
-import { color, InverseLerp, position, Vertex } from '../scripts/utils';
+import { color, InverseLerp, position, Vertex } from '../scripts/utils/utils';
 import util from 'util';
 const perlin = require('../lib/perlin').noise;
 

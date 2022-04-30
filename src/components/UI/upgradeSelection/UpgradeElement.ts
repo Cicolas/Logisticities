@@ -1,7 +1,7 @@
 import GameController from '../../../GameController';
 import UI from '../../../lib/TELESCOPE/UI';
 import UIObject from '../../../lib/TELESCOPE/UIObject';
-import { position } from '../../../scripts/utils';
+import { position } from '../../../scripts/utils/utils';
 import box from './UpgradeElement.html';
 
 export default class UpgradeElement implements UIObject{
