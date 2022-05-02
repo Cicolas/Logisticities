@@ -10,7 +10,7 @@ import { Color } from 'three';
 import RoadComponent from './RoadComponent';
 import Suply, { addInventory, getFromInventory, getRandomNeed, startRandomSuply, SuplyInventory, trainController } from '../scripts/suply';
 import TrainComponent, { Train } from './TrainComponent';
-import { pullToTop, pushToBottom } from '../scripts/utils/utils';
+import { P3DtoVEC3, pullToTop, pushToBottom } from '../scripts/utils/utils';
 import GameManager from './GameManager';
 import { Upgrade } from '../scripts/upgrades';
 import DefaultMaterial from '../test/materials/DefaultMaterial';
@@ -69,9 +69,9 @@ export default class CityComponent implements ComponentInterface, CityInterface 
         this.material.uniformsTable["directionalLightDirection"].value =
             new THREE.Vector3(0, 1, 0);
         this.material.uniformsTable["directionalLightIntensity"].value =
-            .5;
+            .6;
         this.material.uniformsTable["ambientLightIntensity"].value =
-            .5;
+            .4;
         if (DEBUG_INFO.city.dontLoadObj) {
             this.geometry = new THREE.BoxGeometry(this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE, this.definiton/80*CITY_SIZE);
             // const material = new THREE.MeshStandardMaterial({color: "purple"});
@@ -127,7 +127,7 @@ export default class CityComponent implements ComponentInterface, CityInterface 
     setCity() {
         const v = this.plane.grid[this.coordinates.x][this.coordinates.y];
 
-        this.position = v.position;
+        this.position = P3DtoVEC3(v.position);
         this.mesh.position.x = v.position.x;
         this.mesh.position.y = v.position.y+(DEBUG_INFO.city.dontLoadObj?.5:0);
         this.mesh.position.z = v.position.z;

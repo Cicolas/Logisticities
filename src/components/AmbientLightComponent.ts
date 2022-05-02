@@ -20,16 +20,16 @@ export default class AmbientLightComponent implements ComponentInterface {
         this.camera = gameWin.threeCamera;
         this.light = new THREE.AmbientLightProbe(0xe8e8e8, .4);
 
-        if (!DEBUG_INFO.noLight)
+        // if (!DEBUG_INFO.noLight)
             (gameWin as GameController).threeScene.add(this.light);
     }
 
     update(obj: GObject, gameWin: GameController) {
-        if (DEBUG_INFO.camera.emitLight) {
+        // if (DEBUG_INFO.camera.emitLight) {
             this.light.position.x = this.camera.position.x;
             this.light.position.y = this.camera.position.y;
             this.light.position.z = this.camera.position.z;
-        }
+        // }
     }
 
     draw (context?: THREE.Scene) {

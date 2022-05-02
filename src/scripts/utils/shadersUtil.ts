@@ -5,6 +5,7 @@ export interface ShaderUniformInterface {
     "time": { value: number };
     "resolution": { value: THREE.Vector2 };
     "color": { value: THREE.Vector3 };
+    "opacity": { value: number };
     "directionalLightColor": { value: THREE.Vector3 };
     "directionalLightDirection": { value: THREE.Vector3 };
     "directionalLightIntensity": { value: number };
@@ -27,9 +28,10 @@ export const DefaultUniformsTable: ShaderUniformInterface = {
     time: { value: 0 },
     resolution: { value: new THREE.Vector2() },
     color: { value: new THREE.Vector3(1, 1, 1) },
+    opacity: { value: 1 },
     directionalLightColor: { value: new THREE.Vector3(1, 1, 1) },
     directionalLightDirection: { value: new THREE.Vector3(0, 1, 0) },
-    directionalLightIntensity: { value: 0.7 },
+    directionalLightIntensity: { value: 0.8 },
     ambientLightColor: {
         value: new THREE.Vector3(1, 1, 1),
     },

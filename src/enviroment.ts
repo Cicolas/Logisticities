@@ -1,12 +1,11 @@
 export const DEBUG_INFO = {
-    seed: -1,
+    seed: 3,
     testMode: false,
 
     //plane related show/hide
     showGrid: false,
     showWireframe: false,
     noMask: true,
-    noLight: false,
 
     //engine related show/hide
     hideFog: false,
@@ -21,7 +20,6 @@ export const DEBUG_INFO = {
     //non show/hide related DEBUGS
     camera: {
         topDown: false,
-        emitLight: false,
         dontChangeSize: false,
     },
     map: {

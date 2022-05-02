@@ -5,7 +5,7 @@ import GameController from '../GameController';
 import ComponentInterface from "../lib/CUASAR/Component";
 import GameWindow from "../lib/CUASAR/GameWindow";
 import GObject from "../lib/CUASAR/GObject";
-import { color, InverseLerp, position, Vertex } from '../scripts/utils/utils';
+import { color, InverseLerp, position, position3D, Vertex } from '../scripts/utils/utils';
 import util from 'util';
 import DefaultMaterial from '../test/materials/DefaultMaterial';
 import vertShader from "../shaders/default/default.vert";
@@ -59,6 +59,7 @@ export default class PlaneComponent implements ComponentInterface {
     private gw: GameController;
 
     private map: number[][] = [];
+    // private normalMap: position3D[][] = [];
     private vertexMap: Vertex[][] = [];
     public grid: Vertex[][] = [];
     private gridDefinition: number;
@@ -88,9 +89,9 @@ export default class PlaneComponent implements ComponentInterface {
 
         var highestPeak = 0;
 
-        for (let x = 0; x < this.width; x++) {
+        for (let x = 0; x <= this.width; x++) {
             this.map[x] = [];
-            for (let z = 0; z < this.depth; z++) {
+            for (let z = 0; z <= this.depth; z++) {
                 m1[x][z] **= this.perlinPower1;
                 m2[x][z] **= this.perlinPower2;
                 this.map[x][z] = m2[x][z] * m1[x][z];
@@ -114,14 +115,13 @@ export default class PlaneComponent implements ComponentInterface {
         this.setFog(this.material.uniformsTable, gameWin.threeScene);
         this.material.uniformsTable["directionalLightDirection"].value =
             new Vector3(0, 1, 0);
-        this.material.uniformsTable["directionalLightIntensity"].value =
-            .8;
-        this.material.uniformsTable["ambientLightIntensity"].value =
-            .3;
-        this.material.uniformsTable["resolution"].value = new THREE.Vector2(gameWin.width, gameWin.height);
-        this.material.uniformsTable["color"].value = new THREE.Vector3(
-            0, 1, 0
+        this.material.uniformsTable["directionalLightIntensity"].value = .9;
+        this.material.uniformsTable["ambientLightIntensity"].value = .2;
+        this.material.uniformsTable["resolution"].value = new THREE.Vector2(
+            gameWin.width, gameWin.height
         );
+        this.material.uniformsTable["color"].value = new THREE.Vector3(0, 1, 0);
+        this.material.uniformsTable["maxStepness"] = {value: MAX_STEPNESS+2};
         this.material.uniformsTable["highestPeak"] = {value: highestPeak};
         this.material.uniformsTable["height"] = {value: this.height};
         this.material.uniformsTable["colors"] = {value: [
@@ -157,13 +157,13 @@ export default class PlaneComponent implements ComponentInterface {
     rectangleGeometry(map: number[][], highestPeak: number): BufferGeometry {
         const geometry = new THREE.BufferGeometry();
 
-        const size = (this.width - 1) * (this.depth - 1) * 6 * 3;
+        const size = (this.width) * (this.depth) * 6 * 3;
         const vertices = new Float32Array(size);
 
-        let verticesArr = [];
+        const verticesArr = [];
 
-        for (let x = 0; x < map.length - 1; x++) {
-            for (let z = 0; z < map[x].length - 1; z++) {
+        for (let x = 0; x < this.width; x++) {
+            for (let z = 0; z < this.depth; z++) {
                 verticesArr.push(
                     x+1-(this.width/2), map[z+1][x+1], z+1-(this.depth/2),
                     x+1-(this.width/2), map[z][x+1],   z-(this.depth/2),
@@ -179,7 +179,35 @@ export default class PlaneComponent implements ComponentInterface {
         vertices.set(verticesArr);
         geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
         geometry.computeVertexNormals();
+        geometry.normalizeNormals();
+        geometry.computeBoundingBox();
 
+        // const normalArr = Array.from(geometry.getAttribute("normal").array as Float32Array);
+        // const normalXYZArr: position3D[][] = [];
+
+        // for (let x = 0; x < this.width; x++) {
+        //     normalXYZArr[x] = [];
+        //     for (let z = 0; z < this.width; z++) {
+        //         normalXYZArr[x][z] = {
+        //             x: normalArr[((x*this.depth*3)+(z*3))*4],
+        //             y: normalArr[((x*this.depth*3)+(z*3)+1)*4],
+        //             z: normalArr[((x*this.depth*3)+(z*3)+2)*4]
+        //         };
+        //     }
+        // }
+
+        // for (let z = 0; z < this.depth; z++) {
+        //     normalXYZArr[z] = [];
+        //     for (let x = 0; x < this.width; x++) {
+        //         normalXYZArr[z][x] = {
+        //             x: normalArr[((z*this.width*3)+(x*3))],
+        //             y: normalArr[((z*this.width*3)+(x*3)+1)],
+        //             z: normalArr[((z*this.width*3)+(x*3)+2)]
+        //         };
+        //     }
+        // }
+
+        // this.normalMap = normalXYZArr;
         return geometry;
     }
 
@@ -193,18 +221,17 @@ export default class PlaneComponent implements ComponentInterface {
 
         const m = [];
 
-        for (let x = 0; x < this.width; x++) {
+        for (let x = 0; x < this.width+1; x++) {
             m[x] = [];
-            for (let z = 0; z < this.depth; z++) {
+            for (let z = 0; z < this.depth+1; z++) {
                 // m[x][z] = (perlin.simplex2(x/scale+offsetx, z/scale+offsety)+1)/2;
                 m[x][z] = DEBUG_INFO.map.planify
-                    ? (DEBUG_INFO.noMask?0:.9)
+                    ? (DEBUG_INFO.noMask? 0: 0.9)
                     : (perlin.perlin2(
                           x / scale + offsetx,
                           z / scale + offsety
                       ) +
-                          1) /
-                      2;
+                    1) / 2;
             }
         }
 
@@ -232,12 +259,12 @@ export default class PlaneComponent implements ComponentInterface {
             for (let x = 0; x < this.width; x++) {
                 this.vertexMap[x] = [];
                 for (let z = 0; z < this.depth; z++) {
-                    let posVec = new THREE.Vector3();
-                    let normVec = new THREE.Vector3();
+                    let posVec: position3D;
+                    let normVec: position3D;
 
                     const ray = new THREE.Raycaster();
-                    const rx = x+.5-this.width/2;
-                    const rz = z+.5-this.depth/2;
+                    const rx = x+1-this.width/2;
+                    const rz = z+1-this.depth/2;
 
                     ray.set(
                         new THREE.Vector3(rx, this.height * 10, rz),
@@ -249,20 +276,24 @@ export default class PlaneComponent implements ComponentInterface {
                         posVec = intersect.point;
                         normVec = intersect.face.normal;
                     }
+                    // posVec = {x: Math.floor(rx), y: this.map[z][x]+.5, z: Math.floor(rz)};
+                    // normVec = this.normalMap[x][z];
 
                     const v: Vertex = { position: posVec, normal: normVec };
                     v.apropiated = this.checkStepness(v);
 
                     this.vertexMap[x][z] = v;
+                    // console.log(this.vertexMap[x][z], this.normalMap[x][z]);
                 }
             }
         }
+
         const ix = Math.round(coord.x+this.width/2);
         const iz = Math.round(coord.y+this.depth/2);
 
         return this.vertexMap[ix===this.width?this.width-1:ix][iz===this.depth?this.depth-1:iz];
     }
-    getGridByCoordinates(coord: position): THREE.Vector3 {
+    getGridByCoordinates(coord: position): position3D {
         var posVec = new THREE.Vector3();
         posVec.x =
             (coord.x / (this.width / 2 - 0.5)) * (this.gridDefinition / 2);
@@ -333,10 +364,11 @@ export default class PlaneComponent implements ComponentInterface {
             for (let j = 0; j < this.gridDefinition; j++) {
                 const g = this.grid[i][j];
                 const geometry = new THREE.SphereGeometry(0.25);
-                const material = new THREE.MeshStandardMaterial({
-                    color: g.apropiated ? "green" : "red",
-                });
-                const mesh = new THREE.Mesh(geometry, material);
+                const material = new DefaultMaterial();
+                material.uniformsTable["color"].value =
+                    RGBtoVEC3(new Color(g.apropiated?"green":"red"));
+
+                const mesh = new THREE.Mesh(geometry, material.material);
                 mesh.position.x = g.position.x;
                 mesh.position.y = g.position.y;
                 mesh.position.z = g.position.z;

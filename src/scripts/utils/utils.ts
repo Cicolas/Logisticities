@@ -1,6 +1,8 @@
+import * as THREE from "three";
+
 export interface Vertex {
-    position: THREE.Vector3;
-    normal: THREE.Vector3;
+    position: position3D;
+    normal: position3D;
     apropiated?: boolean;
 }
 
@@ -14,6 +16,10 @@ export interface color {
 export interface position {
     x: number;
     y: number;
+}
+
+export interface position3D extends position {
+    z: number;
 }
 
 export interface cameraQuad {
@@ -57,4 +63,8 @@ export function formatNumber(number: number, minDec: number, maxDec: number) {
         minimumFractionDigits: minDec,
         maximumFractionDigits: maxDec,
     });
+}
+
+export function P3DtoVEC3(position) {
+    return new THREE.Vector3(position.x, position.y, position.z);
 }

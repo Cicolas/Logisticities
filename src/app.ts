@@ -20,6 +20,7 @@ import FloatingElement from './components/UI/floatingIcon/FloatingElement';
 import ShaderBoxComponent from './test/components/ShaderBoxComponent';
 import { AmbientLight } from 'three';
 import AmbientLightComponent from './components/AmbientLightComponent';
+import TreeComponent from './test/components/TreeComponent';
 
 if (!DEBUG_INFO.camera.dontChangeSize) {
     document.body.classList.add("resizable");
@@ -48,7 +49,7 @@ const cameraI = {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     depth: DEPTH,
-    cameraAngle: 1/4 * Math.PI,
+    cameraAngle: DEBUG_INFO.testMode?0:1/4 * Math.PI,
     cameraDistance: .9,
     isLocked: true,
     quad: {
@@ -73,7 +74,8 @@ const planeI = {
     perlinPower2: 4,
     gridDefinition: GRID_DEFINITION,
     color: {
-        sand: {r: 240/255, g: 187/255, b: 98/255},
+        // sand: {r: 240/255, g: 187/255, b: 98/255},
+        sand: {r: 81/255, g: 146/255, b: 89/255},
         grass: {r: 81/255, g: 146/255, b: 89/255},
         rock: {r: 100/255, g: 102/255, b: 107/255},
         snow: {r: 1, g: 1, b: 1, a: 0},
@@ -127,10 +129,6 @@ export function createNewScene() {
         new GObject("camera")
         .addComponent(new CameraComponent(cameraI))
         .addComponent(new CameraMovement())
-    ).addObject(
-        new GObject("luz")
-        .addComponent(new LightComponent(HEIGHT))
-        .addComponent(new AmbientLightComponent())
     ).addObject(
         new GObject("gameManager")
         .addComponent(new GameManager(DEFINITION*8, MAPSIZE, GRID_DEFINITION))
@@ -197,18 +195,17 @@ function createNewTestScene() {
 
     const scene = new Scene("teste")
         .addObject(
-            new GObject("camera")
-                .addComponent(new CameraComponent(cameraI))
-                .addComponent(new CameraMovement())
+            new GObject("camera").addComponent(new CameraComponent(cameraI))
+            // .addComponent(new CameraMovement())
         )
         .addObject(new GObject("luz").addComponent(new LightComponent(HEIGHT)))
-        .addObject(new GObject("test").addComponent(new ShaderBoxComponent()))
-        .initScene(gw)
         .addObject(
-            new GObject("UIManager").addComponent(
-                _UI
+            new GObject("test").addComponent(
+                new TreeComponent({ x: 0, y: 0, z: 0 })
             )
-        );
+        )
+        .initScene(gw)
+        .addObject(new GObject("UIManager").addComponent(_UI));
 
     gw.popScene();
     gw.pushScene(scene);

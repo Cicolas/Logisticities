@@ -9,7 +9,7 @@ import CityComponent, { CityInterface } from './CityComponent';
 import PlaneComponent from './PlaneComponent';
 import jsAstar from 'javascript-astar';
 import { DEBUG_INFO } from '../enviroment';
-import { position, Vertex } from '../scripts/utils/utils';
+import { P3DtoVEC3, position, Vertex } from '../scripts/utils/utils';
 import TrainComponent from './TrainComponent';
 
 const LINE_DEFINITION = 10;
@@ -30,12 +30,6 @@ export default class RoadComponent implements ComponentInterface {
     private points: THREE.Vector3[] = [];
     private isInvalid: boolean;
 
-    // constructor(from: GObject, to: GObject, definition: number){
-    //     this.points = [];
-    //     this.cities[0] = from;
-    //     this.cities[1] = to;
-    //     this.definition = definition;
-    // }
     constructor(from: string, to: string){
         this.vertices = [];
         this.fromName = from;
@@ -116,13 +110,13 @@ export default class RoadComponent implements ComponentInterface {
 
         this.finalPath = jsAstar.astar.search(graph, start, end);
 
-        const s = grid[startPos.x][startPos.y].position.clone();
+        const s = P3DtoVEC3(grid[startPos.x][startPos.y].position);
         s.y += 0.5;
         this.points.push(s);
         for (let i = 0; i < this.finalPath.length; i++) {
             const element = this.finalPath[i];
 
-            const pos = grid[element.x][element.y].position.clone();
+            const pos = P3DtoVEC3(grid[element.x][element.y].position);
             pos.y += 0.5;
             this.points.push(pos);
         }

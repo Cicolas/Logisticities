@@ -1,6 +1,7 @@
 uniform float time;
 uniform vec2 resolution;
 uniform vec3 color;
+uniform float opacity;
 uniform vec3 directionalLightColor;
 uniform vec3 directionalLightDirection;
 uniform float directionalLightIntensity;
@@ -39,7 +40,7 @@ void main()	{
     #endif
 
     vec3 actualLight = directionalLight+ambientLight+actualPointLight;
-    gl_FragColor.rgb = gl_FragColor.rgb*actualLight;
+    gl_FragColor = vec4(gl_FragColor.rgb*actualLight, opacity);
 
     #ifdef USE_FOG
         #ifdef USE_LOGDEPTHBUF_EXT

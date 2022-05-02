@@ -9,6 +9,7 @@ uniform float ambientLightIntensity;
 uniform vec3 fog;
 uniform float fogNear;
 uniform float fogFar;
+uniform float maxStepness;
 uniform float highestPeak;
 uniform float height;
 uniform vec3 colors[4];
@@ -22,7 +23,7 @@ uniform vec3 colors[4];
 varying vec3 vPos;
 varying vec3 vNormal;
 
-void defaultBehavior(vec4 _color) {
+void light(vec4 _color) {
     gl_FragColor = _color;
     vec3 normal = normalize(vNormal);
     vec3 dir = normalize(directionalLightDirection);
@@ -55,34 +56,13 @@ void defaultBehavior(vec4 _color) {
     #endif
 }
 
-    // checkStepness(vertex: Vertex) {
-    //     const rotation = new THREE.Vector2();
-    //     rotation.x = -Math.atan2(vertex.normal.y, vertex.normal.z);
-    //     rotation.y =
-    //         (1 / 2) * Math.PI - Math.atan2(vertex.normal.y, vertex.normal.x);
-
-    //     if (
-    //         Math.abs((rotation.x * 180) / Math.PI + 90) > MAX_STEPNESS ||
-    //         Math.abs((rotation.y * 180) / Math.PI) > MAX_STEPNESS
-    //     ) {
-    //         return false;
-    //     }
-
-    //     return true;
-    // }
-
 float checkStepeness() {
-    float maxStepness = 15.;
-
     vec2 rotation = vec2(0);
     rotation.x = (1./2. * PI) - atan(vNormal.y, vNormal.z);
     rotation.y = (1./2. * PI) - atan(vNormal.y, vNormal.x);
 
     float arg1 = maxStepness/abs((rotation.x * 180.) / PI);
     float arg2 = maxStepness/abs((rotation.y * 180.) / PI);
-
-    // arg1 = abs(clamp(arg1, 0., 1.)-1.);
-    // arg2 = abs(clamp(arg2, 0., 1.)-1.);
 
     arg1 = abs(smoothstep(1., 1., arg1)-1.);
     arg2 = abs(smoothstep(1., 1., arg2)-1.);
@@ -97,5 +77,5 @@ void main()	{
     float sand = abs(smoothstep(1./20., 1./20., vPos.y)-1.);
     col = mix(col, sand*colors[0], sand);
     col = mix(col, snow*colors[3], snow);
-    defaultBehavior(vec4(vec3(col), 1));
+    light(vec4(vec3(col), 1));
 }
